@@ -161,7 +161,7 @@
           method: 'GET',
           data:{ code: code},
           success: function(resp){
-            $('#modal-explain').text(resp);
+            $('#modal-explain').text(resp.output);
           }
         });
       });
