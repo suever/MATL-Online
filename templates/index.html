@@ -1,0 +1,255 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+    <style>
+      .error {
+        color: #F00;
+        border: 0px;
+        font-weight:normal;
+        white-space: normal;
+      }
+
+      textarea{
+        resize: none;
+      }
+
+      .annotation {
+        color: #AAA;
+        float: right;
+        text-align: right;
+      }
+
+      .code {
+        font-family: monospace;
+        font-weight: bold;
+        font-size: 14px;
+        white-space: pre;
+      }
+
+      pre.code {
+        border: 0px;
+        min-height: 200px;
+        height: auto;
+        overflow: auto;
+        background-color: none;
+      }
+
+      th {
+        font-size: 14px;
+      }
+
+      .btn-inverse.active {
+        background-color: #080808 \9;
+      }
+
+      td {
+        font-size: 12px;
+        font-family: monospace;
+        vertical-align: top;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="modal fade" id="explainmodal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="modaltitle">Explanation</h4>
+          </div>
+          <div class="modal-body">
+            <pre id="modal-explain" class="code"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 navbar navbar-default">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="https://github.com/lmendo/MATL">MATL Online</a>
+          </div>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">18.1.0<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">18.0.2</a></li>
+                <li><a href="#">18.0.1</a></li>
+                <li><a href="#">18.0.1</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-5">
+          <form id="codeform" action="{{ url_for('run') }}" method="POST">
+            <div class="form-group">
+              <label for="code">Source Code</label> 
+              <span id="explain" data-toggle="tooltip" title="Show Explanation" style="color: #BBB;" class="glyphicon glyphicon-question-sign"></span>
+              <span class="annotation" id="charcount">({{ code|length }} character{% if code|length != 1 %}s{% endif %})</span>
+              <textarea id="code" onkeyup="countChar(this);" class="code form-control" name="code">{% if code %}{{ code }}{% endif %}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="inputs">Input Arguments</label>
+              <!--<input class="annotation" placeholder="Lines Per Run" name="lines_per"></input>-->
+              <textarea id="inputs" rows=8 class="code form-control" name="inputs">{% if inputs %}{{ inputs }}{% endif %}</textarea><br>
+              <button type="submit" class="btn btn-secondary" style="width:100px;">Run</button>
+              &nbsp;&nbsp;
+              <button id="save" class="btn btn-secondary" style="width: 100px;">Save</button>
+            </div>
+
+            <input class="form-control" type="hidden" id="debug" name="debug" value="0">
+          </form>
+
+          <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#outputtab" id="outputconsoletab">Output</a></li>
+            <li><a data-toggle="tab" href="#errortab" id="errorconsoletab">Error Console</a></li>
+
+            <div class="tab-content" style="height:auto;">
+              <div id="outputtab" class="tab-pane active">
+                <pre class="code form-control" id="output" wrap="off"></pre>
+              </div>
+
+              <div id="errortab" class="tab-pane">
+                <pre id="errors" class="code error form-control"></pre>
+              </div>
+            </div>
+          </ul>
+        </div>
+
+        <div class="col-md-6 col-md-offset-1">
+          <table class="table-striped table" id="documentation">
+            <thead>
+              <tr>
+                <th>Sym.</th>
+                <th>Arguments</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+
+    <script>
+
+      $('#explain').on('click', function(d){
+        var code = $('#code').val();
+
+        if ( code == '' ){ return; }
+
+        $('#modal-explain').text('Parsing...');
+
+        // Going to get the explanation and post it in a balloon
+        $('#explainmodal').modal();
+
+        $.ajax({
+          url: '{{ url_for('explain') }}',
+          method: 'GET',
+          data:{ code: code},
+          success: function(resp){
+            $('#modal-explain').text(resp);
+          }
+        });
+      });
+
+      function encodeData(data)
+      {
+        var ret = [];
+        for (var d in data)
+          ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]));
+
+        return ret.join('&');
+      }
+
+      function getlink(){
+        return encodeData({
+          'code': $('#code').val(),
+          'inputs': $('#inputs').val()
+        });
+      }
+
+      function printError(err){
+        $('#errors').html(err);
+        $('#errorconsoletab').css('font-weight', 'bold');
+      }
+
+      $('#save').on('click', function(e){
+        link = '{{ url_for('home') }}' + '?' + getlink();
+        history.pushState({'Title': '', 'Url': link}, '', link);
+        e.preventDefault();
+      });
+
+        $('#documentation').DataTable({
+          paging: false,
+          ordering: false,
+          info: false,
+          ajax: 'static/help.json',
+          stripe: true,
+          scrollY: '80vh',
+          scrollX: false,
+          scrollCollapse: true,
+          order: [[ 0, "asc"]],
+          columns: [
+            {'data': 'source'},
+            {'data': 'inout'},
+            {'data': 'description'}
+            ],
+          });
+
+        $('#documentation').find('td').css('vertical-align', 'top');
+
+        $('#codeform').on('submit', function(d){
+          var form = d.currentTarget;
+
+
+          $('#errorconsoletab').css('font-weight', 'normal');
+          $('#errors').html('');
+          $('#output').html('Running...')
+
+          $('')
+
+          $.ajax({
+            url: '{{ url_for('run') }}',
+            method: 'POST',
+            data: {
+              code: $('#code').val(),
+              inputs: $('#inputs').val(),
+              debug: $('#debug').val()
+            },
+            success: function(resp){
+              $('#output').html(resp.output);
+              printError(resp.error);
+            },
+            error: function(resp){
+              printError('Unknown server error occurred.')
+            }
+          });
+
+          d.preventDefault();
+        });
+
+        function countChar(val){
+          var count = val.value.length;
+          if ( count == 1 ){
+            $('#charcount').text('(' + count + ' character)');
+          } else {
+            $('#charcount').text('(' + count + ' characters)');
+          }
+        }
+    </script>
+  </body>
+</html>

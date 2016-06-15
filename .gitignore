@@ -1,0 +1,9 @@
+*.log
+*.pyc
+env
+
+# Potential octave/MATL files during testing
+*workspace
+*.mat
+MATLc.m
+MATLp.txt
