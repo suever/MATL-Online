@@ -232,7 +232,9 @@
             },
             success: function(resp){
               $('#output').html(resp.output);
-              printError(resp.error);
+              if ( resp.error ){
+                printError(resp.error);
+              }
             },
             error: function(resp){
               printError('Unknown server error occurred.')
