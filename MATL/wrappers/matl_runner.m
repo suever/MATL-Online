@@ -30,6 +30,7 @@ function matl_runner(flags, command, inputs, outfile)
     cleanup();
 
     function cleanup()
+        close all;
         diary off;
     end
 end
