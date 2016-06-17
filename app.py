@@ -98,8 +98,10 @@ def matl(flags, code='', inputs='', version='18.0.1'):
     oc.cd(tempdir)
 
     oc.addpath(get_matl_folder(version))
-
     oc.addpath(app.config['MATL_WRAP_DIR'])
+
+    # Source our custom octaverc file
+    oc.source(os.path.join(app.config['MATL_WRAP_DIR'], '.octaverc'))
 
     try:
         oc.matl_runner(flags, code, inputs, outfile)

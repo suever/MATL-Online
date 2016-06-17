@@ -3,5 +3,5 @@
 env
 
 # Ignore all versions of MATL source code
-MATL
-!/MATL/wrappers
+MATL/*
+!MATL/wrappers

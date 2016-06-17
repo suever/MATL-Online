@@ -1,0 +1,6 @@
+% Overloaded functions which do not work because the built-ins are core
+% functions rather than "built-ins": http://stackoverflow.com/a/37861790/670206
+
+function varargout = imwrite(varargin)
+    [varargout{1:nargout}] = builtin('imwrite', varargin{:});
+endfunction
