@@ -7,3 +7,7 @@ env
 *.mat
 MATLc.m
 MATLp.txt
+
+# Ignore all versions of MATL source code
+MATL
+!/MATL/wrappers
