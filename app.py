@@ -24,8 +24,8 @@ app.config['GITHUB_API'] = 'https://api.github.com'
 oc = oct2py.Oct2Py()
 
 # Add all of our custom and overloaded functions on the path
-oc.addpath(app.config['MATL_WRAP_DIR'])
 oc.source(os.path.join(app.config['MATL_WRAP_DIR'], '.octaverc'))
+oc.addpath(app.config['MATL_WRAP_DIR'])
 
 
 def get_members(zip_file):
