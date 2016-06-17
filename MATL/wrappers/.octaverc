@@ -4,3 +4,6 @@
 function varargout = imwrite(varargin)
     [varargout{1:nargout}] = builtin('imwrite', varargin{:});
 endfunction
+
+% Hide all figures by default
+set(0, 'DefaultFigureVisible', 'off')
