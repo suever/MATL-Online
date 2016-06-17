@@ -2,12 +2,6 @@
 *.pyc
 env
 
-# Potential octave/MATL files during testing
-*workspace
-*.mat
-MATLc.m
-MATLp.txt
-
 # Ignore all versions of MATL source code
 MATL
 !/MATL/wrappers
