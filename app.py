@@ -7,7 +7,7 @@ import zipfile
 import tempfile
 import shutil
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, url_for
 #from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
@@ -19,6 +19,7 @@ app.config['MATL_REPO'] = 'lmendo/MATL'
 app.config['MATL_WRAP_DIR'] = os.path.join(app.config['MATL_FOLDER'], 'wrappers')
 app.config['GITHUB_API'] = 'https://api.github.com'
 app.config['OCTAVE_TIMEOUT'] = 60
+app.config['TEMP_IMAGE_DIR'] = os.path.join(app.config['APP_DIR'], 'static', 'temp')
 
 #socketio = SocketIO(app)
 
@@ -113,7 +114,35 @@ def matl(flags, code='', inputs='', version='18.0.1'):
 
     # Check to see if there is any output
     with open(outfile, 'r') as fid:
-        result['output'] = fid.read()
+        output = fid.read()
+
+    # Split at all control sequences (for now just [IMAGE])
+    parts = re.split('(\[IMAGE\].*?\n)', output)
+
+    result = list()
+
+    for part in parts:
+        if part == '':
+            continue
+
+        item = dict()
+
+        if part.startswith('[IMAGE]'):
+            filename = part.replace('[IMAGE]', '').rstrip()
+            # Move the image where it needs to go
+            import uuid
+            fname = str(uuid.uuid4()) + '.png'
+
+            shutil.move(os.path.join(tempdir, filename),
+                        os.path.join(app.config['TEMP_IMAGE_DIR'], fname))
+
+            item['type'] = 'image'
+            item['value'] = url_for('static', filename='temp/' + fname)
+        else:
+            item['type'] = 'stdout'
+            item['value'] = part
+
+        result.append(item)
 
     # Change back to the original directory
     oc.cd(startdir)
