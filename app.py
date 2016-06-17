@@ -21,12 +21,11 @@ app.config['GITHUB_API'] = 'https://api.github.com'
 
 #socketio = SocketIO(app)
 
-import logging
-logging.basicConfig(filename='/Users/suever/MATL.log')
-logger = logging.getLogger('MATL')
-logger.setLevel(logging.DEBUG)
+oc = oct2py.Oct2Py()
 
-oc = oct2py.Oct2Py(logger=logger)
+# Add all of our custom and overloaded functions on the path
+oc.addpath(app.config['MATL_WRAP_DIR'])
+oc.source(os.path.join(app.config['MATL_WRAP_DIR'], '.octaverc'))
 
 
 def get_members(zip_file):
@@ -89,19 +88,21 @@ def matl(flags, code='', inputs='', version='18.0.1'):
 
     result = {}
 
+    # Create a temp folder here
     tempdir = tempfile.mkdtemp(prefix='matl_session_')
+
+    # The file containing STDOUT will also live in this temporary folder
     outfile = os.path.join(tempdir, 'defout')
 
+    # Remember what directory octave is current in
     startdir = oc.pwd()
 
-    # Create a temp folder here
+    # Change directories to the temporary folder so all temporary files are
+    # placed in here and won't interfere with other sessions
     oc.cd(tempdir)
 
+    # Add the folder for the appropriate MATL version
     oc.addpath(get_matl_folder(version))
-    oc.addpath(app.config['MATL_WRAP_DIR'])
-
-    # Source our custom octaverc file
-    oc.source(os.path.join(app.config['MATL_WRAP_DIR'], '.octaverc'))
 
     try:
         oc.matl_runner(flags, code, inputs, outfile)
@@ -112,8 +113,10 @@ def matl(flags, code='', inputs='', version='18.0.1'):
     with open(outfile, 'r') as fid:
         result['output'] = fid.read()
 
+    # Change back to the original directory
     oc.cd(startdir)
 
+    # Remove the temporary directory
     shutil.rmtree(tempdir)
 
     return jsonify(result), 200
