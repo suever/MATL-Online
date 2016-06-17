@@ -76,11 +76,11 @@
           </div>
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">18.1.0<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="#">18.0.2</a></li>
-                <li><a href="#">18.0.1</a></li>
-                <li><a href="#">18.0.1</a></li>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span id="version">{{ version }}</span><span class="caret"></span></a>
+              <ul id="versiondrop" class="dropdown-menu">
+                <li><a class="version" href="#">18.0.2</a></li>
+                <li><a class="version" href="#">18.0.1</a></li>
+                <li><a class="version" href="#">18.0.0</a></li>
               </ul>
             </li>
           </ul>
@@ -148,6 +148,7 @@
 
       $('#explain').on('click', function(d){
         var code = $('#code').val();
+        var version = $('#version').text();
 
         if ( code == '' ){ return; }
 
@@ -159,7 +160,10 @@
         $.ajax({
           url: '{{ url_for('explain') }}',
           method: 'GET',
-          data:{ code: code},
+          data:{ 
+            code: code,
+            version: version
+          },
           success: function(resp){
             $('#modal-explain').text(resp.output);
           }
@@ -178,7 +182,8 @@
       function getlink(){
         return encodeData({
           'code': $('#code').val(),
-          'inputs': $('#inputs').val()
+          'inputs': $('#inputs').val(),
+          'version': $('#version').text()
         });
       }
 
@@ -186,6 +191,11 @@
         $('#errors').html(err);
         $('#errorconsoletab').css('font-weight', 'bold');
       }
+
+      $('.version').on('click', function(e){
+        $('#version').text(e.target.text);
+        e.preventDefault();
+      });
 
       $('#save').on('click', function(e){
         link = '{{ url_for('home') }}' + '?' + getlink();
@@ -218,7 +228,7 @@
 
           $('#errorconsoletab').css('font-weight', 'normal');
           $('#errors').html('');
-          $('#output').html('Running...')
+          $('#output').html('')
 
           $('')
 
@@ -228,10 +238,11 @@
             data: {
               code: $('#code').val(),
               inputs: $('#inputs').val(),
-              debug: $('#debug').val()
+              debug: $('#debug').val(),
+              version: $('#version').text()
             },
             success: function(resp){
-              $('#output').html(resp.output);
+              $('#output').text(resp.output);
               if ( resp.error ){
                 printError(resp.error);
               }
