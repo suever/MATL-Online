@@ -13,15 +13,16 @@ from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
 
 app.config['DEBUG'] = True
-app.config['APPDIR'] = os.path.dirname(os.path.realpath(__file__))
-app.config['MATL_FOLDER'] = os.path.join(app.config['APPDIR'], 'MATL')
+app.config['APP_DIR'] = os.path.dirname(os.path.realpath(__file__))
+app.config['MATL_FOLDER'] = os.path.join(app.config['APP_DIR'], 'MATL')
 app.config['MATL_REPO'] = 'lmendo/MATL'
 app.config['MATL_WRAP_DIR'] = os.path.join(app.config['MATL_FOLDER'], 'wrappers')
 app.config['GITHUB_API'] = 'https://api.github.com'
+app.config['OCTAVE_TIMEOUT'] = 60
 
 #socketio = SocketIO(app)
 
-oc = oct2py.Oct2Py()
+oc = oct2py.Oct2Py(timeout=app.config['OCTAVE_TIMEOUT'])
 
 # Add all of our custom and overloaded functions on the path
 oc.source(os.path.join(app.config['MATL_WRAP_DIR'], '.octaverc'))
