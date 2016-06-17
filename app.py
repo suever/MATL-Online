@@ -102,7 +102,8 @@ def matl(flags, code='', inputs='', version='18.0.1'):
     oc.cd(tempdir)
 
     # Add the folder for the appropriate MATL version
-    oc.addpath(get_matl_folder(version))
+    matl_folder = get_matl_folder(version)
+    oc.addpath(matl_folder)
 
     try:
         oc.matl_runner(flags, code, inputs, outfile)
@@ -115,6 +116,7 @@ def matl(flags, code='', inputs='', version='18.0.1'):
 
     # Change back to the original directory
     oc.cd(startdir)
+    oc.rmpath(matl_folder)
 
     # Remove the temporary directory
     shutil.rmtree(tempdir)
