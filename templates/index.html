@@ -187,7 +187,7 @@
             version: version
           },
           success: function(resp){
-            $('#modal-explain').text(resp.output);
+            $('#modal-explain').text(resp[0].value);
           }
         });
       });
