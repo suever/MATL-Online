@@ -7,8 +7,6 @@ import zipfile
 import tempfile
 import shutil
 
-from datetime import datetime
-
 from flask import Flask, render_template, request, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
 from settings import ProdConfig, DevConfig
@@ -150,25 +148,6 @@ def matl(flags, code='', inputs='', version='18.0.1'):
     shutil.rmtree(tempdir)
 
     return jsonify(result), 200
-
-
-def parse_iso8601(date):
-    return datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
-
-
-def populate_releases():
-    resp = requests.get(app.config['GITHUB_API'] + '/repos/' + app.config['MATL_REPO'] + '/releases')
-    for item in resp.json():
-
-        # Ignore any pre-releases
-        if item['prerelease']:
-            continue
-
-        # Query for this version
-        release = Release.query.filter(Release.tag==item['tag_name']).first()
-
-        if release is None:
-            Release.create(tag=item['tag_name'], date=parse_iso8601(item['published_at']))
 
 
 @app.route('/')
