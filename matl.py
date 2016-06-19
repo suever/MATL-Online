@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import requests
@@ -8,6 +9,7 @@ import uuid
 
 from app import app, octave
 from flask import url_for
+from scipy.io import loadmat
 from utils import unzip
 
 
@@ -29,6 +31,46 @@ def install_matl(version, folder):
 
     response = requests.get(zipball, stream=True)
     unzip(StringIO.StringIO(response.content), folder)
+
+
+def help_file(version):
+    """
+    Grab the help data for the specified version
+    """
+
+    folder = get_matl_folder(version)
+    outfile = os.path.join(folder, 'help.json')
+
+    if os.path.isfile(outfile):
+        return outfile
+
+    matfile = os.path.join(folder, 'help.mat')
+
+    info = loadmat(matfile, squeeze_me=True, struct_as_record=False)
+    info = info['H']
+
+    # Now create an array of dicts
+    result = []
+
+    for k in range(len(info.source)):
+
+        if not info.inOutTogether[k] or len(info.out[k]) == 0:
+            arguments = ""
+        else:
+            arguments = "%s;  %s" % (info.__getattribute__('in')[k], info.out[k])
+
+        item = {'source': info.source[k],
+                'description': info.descr[k],
+                'arguments': arguments}
+
+        result.append(item)
+
+    output = {'data': result}
+
+    with open(outfile, 'w') as fid:
+        json.dump(output, fid)
+
+    return outfile
 
 
 def get_matl_folder(version):

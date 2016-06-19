@@ -1,7 +1,7 @@
 import os
 import oct2py
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
 from settings import ProdConfig, DevConfig
 
@@ -45,6 +45,13 @@ def explain():
     return jsonify(result), 200
 
 
+@app.route('/help/<version>', methods=['GET'])
+def help(version):
+
+    # Get the help data
+    return send_file(help_file(version))
+
+
 @app.route('/run', methods=['POST'])
 def run():
     inputs = request.values.get('inputs', '')
@@ -55,4 +62,4 @@ def run():
     return jsonify(result), 200
 
 from models import Release
-from matl import matl
+from matl import matl, help_file

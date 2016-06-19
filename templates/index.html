@@ -184,6 +184,8 @@
 
     <script>
 
+      var table;
+
       $('#explain').on('click', function(d){
         var code = $('#code').val();
         var version = $('#version').data('version');
@@ -230,8 +232,13 @@
         $('#errorconsoletab').css('font-weight', 'bold');
       }
 
+      function refreshHelp(){
+        table.ajax.url('help/' + $('#version').data('version')).load();
+      }
+
       $('.version').on('click', function(e){
         $('#version').text(e.target.text).data('version', $(e.target).data('version'));
+        refreshHelp();
         e.preventDefault();
       });
 
@@ -241,11 +248,11 @@
         e.preventDefault();
       });
 
-        $('#documentation').DataTable({
-          paging: false,
-          ordering: false,
+      table = $('#documentation').DataTable({
+        paging: false,
+        ordering: false,
           info: false,
-          ajax: 'static/help.json',
+          ajax: 'help/' + $('#version').data('version'),
           stripe: true,
           scrollY: '80vh',
           scrollX: false,
@@ -253,12 +260,10 @@
           order: [[ 0, "asc"]],
           columns: [
             {'data': 'source'},
-            {'data': 'inout'},
+            {'data': 'arguments'},
             {'data': 'description'}
             ],
           });
-
-        $('#documentation').find('td').css('vertical-align', 'top');
 
         $('#codeform').on('submit', function(d){
           var form = d.currentTarget;
