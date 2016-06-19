@@ -33,6 +33,9 @@ function matl_runner(flags, command, inputs, outfile)
     function cleanup()
         diary off;
 
+        % Flush all inputs so they don't stick around to the next run
+        input('clear');
+
         % Turn off all listeners for printing figures. Trick drawnow into
         % thinking that they are printing which will just do a normal
         % drawnow rather than trying to save

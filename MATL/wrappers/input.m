@@ -2,17 +2,21 @@ function result = input(prompt, varargin)
 
     persistent values
 
-    mlock();
-
-    if exist('prompt', 'var') && strcmp(prompt, 'INIT')
-        values = varargin;
-        result = [];
-        return;
+    if exist('prompt', 'var')
+        switch lower(prompt)
+            case 'init'
+                values = varargin;
+                result = [];
+                return;
+            case 'clear'
+                % Clear out all stored variables
+                values = [];
+                return;
+        end
     end
 
     if isempty(values) || ~iscell(values)
         error('Unable to fetch user input');
-        munlock
     end
 
     result = values{1};
