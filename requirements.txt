@@ -1,5 +1,16 @@
+# General
 flask==0.11.1
+requests==2.10.0
+
+# Octave interaction
 scipy==0.17.1
 oct2py==3.5.7
-numpy
-requests
+numpy==1.11.0
+
+# Database
+SQLAlchemy==1.0.13
+Flask-SQLAlchemy==2.1
+
+# App management
+Flask-Migrate==1.8.0
+Flask-Script==2.0.5
