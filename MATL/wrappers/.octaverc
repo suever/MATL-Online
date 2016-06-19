@@ -2,8 +2,12 @@
 % functions rather than "built-ins": http://stackoverflow.com/a/37861790/670206
 
 function varargout = imwrite(varargin)
+    mlock;
     [varargout{1:nargout}] = builtin('imwrite', varargin{:});
 endfunction
 
 % Hide all figures by default
 set(0, 'DefaultFigureVisible', 'off')
+
+% Hide all warnings
+warning off
