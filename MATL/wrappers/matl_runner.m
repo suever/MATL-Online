@@ -31,7 +31,13 @@ function matl_runner(flags, command, inputs, outfile)
     cleanup();
 
     function cleanup()
-        close all;
         diary off;
+
+        % Turn off all listeners for printing figures. Trick drawnow into
+        % thinking that they are printing which will just do a normal
+        % drawnow rather than trying to save
+        figs = findall(0, 'type', 'figure');
+        set(figs, 'UserData', 1)
+        delete(figs)
     end
 end
