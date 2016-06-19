@@ -107,17 +107,14 @@ def matl(flags, code='', inputs='', version='18.0.1'):
     matl_folder = get_matl_folder(version)
     oc.addpath(matl_folder)
 
-    try:
-        oc.matl_runner(flags, code, inputs, outfile)
-    except Exception as e:
-        result['error'] = parseError(e.message)
+    oc.matl_runner(flags, code, inputs, outfile)
 
     # Check to see if there is any output
     with open(outfile, 'r') as fid:
         output = fid.read()
 
     # Split at all control sequences (for now just [IMAGE])
-    parts = re.split('(\[IMAGE\].*?\n)', output)
+    parts = re.split('(\[.*?\].*?\n)', output)
 
     result = list()
 
@@ -138,6 +135,10 @@ def matl(flags, code='', inputs='', version='18.0.1'):
 
             item['type'] = 'image'
             item['value'] = url_for('static', filename='temp/' + fname)
+        elif part.startswith('[STDERR]'):
+            msg = part.replace('[STDERR]', '').rstrip()
+            item['type'] = 'stderr'
+            item['value'] = msg
         else:
             item['type'] = 'stdout'
             item['value'] = part

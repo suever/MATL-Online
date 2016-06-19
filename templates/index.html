@@ -265,16 +265,21 @@
             },
             success: function(resp){
               for ( var k = 0; k < resp.length; k++ ){
-                if ( resp[k].type == 'image' ){
-                  val = '<a href="#" class="thumb"><img class="imshow" src="' + resp[k].value + '"></a><br>';
-                  $('#output').append(val);
-                  $('.thumb').on('click', function(){
-                    var url = $(this).find('.imshow').attr('src');
-                    $('#imagepreview').attr('src', url);
-                    $('#imagemodal').modal('show');
-                  });
-                } else {
-                  $('#output').append(resp[k].value)
+                switch ( resp[k].type ){
+                  case 'image':
+                    val = '<a href="#" class="thumb"><img class="imshow" src="' + resp[k].value + '"></a><br>';
+                    $('#output').append(val);
+                    $('.thumb').on('click', function(){
+                      var url = $(this).find('.imshow').attr('src');
+                      $('#imagepreview').attr('src', url);
+                      $('#imagemodal').modal('show');
+                    });
+                    break;
+                  case  'stderr':
+                    printError(resp[k].value);
+                    break;
+                  default:
+                    $('#output').append(resp[k].value);
                 }
               }
             },
