@@ -7,21 +7,18 @@ import zipfile
 import tempfile
 import shutil
 
+from datetime import datetime
+
 from flask import Flask, render_template, request, jsonify, url_for
-#from flask_socketio import SocketIO, emit
+from flask_sqlalchemy import SQLAlchemy
+from settings import ProdConfig, DevConfig
 
 app = Flask(__name__)
 
-app.config['DEBUG'] = True
-app.config['APP_DIR'] = os.path.dirname(os.path.realpath(__file__))
-app.config['MATL_FOLDER'] = os.path.join(app.config['APP_DIR'], 'MATL')
-app.config['MATL_REPO'] = 'lmendo/MATL'
-app.config['MATL_WRAP_DIR'] = os.path.join(app.config['MATL_FOLDER'], 'wrappers')
-app.config['GITHUB_API'] = 'https://api.github.com'
-app.config['OCTAVE_TIMEOUT'] = 60
-app.config['TEMP_IMAGE_DIR'] = os.path.join(app.config['APP_DIR'], 'static', 'temp')
+CONFIG = ProdConfig if os.environ.get('MATL_ONLINE_ENV') == 'prod' else DevConfig
+app.config.from_object(CONFIG)
 
-#socketio = SocketIO(app)
+db = SQLAlchemy(app)
 
 oc = oct2py.Oct2Py(timeout=app.config['OCTAVE_TIMEOUT'])
 
@@ -155,12 +152,44 @@ def matl(flags, code='', inputs='', version='18.0.1'):
     return jsonify(result), 200
 
 
+def parse_iso8601(date):
+    return datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
+
+
+def populate_releases():
+    resp = requests.get(app.config['GITHUB_API'] + '/repos/' + app.config['MATL_REPO'] + '/releases')
+    for item in resp.json():
+
+        # Ignore any pre-releases
+        if item['prerelease']:
+            continue
+
+        # Query for this version
+        release = Release.query.filter(Release.tag==item['tag_name']).first()
+
+        if release is None:
+            Release.create(tag=item['tag_name'], date=parse_iso8601(item['published_at']))
+
+
 @app.route('/')
 def home():
     code = request.values.get('code', '')
     inputs = request.values.get('inputs', '')
-    version = request.values.get('version', '18.1.0')
-    return render_template('index.html', code=code, inputs=inputs, version=version)
+
+    # Get the list of versions to show in the list
+    versions = Release.query.order_by(Release.date.desc()).all()
+    version = request.values.get('version', '')
+
+    version = Release.query.filter(Release.tag == version).first()
+
+    # Default to the latest version
+    if version is None:
+        version = versions[0]
+
+    return render_template('index.html', code=code,
+                           inputs=inputs,
+                           version=version,
+                           versions=versions)
 
 
 '''
@@ -185,6 +214,4 @@ def run():
 
     return matl('-ro', code, inputs, version=version)
 
-
-#socketio.run(app)
-app.run(debug=True)
+from models import Release
