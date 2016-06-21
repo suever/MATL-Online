@@ -125,7 +125,7 @@
 
       <div class="row">
         <div class="col-md-5">
-          <form id="codeform" action="{{ url_for('run') }}" method="POST">
+          <form id="codeform" action="{{ url_for('public.run') }}" method="POST">
             <div class="form-group">
               <label for="code">Source Code</label> 
               <span id="explain" data-toggle="tooltip" title="Show Explanation" style="color: #BBB;" class="glyphicon glyphicon-question-sign"></span>
@@ -198,7 +198,7 @@
         $('#explainmodal').modal();
 
         $.ajax({
-          url: '{{ url_for('explain') }}',
+          url: '{{ url_for('public.explain') }}',
           method: 'GET',
           data:{ 
             code: code,
@@ -243,7 +243,7 @@
       });
 
       $('#save').on('click', function(e){
-        link = '{{ url_for('home') }}' + '?' + getlink();
+        link = '{{ url_for('public.home') }}' + '?' + getlink();
         history.pushState({'Title': '', 'Url': link}, '', link);
         e.preventDefault();
       });
@@ -273,7 +273,7 @@
           $('#output').html('')
 
           $.ajax({
-            url: '{{ url_for('run') }}',
+            url: '{{ url_for('public.run') }}',
             method: 'POST',
             data: {
               code: $('#code').val(),

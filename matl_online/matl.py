@@ -1,4 +1,5 @@
 import json
+import oct2py
 import os
 import re
 import requests
@@ -7,10 +8,18 @@ import StringIO
 import tempfile
 import uuid
 
-from app import app, octave
-from flask import url_for
+from flask import url_for, current_app
 from scipy.io import loadmat
-from utils import unzip
+
+from matl_online.utils import unzip
+
+
+octave = oct2py.Oct2Py()
+
+
+def initializeOctave():
+    octave.source(os.path.join(current_app.config['MATL_WRAP_DIR'], '.octaverc'))
+    octave.addpath(current_app.config['MATL_WRAP_DIR'])
 
 
 def install_matl(version, folder):
@@ -20,7 +29,7 @@ def install_matl(version, folder):
     """
 
     url = 'https://api.github.com/repos/%s/releases/tags/%s'
-    url = url % (app.config['MATL_REPO'], version)
+    url = url % (current_app.config['MATL_REPO'], version)
 
     resp = requests.get(url)
 
@@ -78,7 +87,7 @@ def get_matl_folder(version):
     Check if folder exists and download the source code if necessary
     """
 
-    matl_folder = os.path.join(app.config['MATL_FOLDER'], version)
+    matl_folder = os.path.join(current_app.config['MATL_FOLDER'], version)
 
     if not os.path.isdir(matl_folder):
         install_matl(version, matl_folder)
@@ -90,6 +99,8 @@ def matl(flags, code='', inputs='', version=''):
     """
     Opens a session with Octave and manages input/output as well as errors
     """
+
+    initializeOctave()
 
     result = {}
 
@@ -135,7 +146,7 @@ def matl(flags, code='', inputs='', version=''):
             fname = str(uuid.uuid4()) + '.png'
 
             shutil.move(os.path.join(tempdir, filename),
-                        os.path.join(app.config['TEMP_IMAGE_DIR'], fname))
+                        os.path.join(current_app.config['TEMP_IMAGE_DIR'], fname))
 
             item['type'] = 'image'
             item['value'] = url_for('static', filename='temp/' + fname)

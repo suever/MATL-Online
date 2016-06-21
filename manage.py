@@ -8,14 +8,17 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Server, Shell
 from flask_script.commands import Clean, ShowUrls
 
-from settings import DevConfig, ProdConfig
-from utils import parse_iso8601
+from matl_online.app import create_app
+from matl_online.database import db
+from matl_online.settings import DevConfig, ProdConfig
+from matl_online.utils import parse_iso8601
+from matl_online.public.models import Release
 
 CONFIG = ProdConfig if os.environ.get('MATL_ONLINE_ENV') == 'prod' else DevConfig
 HERE = os.path.abspath(os.path.dirname(__file__))
 TEST_PATH = os.path.join(HERE, 'tests')
 
-from app import app, db, Release
+app = create_app(CONFIG)
 
 manager = Manager(app)
 migrate = Migrate(app, db)

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-"""Database module, including the SQLAlchemy database object and DB-related utilities."""
 from sqlalchemy.orm import relationship
-from app import db
+
+from .extensions import db
 
 # Alias common SQLAlchemy names
 Column = db.Column
@@ -40,15 +39,3 @@ class Model(CRUDMixin, db.Model):
     """Base model class that includes CRUD convenience methods."""
 
     __abstract__ = True
-
-
-class Release(Model):
-
-    __tablename__ = 'releases'
-
-    id = Column(db.Integer, primary_key=True)
-    tag = Column(db.String, unique=True, nullable=False)
-    date = Column(db.DateTime, unique=True, nullable=False)
-
-    def __repr__(self):
-        return '<Release %r>' % self.tag
