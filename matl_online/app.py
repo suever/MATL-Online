@@ -26,22 +26,6 @@ def register_extensions(app):
     socketio.init_app(app, message_queue='redis://')
     celery.conf.update(app.config)
 
-    TaskBase = celery.Task
-
-    class ContextTask(TaskBase):
-        abstract = True
-
-        def __call__(self, *args, **kwargs):
-            print 'calling'
-            with app.app_context():
-                return TaskBase.__call__(self, *args, **kwargs)
-
-    celery.Task = ContextTask
-
-
-
-    return None
-
 
 def register_blueprints(app):
     """Register Flask blueprints."""
