@@ -4,3 +4,6 @@ env
 
 # Ignore database
 *.db
+
+# Octave files
+octave-workspace
