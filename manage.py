@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import eventlet
+eventlet.monkey_patch()
+
 """Management script."""
 import requests
 import os
@@ -8,7 +11,9 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Server, Shell
 from flask_script.commands import Clean, ShowUrls
 
-from matl_online.app import create_app
+import flask
+
+from matl_online.app import create_app, socketio
 from matl_online.database import db
 from matl_online.settings import DevConfig, ProdConfig
 from matl_online.utils import parse_iso8601
@@ -46,6 +51,14 @@ def refresh_releases():
         if release is None:
             Release.create(tag=item['tag_name'],
                            date=parse_iso8601(item['published_at']))
+
+
+@manager.command
+def run():
+    socketio.run(app,
+                 host='127.0.0.1',
+                 port=5000,
+                 use_reloader=True)
 
 
 manager.add_command('server', Server())

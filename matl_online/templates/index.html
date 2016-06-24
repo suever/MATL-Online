@@ -12,6 +12,11 @@
         white-space: normal;
       }
 
+      #versiondrop {
+        max-height: 400px;
+        overflow: auto;
+      }
+
       textarea{
         resize: none;
       }
@@ -76,23 +81,24 @@
         </div>
       </div>
     </div>
-<!-- Creates the bootstrap modal where the image will appear -->
-<div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Image preview</h4>
-      </div>
-      <div class="modal-body">
-        <img src="" id="imagepreview" style="width: 100%;" >
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+    <!-- Creates the bootstrap modal where the image will appear -->
+    <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="myModalLabel">Image preview</h4>
+          </div>
+          <div class="modal-body">
+            <img src="" id="imagepreview" style="width: 100%;" >
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
     <div class="container">
       <div class="row">
@@ -104,7 +110,7 @@
             <li class="dropdown">
 
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                <span id="version" data-version="{{ version.tag }}">
+                <span id="version" class="version" data-version="{{ version.tag }}">
                   {% if version == versions[0] %}
                   latest
                   {% else %}
@@ -125,7 +131,7 @@
 
       <div class="row">
         <div class="col-md-5">
-          <form id="codeform" action="{{ url_for('public.run') }}" method="POST">
+          <form id="codeform" action="#" method="POST">
             <div class="form-group">
               <label for="code">Source Code</label> 
               <span id="explain" data-toggle="tooltip" title="Show Explanation" style="color: #BBB;" class="glyphicon glyphicon-question-sign"></span>
@@ -137,7 +143,7 @@
               <label for="inputs">Input Arguments</label>
               <!--<input class="annotation" placeholder="Lines Per Run" name="lines_per"></input>-->
               <textarea id="inputs" rows=8 class="code form-control" name="inputs">{% if inputs %}{{ inputs }}{% endif %}</textarea><br>
-              <button type="submit" class="btn btn-secondary" style="width:100px;">Run</button>
+              <button id="run" class="btn btn-secondary" style="width:100px;">Run</button>
               &nbsp;&nbsp;
               <button id="save" class="btn btn-secondary" style="width: 100px;">Save</button>
             </div>
@@ -181,10 +187,37 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
 
     <script>
 
       var table;
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      var uuid;
+
+      $('#codeform').on('submit', function(d){ d.preventDefault(); });
+      
+      function submitCode(){
+        var form = $('#codeform');
+        
+        $('#errorconsoletab').css('font-weight', 'normal');
+        $('#errors').html('');
+        $('#output').html('')
+
+        socket.emit('submit', {
+          code: $('#code').val(),
+          inputs: $('#inputs').val(),
+          debug: $('#debug').val(),
+          version: $('#version').data('version'),
+          uid: uuid
+        });
+      }
+
+      // When the server acknowledges that we are connected it will issue
+      // us an ID which we can use to get updates
+      socket.on('connection', function(data){
+        uuid = data.session_id;
+      });
 
       $('#explain').on('click', function(d){
         var code = $('#code').val();
@@ -205,7 +238,7 @@
             version: version
           },
           success: function(resp){
-            $('#modal-explain').text(resp[0].value);
+            $('#modal-explain').text(resp['data'][0].value);
           }
         });
       });
@@ -226,6 +259,50 @@
           'version': $('#version').data('version')
         });
       }
+
+      socket.on('killed', function(data){
+        $('#run').text('Run...');
+        console.log(data['success']);
+      });
+
+      socket.on('complete', function(data){
+        console.log('complete');
+      });
+
+      socket.on('started', function(data){
+        debugger;
+      });
+
+
+      $('#run').on('click', function(){
+          submitCode();
+      });
+
+      socket.on('status', function(data){
+        console.log('response');
+        var output = $('#output');
+
+        if ( data['session'] == uuid ){
+          data['data'].forEach(function(item){
+            switch ( item.type ){
+              case 'image':
+                val = '<a href="#" class="thumb"><img class="imshow" src="' + item.value + '"></a><br>';
+                output.append(val);
+                $('.thumb').on('click', function(){
+                  var url = $(this).find('.imshow').attr('src');
+                  $('#imagepreview').attr('src', url);
+                  $('#imagemodal').modal('show');
+                });
+                break;
+              case 'stderr':
+                printError(item.value);
+                break;
+              default:
+                $('#output').append(item.value);
+            }
+          });
+        }
+      });
 
       function printError(err){
         $('#errors').html(err);
@@ -264,52 +341,6 @@
             {'data': 'description'}
             ],
           });
-
-        $('#codeform').on('submit', function(d){
-          var form = d.currentTarget;
-
-          $('#errorconsoletab').css('font-weight', 'normal');
-          $('#errors').html('');
-          $('#output').html('')
-
-          $.ajax({
-            url: '{{ url_for('public.run') }}',
-            method: 'POST',
-            data: {
-              code: $('#code').val(),
-              inputs: $('#inputs').val(),
-              debug: $('#debug').val(),
-              version: $('#version').data('version')
-            },
-            success: function(resp){
-              // Make sure that we are actually cleared out
-              $('#output').html('')
-              for ( var k = 0; k < resp.length; k++ ){
-                switch ( resp[k].type ){
-                  case 'image':
-                    val = '<a href="#" class="thumb"><img class="imshow" src="' + resp[k].value + '"></a><br>';
-                    $('#output').append(val);
-                    $('.thumb').on('click', function(){
-                      var url = $(this).find('.imshow').attr('src');
-                      $('#imagepreview').attr('src', url);
-                      $('#imagemodal').modal('show');
-                    });
-                    break;
-                  case  'stderr':
-                    printError(resp[k].value);
-                    break;
-                  default:
-                    $('#output').append(resp[k].value);
-                }
-              }
-            },
-            error: function(resp){
-              printError('Unknown server error occurred.')
-            }
-          });
-
-          d.preventDefault();
-        });
 
         function countChar(val){
           var count = val.value.length;

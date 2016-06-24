@@ -14,14 +14,6 @@ from scipy.io import loadmat
 from matl_online.utils import unzip
 
 
-octave = oct2py.Oct2Py()
-
-
-def initializeOctave():
-    octave.source(os.path.join(current_app.config['MATL_WRAP_DIR'], '.octaverc'))
-    octave.addpath(current_app.config['MATL_WRAP_DIR'])
-
-
 def install_matl(version, folder):
     """
     Downloads the specified version of the MATL source code to the desired
@@ -95,17 +87,23 @@ def get_matl_folder(version):
     return matl_folder
 
 
-def matl(flags, code='', inputs='', version=''):
+def matl(octave, flags, code='', inputs='', version='', session=None):
     """
     Opens a session with Octave and manages input/output as well as errors
     """
 
-    initializeOctave()
-
     result = {}
 
     # Create a temporary folder
-    tempdir = tempfile.mkdtemp(prefix='matl_session_')
+    if session is None:
+        tempdir = tempfile.mkdtemp()
+    else:
+        tempdir = os.path.join(tempfile.gettempdir(), session)
+        os.makedirs(tempdir)
+
+    # Create a PID file for octave
+    with open(os.path.join(tempdir, 'pid'), 'w') as fid:
+        fid.write(str(octave._session.proc.pid))
 
     # The file containing STDOUT will also live in this temporary folder
     outfile = os.path.join(tempdir, 'defout')

@@ -3,7 +3,7 @@
 from flask import Flask, render_template
 
 from matl_online import public
-from matl_online.extensions import db, migrate
+from matl_online.extensions import db, migrate, socketio, celery
 from matl_online.settings import ProdConfig
 
 
@@ -23,6 +23,23 @@ def register_extensions(app):
     """Register Flask extensions."""
     db.init_app(app)
     migrate.init_app(app, db)
+    socketio.init_app(app, message_queue='redis://')
+    celery.conf.update(app.config)
+
+    TaskBase = celery.Task
+
+    class ContextTask(TaskBase):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            print 'calling'
+            with app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+
+    celery.Task = ContextTask
+
+
+
     return None
 
 

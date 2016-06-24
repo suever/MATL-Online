@@ -1,13 +1,22 @@
-from flask import Blueprint, render_template, request, jsonify, send_file
+import uuid
 
-from matl_online.matl import help_file, matl
+from flask import Blueprint, render_template, request, jsonify, send_file, session
+from flask_socketio import emit, rooms
+
+from matl_online.matl import help_file
 from matl_online.public.models import Release
+
+from matl_online.extensions import socketio
+from matl_online.tasks import matl_task, killtask
 
 blueprint = Blueprint('public', __name__, static_folder='../static')
 
 
 @blueprint.route('/')
 def home():
+
+    session['uid'] = str(uuid.uuid4())
+
     code = request.values.get('code', '')
     inputs = request.values.get('inputs', '')
 
@@ -27,10 +36,57 @@ def home():
                            versions=versions)
 
 
+@socketio.on('connect')
+def connected():
+    # Go ahead and assign to their own room
+    session_id = rooms()[0]
+    emit('connection', {'session_id': session_id})
+
+
+@socketio.on('submit')
+def submit_job(data):
+
+    # If we already have a task disable submitting
+    taskid = session.get('taskid', None)
+    uid = data.get('uid', str(uuid.uuid4()))
+
+    if taskid is not None:
+        # Kill the task and wait for it to complete
+        task = killtask.delay(taskid, uid)
+        task.wait()
+
+        # Notify the caller
+        emit('killed', {
+            'data': {
+                'success': 'true',
+                'message': 'Terminated'}})
+
+        # Clear the session variable
+        session['taskid'] = None
+        return
+
+    # Process all input arguments
+    inputs = data.get('inputs', '')
+    code = data.get('code', '')
+    version = data.get('version', '18.3.0')
+
+    # No op if no inputs are provided
+    if code == '':
+        return
+
+    task = matl_task.delay('-ro', code, inputs,
+                           version=version, session=uid)
+
+    # Store the currently executing task ID in the session
+    session['taskid'] = task.id
+
+
 @blueprint.route('/explain', methods=['POST', 'GET'])
 def explain():
     code = request.values.get('code', '')
-    result = matl('-eo', code, version=request.values.get('version', ''))
+    version = request.values.get('version', '18.3.0')
+
+    result = matl_task.delay('-eo', code, version=version).wait()
     return jsonify(result), 200
 
 
@@ -39,13 +95,3 @@ def help(version):
 
     # Get the help data
     return send_file(help_file(version))
-
-
-@blueprint.route('/run', methods=['POST'])
-def run():
-    inputs = request.values.get('inputs', '')
-    code = request.values.get('code', '')
-    version = request.values.get('version', '')
-
-    result = matl('-ro', code, inputs, version=version)
-    return jsonify(result), 200
