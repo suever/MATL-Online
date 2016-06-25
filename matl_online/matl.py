@@ -1,16 +1,14 @@
 import json
-import oct2py
 import os
 import re
 import requests
 import shutil
 import StringIO
-import tempfile
 import uuid
 
-from flask import url_for, current_app
 from scipy.io import loadmat
 
+from matl_online.settings import Config
 from matl_online.utils import unzip
 
 
@@ -21,7 +19,7 @@ def install_matl(version, folder):
     """
 
     url = 'https://api.github.com/repos/%s/releases/tags/%s'
-    url = url % (current_app.config['MATL_REPO'], version)
+    url = url % (Config.MATL_REPO, version)
 
     resp = requests.get(url)
 
@@ -79,7 +77,7 @@ def get_matl_folder(version):
     Check if folder exists and download the source code if necessary
     """
 
-    matl_folder = os.path.join(current_app.config['MATL_FOLDER'], version)
+    matl_folder = os.path.join(Config.MATL_FOLDER, version)
 
     if not os.path.isdir(matl_folder):
         install_matl(version, matl_folder)
@@ -87,33 +85,22 @@ def get_matl_folder(version):
     return matl_folder
 
 
-def matl(octave, flags, code='', inputs='', version='', session=None):
+def matl(octave, flags, code='', inputs='', version='', folder=''):
     """
     Opens a session with Octave and manages input/output as well as errors
     """
 
     result = {}
 
-    # Create a temporary folder
-    if session is None:
-        tempdir = tempfile.mkdtemp()
-    else:
-        tempdir = os.path.join(tempfile.gettempdir(), session)
-        os.makedirs(tempdir)
-
-    # Create a PID file for octave
-    with open(os.path.join(tempdir, 'pid'), 'w') as fid:
-        fid.write(str(octave._session.proc.pid))
-
     # The file containing STDOUT will also live in this temporary folder
-    outfile = os.path.join(tempdir, 'defout')
+    outfile = os.path.join(folder, 'defout')
 
     # Remember what directory octave is current in
     startdir = octave.pwd()
 
     # Change directories to the temporary folder so that all temporary
     # files are placed in here and won't interfere with other requests
-    octave.cd(tempdir)
+    octave.cd(folder)
 
     # Add the folder for the appropriate MATL version
     matl_folder = get_matl_folder(version)
@@ -143,11 +130,11 @@ def matl(octave, flags, code='', inputs='', version='', session=None):
             # Move the image where it needs to go
             fname = str(uuid.uuid4()) + '.png'
 
-            shutil.move(os.path.join(tempdir, filename),
-                        os.path.join(current_app.config['TEMP_IMAGE_DIR'], fname))
+            shutil.move(os.path.join(folder, filename),
+                        os.path.join(Config.TEMP_IMAGE_DIR, fname))
 
             item['type'] = 'image'
-            item['value'] = url_for('static', filename='temp/' + fname)
+            item['value'] = 'static/temp/' + fname
         elif part.startswith('[STDERR]'):
             msg = part.replace('[STDERR]', '').rstrip()
             item['type'] = 'stderr'
@@ -163,6 +150,6 @@ def matl(octave, flags, code='', inputs='', version='', session=None):
     octave.rmpath(matl_folder)
 
     # Remove the temporary directory
-    shutil.rmtree(tempdir)
+    shutil.rmtree(folder)
 
     return result

@@ -194,6 +194,7 @@
       var table;
       var socket = io.connect('http://' + document.domain + ':' + location.port);
       var uuid;
+      var running = false;
 
       $('#codeform').on('submit', function(d){ d.preventDefault(); });
       
@@ -211,6 +212,10 @@
           version: $('#version').data('version'),
           uid: uuid
         });
+
+        running = true;
+
+        $('#run').text('Kill');
       }
 
       // When the server acknowledges that we are connected it will issue
@@ -261,25 +266,24 @@
       }
 
       socket.on('killed', function(data){
-        $('#run').text('Run...');
-        console.log(data['success']);
+        $('#run').text('Run');
+        running = false;
       });
 
-      socket.on('complete', function(data){
-        console.log('complete');
+      socket.on('complete', function(msg){
+        $('#run').text('Run');
+        running = false;
       });
-
-      socket.on('started', function(data){
-        debugger;
-      });
-
 
       $('#run').on('click', function(){
+        if ( running ){
+          socket.emit('kill', {uid: uuid});
+        } else {
           submitCode();
+        }
       });
 
       socket.on('status', function(data){
-        console.log('response');
         var output = $('#output');
 
         if ( data['session'] == uuid ){

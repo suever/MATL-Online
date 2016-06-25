@@ -43,27 +43,27 @@ def connected():
     emit('connection', {'session_id': session_id})
 
 
+@socketio.on('kill')
+def kill_task(data):
+    taskid = session.get('taskid', None)
+    uid = data.get('uid', str(uuid.uuid4()))
+    if taskid is not None:
+        task = killtask.delay(taskid, uid)
+        task.wait()
+
+        emit('complete', {
+            'success': False,
+            'message': 'User terminated the job'
+        })
+
+        session['taskid'] = None
+
+
 @socketio.on('submit')
 def submit_job(data):
 
     # If we already have a task disable submitting
-    taskid = session.get('taskid', None)
     uid = data.get('uid', str(uuid.uuid4()))
-
-    if taskid is not None:
-        # Kill the task and wait for it to complete
-        task = killtask.delay(taskid, uid)
-        task.wait()
-
-        # Notify the caller
-        emit('killed', {
-            'data': {
-                'success': 'true',
-                'message': 'Terminated'}})
-
-        # Clear the session variable
-        session['taskid'] = None
-        return
 
     # Process all input arguments
     inputs = data.get('inputs', '')
