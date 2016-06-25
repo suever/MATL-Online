@@ -85,15 +85,56 @@ def get_matl_folder(version):
     return matl_folder
 
 
+def parse_matl_results(output):
+    """
+    Takes all of the output and parses it out into sections to pass back
+    to the client which indicates stderr/stdout/images, etc.
+    """
+
+    result = list()
+
+    parts = re.split('(\[.*?\][^\n].*)', output)
+
+    for part in parts:
+        if part == '':
+            continue
+
+        item = dict()
+
+        if part.startswith('[IMAGE]'):
+            imname = part.replace('[IMAGE]', '').rstrip()
+            # Move the image where it needs to go
+            fname = str(uuid.uuid4()) + '.png'
+
+            print 'FOUND IMAGE'
+
+            shutil.move(imname,
+                        os.path.join(Config.TEMP_IMAGE_DIR, fname))
+
+            item['type'] = 'image'
+            item['value'] = 'static/temp/' + fname
+        elif part.startswith('[STDERR]'):
+            msg = part.replace('[STDERR]', '').rstrip()
+            item['type'] = 'stderr'
+            item['value'] = msg
+        elif part.startswith('[STDOUT]'):
+            item['type'] = 'stdout2'
+            msg = part.replace('[STDOUT]', '')
+            item['value'] = msg
+        else:
+            item['type'] = 'stdout'
+            item['value'] = part
+
+        if len(item.keys()):
+            result.append(item)
+
+    return result
+
+
 def matl(octave, flags, code='', inputs='', version='', folder=''):
     """
     Opens a session with Octave and manages input/output as well as errors
     """
-
-    result = {}
-
-    # The file containing STDOUT will also live in this temporary folder
-    outfile = os.path.join(folder, 'defout')
 
     # Remember what directory octave is current in
     startdir = octave.pwd()
@@ -107,49 +148,8 @@ def matl(octave, flags, code='', inputs='', version='', folder=''):
     octave.addpath(matl_folder)
 
     # Actually run the MATL code
-    octave.matl_runner(flags, code, inputs, outfile)
-
-    output = ''
-
-    # Check to see if there was any output
-    with open(outfile, 'r') as fid:
-        output = fid.read()
-
-    parts = re.split('(\[.*?\].*?\n)', output)
-
-    result = list()
-
-    for part in parts:
-        if part == '':
-            continue
-
-        item = dict()
-
-        if part.startswith('[IMAGE]'):
-            filename = part.replace('[IMAGE]', '').rstrip()
-            # Move the image where it needs to go
-            fname = str(uuid.uuid4()) + '.png'
-
-            shutil.move(os.path.join(folder, filename),
-                        os.path.join(Config.TEMP_IMAGE_DIR, fname))
-
-            item['type'] = 'image'
-            item['value'] = 'static/temp/' + fname
-        elif part.startswith('[STDERR]'):
-            msg = part.replace('[STDERR]', '').rstrip()
-            item['type'] = 'stderr'
-            item['value'] = msg
-        else:
-            item['type'] = 'stdout'
-            item['value'] = part
-
-        result.append(item)
+    octave.matl_runner(flags, code, inputs)
 
     # Change back to the original directory
     octave.cd(startdir)
     octave.rmpath(matl_folder)
-
-    # Remove the temporary directory
-    shutil.rmtree(folder)
-
-    return result

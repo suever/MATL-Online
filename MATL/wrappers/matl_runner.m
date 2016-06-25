@@ -1,14 +1,4 @@
-function matl_runner(flags, command, inputs, outfile)
-    % Turn on diary
-    if ~exist('outfile', 'var')
-        outfile = 'defout';
-    end
-
-    % Remove any old diary files
-    if exist(outfile, 'file')
-        delete(outfile);
-    end
-    diary(outfile);
+function matl_runner(flags, command, inputs)
 
     % If any inputs are provided, go ahead and fill up the inputs queue
     if exist('inputs', 'var') && ~isempty(inputs)

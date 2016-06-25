@@ -15,7 +15,7 @@ function varargout = drawnow(varargin)
         end
 
         filename = fname(k);
-        disp(['[IMAGE]', filename])
+        builtin('disp', (['[IMAGE]', fullfile(pwd, filename)]))
         print(gcf(), filename, '-dpng', '-tight')
 
         set(gcf(), 'UserData', 0)

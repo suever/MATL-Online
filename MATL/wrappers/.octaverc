@@ -6,8 +6,31 @@ function varargout = imwrite(varargin)
     [varargout{1:nargout}] = builtin('imwrite', varargin{:});
 endfunction
 
+function varargout = disp(varargin)
+    mlock;
+    [varargout{1:nargout}] = builtin('disp', varargin{:});
+endfunction
+
+function varargout = pause(varargin)
+    mlock;
+    % Flush the output before calling pause
+    builtin('disp', '[PAUSE]')
+    [varargout{1:nargout}] = builtin('pause', varargin{:});
+endfunction
+
+function varargout = clc(varargin)
+    mlock;
+    builtin('disp', '[CLC]')
+endfunction
+
+pkg load image
+
 % Hide all figures by default
 set(0, 'DefaultFigureVisible', 'off')
 
 % Hide all warnings
 warning off
+
+% Make sure we flush output immediately
+page_screen_output(false);
+page_output_immediately(true);

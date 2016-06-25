@@ -243,7 +243,9 @@
             version: version
           },
           success: function(resp){
-            $('#modal-explain').text(resp['data'][0].value);
+            alltext = '';
+            resp['data'].forEach(function (item){ alltext = alltext + item.value });
+            $('#modal-explain').text(alltext);
           }
         });
       });
@@ -285,6 +287,8 @@
 
       socket.on('status', function(data){
         var output = $('#output');
+
+        output.text('');
 
         if ( data['session'] == uuid ){
           data['data'].forEach(function(item){
