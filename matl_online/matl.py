@@ -106,8 +106,6 @@ def parse_matl_results(output):
             # Move the image where it needs to go
             fname = str(uuid.uuid4()) + '.png'
 
-            print 'FOUND IMAGE'
-
             shutil.move(imname,
                         os.path.join(Config.TEMP_IMAGE_DIR, fname))
 
