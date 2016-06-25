@@ -57,9 +57,15 @@ class OctaveTask(Task):
         socket.emit(*args, room=self.session_id, **kwargs)
 
     def cleanup(self):
-        # Clean up directories, kill octave, etc.
-        self.octave.close()
+        # Go ahead and kill octave
+        self.octave._session.interrupt()
+
+        # Remove all temporary files
         self.clean_folders()
+
+        # Get it running again
+        self.octave.restart()
+        _initialize_process()
 
     def clean_folders(self):
         if os.path.isdir(self.folder):
@@ -104,6 +110,7 @@ def matl_task(self, *args, **kwargs):
     # In the case of an interrupt (either through a time limit or a
     # revoke() event, we will still clean things up
     except (KeyboardInterrupt, SystemExit, SoftTimeLimitExceeded):
+        print 'term event'
         # Clean things up
         self.cleanup()
 
