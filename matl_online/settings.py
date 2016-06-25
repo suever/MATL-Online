@@ -27,7 +27,6 @@ class Config(object):
     # Directories
     MATL_FOLDER = os.path.join(PROJECT_ROOT, 'MATL')
     MATL_WRAP_DIR = os.path.join(MATL_FOLDER, 'wrappers')
-    TEMP_IMAGE_DIR = os.path.join(APP_DIR, 'static', 'temp')
 
     # Octave settings
     OCTAVE_TIMEOUT = 60

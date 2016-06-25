@@ -1,8 +1,8 @@
+import base64
 import json
 import os
 import re
 import requests
-import shutil
 import StringIO
 import uuid
 
@@ -103,14 +103,14 @@ def parse_matl_results(output):
 
         if part.startswith('[IMAGE]'):
             imname = part.replace('[IMAGE]', '').rstrip()
-            # Move the image where it needs to go
-            fname = str(uuid.uuid4()) + '.png'
 
-            shutil.move(imname,
-                        os.path.join(Config.TEMP_IMAGE_DIR, fname))
+            # Base64-encode the image.
+            with open(imname, 'rb') as image_file:
+                encoded = base64.b64encode(image_file.read())
+                srcstr = 'data:image/png;base64,' + encoded
 
             item['type'] = 'image'
-            item['value'] = 'static/temp/' + fname
+            item['value'] = srcstr
         elif part.startswith('[STDERR]'):
             msg = part.replace('[STDERR]', '').rstrip()
             item['type'] = 'stderr'
@@ -150,4 +150,3 @@ def matl(octave, flags, code='', inputs='', version='', folder=''):
 
     # Change back to the original directory
     octave.cd(startdir)
-    octave.rmpath(matl_folder)
