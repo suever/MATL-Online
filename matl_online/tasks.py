@@ -65,6 +65,8 @@ class OutputHandler(StreamHandler):
             self.send()
             self.clear()
             return
+        elif record.msg.startswith('warning:'):
+            return
         elif record.msg.startswith('MATL run-time error:'):
             import copy
             for item in record.msg.split('\n'):
