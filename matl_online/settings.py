@@ -28,9 +28,6 @@ class Config(object):
     MATL_FOLDER = os.path.join(PROJECT_ROOT, 'MATL')
     MATL_WRAP_DIR = os.path.join(MATL_FOLDER, 'wrappers')
 
-    # Octave settings
-    OCTAVE_TIMEOUT = 60
-
     # Github / Repo settings
     MATL_REPO = 'lmendo/MATL'
     GITHUB_API = 'https://api.github.com'

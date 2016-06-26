@@ -65,6 +65,17 @@ class OutputHandler(StreamHandler):
             self.send()
             self.clear()
             return
+        elif record.msg.startswith('MATL run-time error:'):
+            import copy
+            for item in record.msg.split('\n'):
+                newrecord = copy.copy(record)
+                newrecord.msg = '[STDERR]' + item
+                print newrecord.msg
+                self.contents.append(newrecord)
+
+            return
+        elif record.msg.startswith('---'):
+            return
 
         self.contents.append(record)
 

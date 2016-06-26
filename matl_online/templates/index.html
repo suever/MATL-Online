@@ -64,6 +64,16 @@
       .imshow {
         width: 75%;
       }
+
+      img {
+        image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+        image-rendering: -moz-crisp-edges;          /* Firefox                        */
+        image-rendering: -o-crisp-edges;            /* Opera                          */
+        image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+        image-rendering: pixelated; /* Chrome */
+        image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+        -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+      }
     </style>
   </head>
   <body>
@@ -287,6 +297,7 @@
 
       socket.on('status', function(data){
         var output = $('#output');
+        var errors = $('#errors');
 
         output.text('');
 
@@ -303,7 +314,8 @@
                 });
                 break;
               case 'stderr':
-                printError(item.value);
+                errors.append(item.value + '\n');
+                $('#errorconsoletab').css('font-weight', 'bold');
                 break;
               default:
                 $('#output').append(item.value);
@@ -311,11 +323,6 @@
           });
         }
       });
-
-      function printError(err){
-        $('#errors').html(err);
-        $('#errorconsoletab').css('font-weight', 'bold');
-      }
 
       function refreshHelp(){
         table.ajax.url('help/' + $('#version').data('version')).load();

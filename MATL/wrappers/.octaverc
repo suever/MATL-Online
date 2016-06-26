@@ -1,17 +1,101 @@
 % Overloaded functions which do not work because the built-ins are core
 % functions rather than "built-ins": http://stackoverflow.com/a/37861790/670206
 
-function varargout = imwrite(varargin)
+function varargout = drawnow(varargin)
+    % drawnow - Overloaded version of built-in
+    %
+    %   Whenever this function is executed, the graphics on the current
+    %   figure are saved to images. This works because all plotting
+    %   commands in MATL call a drawnow if output is expected at that
+    %   point. This function just saves the images in the working directory
+    %   to be colleceted later.
+
     mlock;
+
+    if get(gcf(), 'UserData')
+        % If we're currently saving the figure, just let the internal
+        % calls to drawnow just pass through to the built-in
+        [varargout{1:nargout}] = builtin('drawnow', varargin{:});
+    else
+        % Set this so that we dont' try to re-print on every internal call
+        % to drawnow
+        set(gcf(), 'UserData', 1)
+
+        filename = generateUniqueFilename(pwd, 'image', '.png');
+        builtin('disp', (['[IMAGE]', filename]))
+        print(gcf(), filename, '-dpng', '-r72');
+
+        % Release this status so we're ready to print again if necessary
+        set(gcf(), 'UserData', 0)
+    end
+endfunction
+
+function result = input(prompt, varargin)
+    % input - Overloads the built-in input to provide input when requested
+    %
+    %   We "fill up" the queue with the provided inputs and then whenever
+    %   the code calls INPUT, we provide them the item that's on the top of
+    %   the stack. If no items exist, we throw an error rather than
+    %   prompting the user. This allows us to prevent an interactive
+    %   session.
+    %
+    % - Filling the Queue
+    %   
+    %   Inputs arguments are placed into the queue by specifying 'init' as
+    %   the first input parameter, and the other inputs are all other
+    %   inputs.
+    %
+    %       input('init', 'input1', 'input2', 'input3')
+    %
+    % - Clearing the Queue
+    %
+    %   This function uses persistent variables so if you want to clear the
+    %   input arguments for any reason you need to explicitly clear the
+    %   queue out. To do this, you just pass 'clear' as the only input
+    %
+    %       input('clear')
+
+    mlock;
+    persistent values
+
+    if exist('prompt', 'var')
+        switch lower(prompt)
+            case 'init'
+                values = varargin;
+                result = [];
+                return;
+            case 'clear'
+                % Clear out all stored variables
+                values = [];
+                return;
+        end
+    end
+
+    if isempty(values) || ~iscell(values)
+        error('Unable to fetch user input');
+    end
+
+    result = values{1};
+
+    % Pop this from the top of the input stack
+    values(1) = [];
+endfunction
+
+function varargout = imwrite(varargin)
+    % imwrite - Intercepts imwrite calls and forces format and location
+
+    mlock;
+
+    % Filename is going to be input #2. We want to replace this with the
+    % filename that we actually want
+    varargin{2} = generateUniqueFilename(pwd, 'image', '.png');
+    builtin('disp', ['[IMAGE]', varargin{2}])
     [varargout{1:nargout}] = builtin('imwrite', varargin{:});
 endfunction
 
-function varargout = disp(varargin)
-    mlock;
-    [varargout{1:nargout}] = builtin('disp', varargin{:});
-endfunction
-
 function varargout = pause(varargin)
+    % Writes a [PAUSE] to stdout when executed to alert any listeners
+
     mlock;
     % Flush the output before calling pause
     builtin('disp', '[PAUSE]')
@@ -19,10 +103,31 @@ function varargout = pause(varargin)
 endfunction
 
 function varargout = clc(varargin)
+    % Writes a [CLC] to stdout when executed to alert any listeners
+
     mlock;
     builtin('disp', '[CLC]')
 endfunction
 
+function name = generateUniqueFilename(folder, prefix, extension)
+    % Helper function for generating a unique filename
+
+    mlock;
+
+    % Anonymous function to generate the name. We keep them numbered
+    % consecutively just in case we care at the other end
+    generateName = @(x)fullfile(folder, [prefix, num2str(x), extension]);
+
+    % Increment until we find an available name
+    k = 0;
+    while exist(generateName(k), 'file')
+        k = k + 1;
+    end
+    
+    name = generateName(k);
+endfunction
+
+% Load necessary packages
 pkg load image
 
 % Hide all figures by default

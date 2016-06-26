@@ -102,7 +102,10 @@ def parse_matl_results(output):
         item = dict()
 
         if part.startswith('[IMAGE]'):
-            imname = part.replace('[IMAGE]', '').rstrip()
+            imname = part.replace('[IMAGE]', '')
+
+            if not os.path.isfile(imname):
+                continue
 
             # Base64-encode the image.
             with open(imname, 'rb') as image_file:
@@ -112,7 +115,7 @@ def parse_matl_results(output):
             item['type'] = 'image'
             item['value'] = srcstr
         elif part.startswith('[STDERR]'):
-            msg = part.replace('[STDERR]', '').rstrip()
+            msg = part.replace('[STDERR]', '')
             item['type'] = 'stderr'
             item['value'] = msg
         elif part.startswith('[STDOUT]'):
