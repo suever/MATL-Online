@@ -139,3 +139,6 @@ warning off
 % Make sure we flush output immediately
 page_screen_output(false);
 page_output_immediately(true);
+
+% Make Octave work if we compiled it with --disable-docs
+texi_macros_file ("/dev/null")
