@@ -1,11 +1,22 @@
 # General
 flask==0.11.1
 requests==2.10.0
+eventlet==0.19.0
+
+# Sockets
+flask_socketio==2.4
+
+# Celery
+celery==3.1.23
+redis==2.10.5
 
 # Octave interaction
 scipy==0.17.1
 oct2py==3.5.7
 numpy==1.11.0
+
+# Octave packages
+sympy
 
 # Database
 SQLAlchemy==1.0.13
