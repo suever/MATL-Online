@@ -6,10 +6,13 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
     <style>
       .error {
+        font-family: monospace;
         color: #F00;
         border: 0px;
         font-weight:normal;
-        white-space: normal;
+        font-size: 14px;
+        overflow: auto;
+        white-space: pre-line;
       }
 
       #versiondrop {
@@ -31,7 +34,9 @@
         font-family: monospace;
         font-weight: bold;
         font-size: 14px;
-        white-space: nowrap;
+        white-space: pre;
+        display: block;
+        overflow: auto;
       }
 
       pre.code {
@@ -40,6 +45,7 @@
         height: auto;
         overflow: auto;
         background-color: none;
+        white-space: pre;
       }
 
       th {
@@ -164,18 +170,17 @@
           <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#outputtab" id="outputconsoletab">Output</a></li>
             <li><a data-toggle="tab" href="#errortab" id="errorconsoletab">Error Console</a></li>
+</ul>
 
             <div class="tab-content" style="height:auto;">
               <div id="outputtab" class="tab-pane active">
-                <pre class="code form-control" id="output" wrap="off">
-                </pre>
+                <div class="code" id="output" wrap="off"></div>
               </div>
 
               <div id="errortab" class="tab-pane">
-                <pre id="errors" class="code error form-control"></pre>
+                <div id="errors" class="error"></div>
               </div>
             </div>
-          </ul>
         </div>
 
         <div class="col-md-6 col-md-offset-1">
