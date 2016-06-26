@@ -15,6 +15,10 @@
         white-space: pre-line;
       }
 
+      .output {
+        padding: 6px 12px;
+      }
+
       #versiondrop {
         max-height: 400px;
         overflow: auto;
@@ -174,11 +178,11 @@
 
             <div class="tab-content" style="height:auto;">
               <div id="outputtab" class="tab-pane active">
-                <div class="code" id="output" wrap="off"></div>
+                <div class="code output" id="output" wrap="off"></div>
               </div>
 
               <div id="errortab" class="tab-pane">
-                <div id="errors" class="error"></div>
+                <div id="errors" class="error output"></div>
               </div>
             </div>
         </div>
