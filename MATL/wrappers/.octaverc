@@ -129,6 +129,11 @@ endfunction
 
 % Load necessary packages
 pkg load image
+pkg load statistics
+pkg load symbolic
+
+% Initialize the symbolic toolbox
+catalan
 
 % Hide all figures by default
 set(0, 'DefaultFigureVisible', 'off')
