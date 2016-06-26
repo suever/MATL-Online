@@ -38,6 +38,8 @@ class OutputHandler(StreamHandler):
     def send(self):
         """ Send a message out to the specified rooms """
         output = parse_matl_results(self.getMessages())
+        print 'messages'
+        print self.getMessages()
         result = {'data': output, 'session': self.task.session_id}
         socket.emit('status', result, room=self.task.session_id)
         return result
@@ -87,6 +89,7 @@ class OctaveTask(Task):
     _octave = None
     _tempfolder = None
     session_id = None
+    _handler = None
 
     def __init__(self, *args, **kwargs):
         super(OctaveTask, self).__init__(*args, **kwargs)
@@ -101,19 +104,23 @@ class OctaveTask(Task):
             from oct2py import octave
             self._octave = octave
 
-            # Setup handler
-            self._handler = OutputHandler(self)
-
             # Remove all other handlers (stdout, etc.)
             self._octave.logger.handlers = []
+
+	# Add the handler if we need to
+        if len(self._octave.logger.handlers) == 0:
+            if self._handler is None:
+		self._handler = OutputHandler(self)
 
             # Turn on debugging so we get notified of EVERY output as it
             # happens rather than waiting for a command to finish which is
             # what happens if we set the log level to INFO instead
+            #self._octave.logger.setLevel(logging.DEBUG)
             self._octave.logger.setLevel(logging.DEBUG)
 
             # Add our custom handler to capture all output
             self._octave.logger.addHandler(self._handler)
+
         return self._octave
 
     @property
@@ -213,6 +220,8 @@ def _initialize_process(**kwargs):
 
     # Import oct2py within here because it creates a new instance of octave
     import oct2py
+
+    oct2py.octave.logger.handlers = []
 
     # Run MATL for the first time to initialize everything
     oct2py.octave.source(os.path.join(Config.MATL_WRAP_DIR, '.octaverc'))
