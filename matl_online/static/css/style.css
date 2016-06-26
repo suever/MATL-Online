@@ -1,0 +1,81 @@
+.error {
+    font-family: monospace;
+    color: #F00;
+    border: 0px;
+    font-weight:normal;
+    font-size: 14px;
+    overflow: auto;
+    white-space: pre-line;
+}
+
+.output {
+    padding: 6px 12px;
+}
+
+#versiondrop {
+    max-height: 400px;
+    overflow: auto;
+}
+
+textarea{
+    resize: none;
+}
+
+.annotation {
+    color: #AAA;
+    float: right;
+    text-align: right;
+}
+
+.code {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 14px;
+    white-space: pre;
+    display: block;
+    overflow: auto;
+}
+
+pre.code {
+    border: 0px;
+    min-height: 200px;
+    height: auto;
+    overflow: auto;
+    background-color: none;
+    white-space: pre;
+}
+
+th {
+    font-size: 14px;
+}
+
+.btn-inverse.active {
+    background-color: #080808 \9;
+}
+
+td {
+    font-size: 12px;
+    font-family: monospace;
+    vertical-align: top;
+}
+
+.explain {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.imshow {
+    width: 75%;
+    border: 1px solid #DDD;
+}
+
+img {
+    image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+    image-rendering: -moz-crisp-edges;          /* Firefox                        */
+    image-rendering: -o-crisp-edges;            /* Opera                          */
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+    image-rendering: pixelated; /* Chrome */
+    image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+}
+

@@ -3,6 +3,7 @@
 from flask import Flask, render_template
 
 from matl_online import public
+from matl_online.assets import assets
 from matl_online.extensions import db, migrate, socketio, celery
 from matl_online.settings import ProdConfig
 
@@ -21,6 +22,7 @@ def create_app(config_object=ProdConfig):
 
 def register_extensions(app):
     """Register Flask extensions."""
+    assets.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     socketio.init_app(app, message_queue='redis://')

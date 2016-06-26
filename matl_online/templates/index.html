@@ -1,91 +1,13 @@
 <html>
   <head>
+    <title>MATL Online</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
-    <style>
-      .error {
-        font-family: monospace;
-        color: #F00;
-        border: 0px;
-        font-weight:normal;
-        font-size: 14px;
-        overflow: auto;
-        white-space: pre-line;
-      }
-
-      .output {
-        padding: 6px 12px;
-      }
-
-      #versiondrop {
-        max-height: 400px;
-        overflow: auto;
-      }
-
-      textarea{
-        resize: none;
-      }
-
-      .annotation {
-        color: #AAA;
-        float: right;
-        text-align: right;
-      }
-
-      .code {
-        font-family: monospace;
-        font-weight: bold;
-        font-size: 14px;
-        white-space: pre;
-        display: block;
-        overflow: auto;
-      }
-
-      pre.code {
-        border: 0px;
-        min-height: 200px;
-        height: auto;
-        overflow: auto;
-        background-color: none;
-        white-space: pre;
-      }
-
-      th {
-        font-size: 14px;
-      }
-
-      .btn-inverse.active {
-        background-color: #080808 \9;
-      }
-
-      td {
-        font-size: 12px;
-        font-family: monospace;
-        vertical-align: top;
-      }
-
-      .explain {
-        max-height: 500px;
-        overflow-y: auto;
-      }
-
-      .imshow {
-        width: 75%;
-        border: 1px solid #DDD;
-      }
-
-      img {
-        image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
-        image-rendering: -moz-crisp-edges;          /* Firefox                        */
-        image-rendering: -o-crisp-edges;            /* Opera                          */
-        image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
-        image-rendering: pixelated; /* Chrome */
-        image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
-        -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
-      }
-    </style>
+    {% assets "css_all" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+    {% endassets %}
   </head>
   <body>
 
@@ -175,17 +97,17 @@
           <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#outputtab" id="outputconsoletab">Output</a></li>
             <li><a data-toggle="tab" href="#errortab" id="errorconsoletab">Error Console</a></li>
-</ul>
+          </ul>
 
-            <div class="tab-content" style="height:auto;">
-              <div id="outputtab" class="tab-pane active">
-                <div class="code output" id="output" wrap="off"></div>
-              </div>
-
-              <div id="errortab" class="tab-pane">
-                <div id="errors" class="error output"></div>
-              </div>
+          <div class="tab-content" style="height:auto;">
+            <div id="outputtab" class="tab-pane active">
+              <div class="code output" id="output" wrap="off"></div>
             </div>
+
+            <div id="errortab" class="tab-pane">
+              <div id="errors" class="error output"></div>
+            </div>
+          </div>
         </div>
 
         <div class="col-md-6 col-md-offset-1">
@@ -199,182 +121,17 @@
             </thead>
             <tbody>
             </tbody>
+          </table>
         </div>
       </div>
     </div>
-  </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-
-    <script>
-
-      var table;
-      var socket = io.connect('http://' + document.domain + ':' + location.port);
-      var uuid;
-      var running = false;
-
-      $('#codeform').on('submit', function(d){ d.preventDefault(); });
-      
-      function submitCode(){
-        var form = $('#codeform');
-        
-        $('#errorconsoletab').css('font-weight', 'normal');
-        $('#errors').html('');
-        $('#output').html('')
-
-        socket.emit('submit', {
-          code: $('#code').val(),
-          inputs: $('#inputs').val(),
-          debug: $('#debug').val(),
-          version: $('#version').data('version'),
-          uid: uuid
-        });
-
-        running = true;
-
-        $('#run').text('Kill');
-      }
-
-      // When the server acknowledges that we are connected it will issue
-      // us an ID which we can use to get updates
-      socket.on('connection', function(data){
-        uuid = data.session_id;
-      });
-
-      $('#explain').on('click', function(d){
-        var code = $('#code').val();
-        var version = $('#version').data('version');
-
-        if ( code == '' ){ return; }
-
-        $('#modal-explain').text('Parsing...');
-
-        // Going to get the explanation and post it in a balloon
-        $('#explainmodal').modal();
-
-        $.ajax({
-          url: '{{ url_for('public.explain') }}',
-          method: 'GET',
-          data:{ 
-            code: code,
-            version: version
-          },
-          success: function(resp){
-            alltext = '';
-            resp['data'].forEach(function (item){ alltext = alltext + item.value });
-            $('#modal-explain').text(alltext);
-          }
-        });
-      });
-
-      function encodeData(data)
-      {
-        var ret = [];
-        for (var d in data)
-          ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]));
-
-        return ret.join('&');
-      }
-
-      function getlink(){
-        return encodeData({
-          'code': $('#code').val(),
-          'inputs': $('#inputs').val(),
-          'version': $('#version').data('version')
-        });
-      }
-
-      socket.on('killed', function(data){
-        $('#run').text('Run');
-        running = false;
-      });
-
-      socket.on('complete', function(msg){
-        $('#run').text('Run');
-        running = false;
-      });
-
-      $('#run').on('click', function(){
-        if ( running ){
-          socket.emit('kill', {uid: uuid});
-        } else {
-          submitCode();
-        }
-      });
-
-      socket.on('status', function(data){
-        var output = $('#output');
-        var errors = $('#errors');
-
-        output.text('');
-
-        if ( data['session'] == uuid ){
-          data['data'].forEach(function(item){
-            switch ( item.type ){
-              case 'image':
-                val = '<a href="#" class="thumb"><img class="imshow" src="' + item.value + '"></a><br>';
-                output.append(val);
-                $('.thumb').on('click', function(){
-                  var url = $(this).find('.imshow').attr('src');
-                  $('#imagepreview').attr('src', url);
-                  $('#imagemodal').modal('show');
-                });
-                break;
-              case 'stderr':
-                errors.append(item.value + '\n');
-                $('#errorconsoletab').css('font-weight', 'bold');
-                break;
-              default:
-                $('#output').append(item.value);
-            }
-          });
-        }
-      });
-
-      function refreshHelp(){
-        table.ajax.url('help/' + $('#version').data('version')).load();
-      }
-
-      $('.version').on('click', function(e){
-        $('#version').text(e.target.text).data('version', $(e.target).data('version'));
-        refreshHelp();
-        e.preventDefault();
-      });
-
-      $('#save').on('click', function(e){
-        link = '{{ url_for('public.home') }}' + '?' + getlink();
-        history.pushState({'Title': '', 'Url': link}, '', link);
-        e.preventDefault();
-      });
-
-      table = $('#documentation').DataTable({
-        paging: false,
-        ordering: false,
-          info: false,
-          ajax: 'help/' + $('#version').data('version'),
-          stripe: true,
-          scrollY: '80vh',
-          scrollX: false,
-          scrollCollapse: true,
-          order: [[ 0, "asc"]],
-          columns: [
-            {'data': 'source'},
-            {'data': 'arguments'},
-            {'data': 'description'}
-            ],
-          });
-
-        function countChar(val){
-          var count = val.value.length;
-          if ( count == 1 ){
-            $('#charcount').text('(' + count + ' character)');
-          } else {
-            $('#charcount').text('(' + count + ' characters)');
-          }
-        }
-    </script>
+    {% assets "js_all" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
   </body>
 </html>

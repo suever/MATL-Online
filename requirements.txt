@@ -3,6 +3,11 @@ flask==0.11.1
 requests==2.10.0
 eventlet==0.19.0
 
+# CSS/JS Assets
+flask_assets==0.11
+cssmin
+jsmin
+
 # Sockets
 flask_socketio==2.4
 

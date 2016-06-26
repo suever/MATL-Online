@@ -45,6 +45,7 @@ class DevConfig(Config):
 
     ENV = 'dev'
     DEBUG = True
+    ASSETS_DEBUG = True
 
 
 class TestConfig(Config):
