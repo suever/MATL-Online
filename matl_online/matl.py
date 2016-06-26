@@ -4,7 +4,6 @@ import os
 import re
 import requests
 import StringIO
-import uuid
 
 from scipy.io import loadmat
 
@@ -51,14 +50,21 @@ def help_file(version):
     # Now create an array of dicts
     result = []
 
-    for k in range(len(info.source)):
+    # Sort everything by the plain source
+    sortfunc = lambda x: x[1].swapcase()
+    sortinds = [x[0] for x in sorted(enumerate(info.sourcePlain), key=sortfunc)]
 
+    for k in sortinds:
         if not info.inOutTogether[k] or len(info.out[k]) == 0:
             arguments = ""
         else:
             arguments = "%s;  %s" % (info.__getattribute__('in')[k], info.out[k])
 
+        # Replace all newlines in description
+        info.descr[k] = info.descr[k].replace('\n', '')
+
         item = {'source': info.source[k],
+                'brief': info.comm[k],
                 'description': info.descr[k],
                 'arguments': arguments}
 

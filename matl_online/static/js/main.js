@@ -155,9 +155,21 @@ table = $('#documentation').DataTable({
     scrollCollapse: true,
     order: [[ 0, "asc"]],
     columns: [
-        {'data': 'source'},
-        {'data': 'arguments'},
-        {'data': 'description'}]
+        {
+            data: 'source',
+            orderable: true
+        },
+        {
+            data: null,
+            orderable: false,
+            render: function(data) {
+                output = '<strong>' + data.brief + '</strong>';
+                if ( data.arguments ){
+                    output = output + '\n' + data.arguments;
+                }
+                return output + '\n' + data.description;
+            }
+        }]
 });
 
 function countChar(val) {
