@@ -5,6 +5,8 @@ var running = false;
 
 $('#codeform').on('submit', function(d) { d.preventDefault(); });
 
+parseHash();
+
 function submitCode() {
     var form = $('#codeform');
 
@@ -79,6 +81,36 @@ function getlink() {
     });
 }
 
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+// Parse the hashed information
+function parseHash(){
+    if ( window.location.hash.length > 1 ){
+        $('#code').val(getParameterByName('code'));
+        $('#inputs').val(getParameterByName('inputs'));
+
+        version = getParameterByName('version');
+
+        // Make sure that the version is even valid
+        versions = $('a.version');
+        for ( k = 0; k < versions.length; ++k ) {
+            V = $(versions[k]);
+            if ( version == V.data('version') ) {
+                $('#version').data('version', V.data('version')).text(V.text());
+                break
+            }
+        }
+    }
+}
+
 socket.on('killed', function(data) {
     $('#run').text('Run');
     running = false;
@@ -139,8 +171,7 @@ $('.version').on('click', function(e) {
 });
 
 $('#save').on('click', function(e) {
-    link = document.root + ':' + document.port + '?' + getlink();
-    history.pushState({'Title': '', 'Url': link}, '', link);
+    window.location.hash = '?' + getlink();
     e.preventDefault();
 });
 
