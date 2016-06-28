@@ -108,6 +108,9 @@ function parseHash(){
                 break
             }
         }
+
+        // Update the character count
+        countChar($('#code')[0]);
     }
 }
 
