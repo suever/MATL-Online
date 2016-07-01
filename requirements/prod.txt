@@ -1,0 +1,32 @@
+# General
+flask==0.11.1
+requests==2.10.0
+eventlet==0.19.0
+
+# CSS/JS Assets
+flask_assets==0.11
+cssmin
+jsmin
+
+# Sockets
+flask_socketio==2.4
+
+# Celery
+celery==3.1.23
+redis==2.10.5
+
+# Octave interaction
+scipy==0.17.1
+-e git://github.com/suever/oct2py.git#egg=oct2py
+numpy==1.11.0
+
+# Octave packages
+sympy
+
+# Database
+SQLAlchemy==1.0.13
+Flask-SQLAlchemy==2.1
+
+# App management
+Flask-Migrate==1.8.0
+Flask-Script==2.0.5
