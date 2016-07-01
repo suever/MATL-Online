@@ -38,6 +38,7 @@ class ProdConfig(Config):
 
     ENV = 'prod'
     DEBUG = False
+    ASSETS_DEBUG = False
 
 
 class DevConfig(Config):

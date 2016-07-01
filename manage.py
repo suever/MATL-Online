@@ -35,6 +35,14 @@ def _make_context():
 
 
 @manager.command
+def test():
+    """Run the tests."""
+    import pytest
+    exit_code = pytest.main([TEST_PATH, '--verbose'])
+    return exit_code
+
+
+@manager.command
 def refresh_releases():
     """
     Fetch new release information from Github and update local database
