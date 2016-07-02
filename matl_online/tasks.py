@@ -224,8 +224,9 @@ def _initialize_process(**kwargs):
     oct2py.octave.logger.handlers = []
 
     # Run MATL for the first time to initialize everything
-    oct2py.octave.source(os.path.join(Config.MATL_WRAP_DIR, '.octaverc'))
-    oct2py.octave.addpath(os.path.join(Config.MATL_WRAP_DIR))
+    octaverc = os.path.join(Config.MATL_WRAP_DIR, '.octaverc')
+    oct2py.octave.eval('source("' + octaverc + '")', log=False)
+    oct2py.octave.eval('addpath("' + Config.MATL_WRAP_DIR + '");', log=False)
 
 # When a worker process is spawned, initialize octave
 worker_process_init.connect(_initialize_process)

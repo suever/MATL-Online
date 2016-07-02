@@ -146,18 +146,23 @@ def matl(octave, flags, code='', inputs='', version='', folder=''):
     """
 
     # Remember what directory octave is current in
-    startdir = octave.pwd()
+    escape = lambda x: x.replace("'", "''")
+
+    #print startdir
 
     # Change directories to the temporary folder so that all temporary
     # files are placed in here and won't interfere with other requests
-    octave.cd(folder)
+    octave.eval("cd('%s');" % escape(folder))
 
     # Add the folder for the appropriate MATL version
     matl_folder = get_matl_folder(version)
-    octave.addpath(matl_folder)
+    cmd = "addpath('%s')" % escape(matl_folder)
+    octave.eval(cmd)
 
     # Actually run the MATL code
-    octave.matl_runner(flags, code, inputs)
+    cmd = "matl_runner('%s', '%s', '%s');" % (escape(flags), escape(code), escape(inputs))
+    octave.eval(cmd)
 
     # Change back to the original directory
-    octave.cd(startdir)
+    cmd = "cd('%s')" % escape(Config.PROJECT_ROOT)
+    octave.eval(cmd)
