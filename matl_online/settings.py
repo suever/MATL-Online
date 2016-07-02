@@ -10,9 +10,9 @@ class Config(object):
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
     CELERYD_TASK_SOFT_TIME_LIMIT = 30
     CELERYD_TASK_TIME_LIMIT = 60
-    #CELERY_ACCEPT_CONTENT = ['json']
-    #CELERY_TASK_SERIALIZER = 'json'
-    #CELERY_RESULT_SERIALIZER = 'json'
+    # CELERY_ACCEPT_CONTENT = ['json']
+    # CELERY_TASK_SERIALIZER = 'json'
+    # CELERY_RESULT_SERIALIZER = 'json'
 
     SECRET_KEY = str(uuid.uuid4())
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory

@@ -52,13 +52,15 @@ def help_file(version):
 
     # Sort everything by the plain source
     sortfunc = lambda x: x[1].swapcase()
-    sortinds = [x[0] for x in sorted(enumerate(info.sourcePlain), key=sortfunc)]
+    src = info.sourcePlain
+    sortinds = [x[0] for x in sorted(enumerate(src), key=sortfunc)]
 
     for k in sortinds:
         if not info.inOutTogether[k] or len(info.out[k]) == 0:
             arguments = ""
         else:
-            arguments = "%s;  %s" % (info.__getattribute__('in')[k], info.out[k])
+            arguments = "%s;  %s" % \
+                (info.__getattribute__('in')[k], info.out[k])
 
         # Replace all newlines in description
         info.descr[k] = info.descr[k].replace('\n', '')

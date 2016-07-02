@@ -1,6 +1,12 @@
 import uuid
 
-from flask import Blueprint, render_template, request, jsonify, send_file, session
+from flask import (Blueprint,
+                   render_template,
+                   request,
+                   jsonify,
+                   send_file,
+                   session)
+
 from flask_socketio import emit, rooms
 
 from matl_online.matl import help_file

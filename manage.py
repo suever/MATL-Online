@@ -7,11 +7,12 @@ eventlet.monkey_patch()
 import requests
 import os
 
-from flask_migrate import Migrate, MigrateCommand
-from flask_script import Manager, Server, Shell
-from flask_script.commands import Clean, ShowUrls
+from glob import glob
+from subprocess import call
 
-import flask
+from flask_migrate import Migrate, MigrateCommand
+from flask_script import Manager, Server, Shell, Command, Option
+from flask_script.commands import Clean, ShowUrls
 
 from matl_online.app import create_app, socketio
 from matl_online.database import db
@@ -19,7 +20,11 @@ from matl_online.settings import DevConfig, ProdConfig
 from matl_online.utils import parse_iso8601
 from matl_online.public.models import Release
 
-CONFIG = ProdConfig if os.environ.get('MATL_ONLINE_ENV') == 'prod' else DevConfig
+if os.environ.get('MATL_ONLINE_ENV') == 'prod':
+    CONFIG = ProdConfig
+else:
+    CONFIG = DevConfig
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 TEST_PATH = os.path.join(HERE, 'tests')
 
@@ -30,7 +35,10 @@ migrate = Migrate(app, db)
 
 
 def _make_context():
-    """Return context dict for a shell session so you can access app, db, and the User model by default."""
+    """
+    Return context dict for a shell session so you can access app, db,
+    and the User model by default.
+    """
     return {'app': app, 'db': db}
 
 
@@ -62,6 +70,49 @@ def refresh_releases():
 
 
 @manager.command
+
+class Lint(Command):
+    """Lint and check code style with flake8 and isort."""
+
+    def get_options(self):
+        """Command line options."""
+        return (
+            Option('-f', '--fix-imports',
+                   action='store_true', dest='fix_imports', default=False,
+                   help='Fix imports using isort, before linting'),
+        )
+
+    def run(self, fix_imports):
+        """Run command."""
+        skip = ['requirements', 'env', 'migrations']
+        root_files = glob('*.py')
+
+        root_directories = list()
+
+        for name in next(os.walk('.'))[1]:
+            if not name.startswith('.'):
+                root_directories.append(name)
+
+        files_and_directories = list()
+
+        for arg in root_files + root_directories:
+            if arg not in skip:
+                files_and_directories.append(arg)
+
+        def execute_tool(description, *args):
+            """Execute a checking tool with its arguments."""
+            command_line = list(args) + files_and_directories
+            print('{}: {}'.format(description, ' '.join(command_line)))
+            rv = call(command_line)
+            if rv is not 0:
+                exit(rv)
+
+        if fix_imports:
+            execute_tool('Fixing import order', 'isort', '-rc')
+        execute_tool('Checking code style', 'flake8')
+
+
+@manager.command
 def run():
     socketio.run(app,
                  host='127.0.0.1',
@@ -74,6 +125,7 @@ manager.add_command('shell', Shell(make_context=_make_context))
 manager.add_command('db', MigrateCommand)
 manager.add_command('urls', ShowUrls())
 manager.add_command('clean', Clean())
+manager.add_command('lint', Lint())
 
 if __name__ == '__main__':
     manager.run()
