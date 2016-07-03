@@ -1,4 +1,4 @@
-function matl_runner(flags, command, inputs)
+function matl_runner(flags, command, varargin)
     % matl_runner - Wrapper function for dealing with MATL gracefully
     %
     %   We have to wrap calls to MATL for two primary reasons:
@@ -10,10 +10,7 @@ function matl_runner(flags, command, inputs)
     %   the MATL source directly without any modification.
 
     % If any inputs are provided, go ahead and fill up the inputs queue
-    if exist('inputs', 'var') && ~isempty(inputs)
-        inputs = regexp(inputs, '\n', 'split');
-        input('INIT', inputs{:});
-    end
+    input('INIT', varargin{:});
 
     % Go ahead and disable all warnings
     warning off %#ok
