@@ -195,7 +195,7 @@ def matl_task(self, *args, **kwargs):
     # revoke() event, we will still clean things up
     except (KeyboardInterrupt, SystemExit):
         self.octave.logger.info('[STDERR]Job cancelled')
-        self.on_term()
+        self.on_failure()
         raise
     except SoftTimeLimitExceeded:
         # Propagate the term event up the chain to actually kill the worker
