@@ -69,8 +69,6 @@ def refresh_releases():
                            date=parse_iso8601(item['published_at']))
 
 
-@manager.command
-
 class Lint(Command):
     """Lint and check code style with flake8 and isort."""
 

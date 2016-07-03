@@ -5,7 +5,6 @@ import shutil
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import worker_process_init
-from celery.task.control import revoke
 
 from flask_socketio import SocketIO
 
