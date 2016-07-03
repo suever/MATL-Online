@@ -56,6 +56,10 @@ pre.code {
     white-space: pre-line;
 }
 
+.thumb {
+    cursor: pointer;
+}
+
 .explain {
     max-height: 500px;
     overflow-y: auto;
