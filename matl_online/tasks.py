@@ -74,7 +74,6 @@ class OutputHandler(StreamHandler):
             for item in record.msg.split('\n'):
                 newrecord = copy.copy(record)
                 newrecord.msg = '[STDERR]' + item
-                print newrecord.msg
                 self.contents.append(newrecord)
 
             return
@@ -180,14 +179,6 @@ class OctaveTask(Task):
         # Send a message that we failed
         self.send_results()
         self.emit('complete', {'success': False})
-
-
-@celery.task()
-def killtask(taskid, sessionid):
-    """
-    Simple task for killing a currently-running job.
-    """
-    revoke(taskid, terminate=True)
 
 
 @celery.task(base=OctaveTask, bind=True)
