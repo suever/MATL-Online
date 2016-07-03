@@ -53,7 +53,7 @@ class OutputHandler(StreamHandler):
         #   2. [CLC]    Send an empty message and clear contents
         #   3. [IMAGE]  FUTURE ENCODING TO BASE64
 
-        if not record.levelno == logging.DEBUG:
+        if not record.levelno == logging.INFO:
             return
 
         if record.msg == '[PAUSE]':
@@ -113,7 +113,7 @@ class OctaveTask(Task):
             # Turn on debugging so we get notified of EVERY output as it
             # happens rather than waiting for a command to finish which is
             # what happens if we set the log level to INFO instead
-            self._octave.logger.setLevel(logging.DEBUG)
+            self._octave.logger.setLevel(logging.INFO)
 
             # Add our custom handler to capture all output
             self._octave.logger.addHandler(self._handler)
