@@ -142,12 +142,29 @@ class OctaveTask(Task):
         socket.emit(*args, room=self.session_id, **kwargs)
 
     def on_term(self):
+        """
+        This is a time-limit exceed so the worker will NOT be restarted,
+        we just need to halt the current process and get it to a point
+        where we can process new tasks
+        """
         # Go ahead and kill the subprocess
         self.octave._session.interrupt()
+
+        # Restart octave so we're ready to go with future calls
+        self.octave.restart()
+        _initialize_process()
 
     def on_success(self, *args, **kwargs):
         self.emit('complete', {'success': True,
                                'message': ''})
+
+    def on_kill(self):
+        """
+        This is a hard kill by celery so this worker will be destroyed. No
+        need to restart octave
+        """
+        self.octave._session.interrupt()
+        self.on_failure()
 
     def send_results(self):
         """ Local forwarder for all send events """
@@ -163,12 +180,6 @@ class OctaveTask(Task):
         # Send a message that we failed
         self.send_results()
         self.emit('complete', {'success': False})
-
-        self.octave._session.interrupt()
-
-        # Restart the octave session
-        #self.octave.restart()
-        #_initialize_process()
 
 
 @celery.task()
@@ -195,7 +206,7 @@ def matl_task(self, *args, **kwargs):
     # revoke() event, we will still clean things up
     except (KeyboardInterrupt, SystemExit):
         self.octave.logger.info('[STDERR]Job cancelled')
-        self.on_failure()
+        self.on_kill()
         raise
     except SoftTimeLimitExceeded:
         # Propagate the term event up the chain to actually kill the worker
