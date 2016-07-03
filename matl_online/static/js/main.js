@@ -5,8 +5,6 @@ var running = false;
 
 $('#codeform').on('submit', function(d) { d.preventDefault(); });
 
-parseHash();
-
 function submitCode() {
     var form = $('#codeform');
 
@@ -64,54 +62,19 @@ $('#explain').on('click', function(d) {
     });
 });
 
-function encodeData(data) {
-    var ret = [];
-    for (var d in data) {
-        ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]));
-    }
-
-    return ret.join('&');
-}
-
 function getlink() {
-    return encodeData({
+
+    var data = {
         'code': $('#code').val(),
         'inputs': $('#inputs').val(),
-        'version': $('#version').data('version')
+        'version': $('#version').data('version')};
+
+    var link = $.param(data);
+
+    // Now sanitize for SE
+    return link.replace(/[!'()*]/g, function(ch) {
+        return '%' + ch.charCodeAt(0).toString(16);
     });
-}
-
-function getParameterByName(name, url) {
-    if (!url) url = window.location.href;
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
-
-// Parse the hashed information
-function parseHash(){
-    if ( window.location.hash.length > 1 ){
-        $('#code').val(getParameterByName('code'));
-        $('#inputs').val(getParameterByName('inputs'));
-
-        version = getParameterByName('version');
-
-        // Make sure that the version is even valid
-        versions = $('a.version');
-        for ( k = 0; k < versions.length; ++k ) {
-            V = $(versions[k]);
-            if ( version == V.data('version') ) {
-                $('#version').data('version', V.data('version')).text(V.text());
-                break
-            }
-        }
-
-        // Update the character count
-        countChar($('#code')[0]);
-    }
 }
 
 socket.on('killed', function(data) {
@@ -185,7 +148,8 @@ $('.version').on('click', function(e) {
 });
 
 $('#save').on('click', function(e) {
-    window.location.hash = '?' + getlink();
+    link = '?' + getlink();
+    history.pushState({'Title': '', 'Url': link}, '', link);
     e.preventDefault();
 });
 
