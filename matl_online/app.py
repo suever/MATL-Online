@@ -18,7 +18,6 @@ def create_app(config_object=ProdConfig):
     app.config.from_object(config_object)
     register_extensions(app)
     register_blueprints(app)
-    #register_errorhandlers(app)
     return app
 
 

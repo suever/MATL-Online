@@ -12,8 +12,8 @@ from flask_socketio import emit, rooms
 from matl_online.matl import help_file
 from matl_online.public.models import Release
 
-from matl_online.extensions import socketio
-from matl_online.tasks import matl_task, killtask
+from matl_online.extensions import socketio, celery
+from matl_online.tasks import matl_task
 
 blueprint = Blueprint('public', __name__, static_folder='../static')
 
@@ -52,17 +52,17 @@ def connected():
 @socketio.on('kill')
 def kill_task(data):
     taskid = session.get('taskid', None)
-    uid = data.get('uid', str(uuid.uuid4()))
     if taskid is not None:
-        task = killtask.delay(taskid, uid)
-        task.wait()
+        celery.control.revoke(taskid, terminate=True)
 
-        emit('complete', {
-            'success': False,
-            'message': 'User terminated the job'
-        })
+    # Send a success notification regardless just in case something went
+    # wrong and the task was ALREADY killed
+    emit('complete', {
+        'success': False,
+        'message': 'User terminated the job'
+    })
 
-        session['taskid'] = None
+    session['taskid'] = None
 
 
 @socketio.on('submit')
