@@ -143,16 +143,24 @@ socket.on('status', function(data) {
         data['data'].forEach(function(item) {
             switch ( item.type ) {
                 case 'image':
-                    val = '<span class="thumb"><img class="imshow" src="' + item.value + '"></span><br>';
-                    output.append(val);
-                    $('.thumb').on('click', function(e) {
-                        var url = $(this).find('.imshow').attr('src');
-                        $('#imagepreview').attr('src', url);
-                        var img = $('#imagepreview').get(0);
 
-                        $('#dimensions').text(img.naturalHeight + ' x ' + img.naturalWidth);
-                        $('#imagemodal').modal('show');
-                    });
+                    // Remove any previous images (simulates drawnow)
+                    var thumb = $('.thumb');
+
+                    if ( thumb.length ){
+                        $(thumb).find('.imshow').attr('src', item.value);
+                    } else {
+                        val = '<span class="thumb"><img class="imshow" src="' + item.value + '"><br/></span>';
+                        output.append(val);
+                        $('.thumb').on('click', function(e) {
+                            var url = $(this).find('.imshow').attr('src');
+                            $('#imagepreview').attr('src', url);
+                            var img = $('#imagepreview').get(0);
+
+                            $('#dimensions').text(img.naturalHeight + ' x ' + img.naturalWidth);
+                            $('#imagemodal').modal('show');
+                        });
+                    }
 
                     break;
                 case 'stderr':
