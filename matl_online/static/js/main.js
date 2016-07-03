@@ -143,11 +143,14 @@ socket.on('status', function(data) {
         data['data'].forEach(function(item) {
             switch ( item.type ) {
                 case 'image':
-                    val = '<a href="#" class="thumb"><img class="imshow" src="' + item.value + '"></a><br>';
+                    val = '<span class="thumb"><img class="imshow" src="' + item.value + '"></span><br>';
                     output.append(val);
-                    $('.thumb').on('click', function() {
+                    $('.thumb').on('click', function(e) {
                         var url = $(this).find('.imshow').attr('src');
                         $('#imagepreview').attr('src', url);
+                        var img = $('#imagepreview').get(0);
+
+                        $('#dimensions').text(img.naturalHeight + ' x ' + img.naturalWidth);
                         $('#imagemodal').modal('show');
                     });
 

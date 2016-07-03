@@ -66,6 +66,17 @@ pre.code {
     border: 1px solid #DDD;
 }
 
+.imagedetaildiv {
+    padding-top:10px;
+    padding-bottom: 5px;
+    color: #AAAAAA;
+    font-size: 75%;
+}
+
+.imagedetails {
+    float: right;
+}
+
 img {
     image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
     image-rendering: -moz-crisp-edges;          /* Firefox                        */
