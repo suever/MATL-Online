@@ -107,15 +107,14 @@ class OctaveTask(Task):
             # Remove all other handlers (stdout, etc.)
             self._octave.logger.handlers = []
 
-	# Add the handler if we need to
+        # Add the handler if we need to
         if len(self._octave.logger.handlers) == 0:
             if self._handler is None:
-		self._handler = OutputHandler(self)
+                self._handler = OutputHandler(self)
 
             # Turn on debugging so we get notified of EVERY output as it
             # happens rather than waiting for a command to finish which is
             # what happens if we set the log level to INFO instead
-            #self._octave.logger.setLevel(logging.DEBUG)
             self._octave.logger.setLevel(logging.DEBUG)
 
             # Add our custom handler to capture all output
@@ -142,41 +141,34 @@ class OctaveTask(Task):
     def emit(self, *args, **kwargs):
         socket.emit(*args, room=self.session_id, **kwargs)
 
-    def cleanup(self):
-        # Go ahead and kill octave
+    def on_term(self):
+        # Go ahead and kill the subprocess
         self.octave._session.interrupt()
 
-        # Remove all temporary files
-        self.clean_folders()
-
-        # Get it running again
-        self.octave.restart()
-        _initialize_process()
-
-    def on_term(self):
-        self.send_results()
-        self.cleanup()
-
-    def clean_folders(self):
-        if os.path.isdir(self.folder):
-            shutil.rmtree(self.folder)
-
-        # Clear any messages from the handler
-        self._handler.clear()
-
     def on_success(self, *args, **kwargs):
-        self.emit('complete', {'success': True})
-        self.clean_folders()
+        self.emit('complete', {'success': True,
+                               'message': ''})
 
     def send_results(self):
         """ Local forwarder for all send events """
         return self._handler.send()
 
+    def after_return(self, *args, **kwargs):
+        self._handler.clear()
+
+        if os.path.isdir(self.folder):
+            shutil.rmtree(self.folder)
+
     def on_failure(self, *args, **kwargs):
         # Send a message that we failed
         self.send_results()
         self.emit('complete', {'success': False})
-        self.cleanup()
+
+        self.octave._session.interrupt()
+
+        # Restart the octave session
+        #self.octave.restart()
+        #_initialize_process()
 
 
 @celery.task()
@@ -201,12 +193,14 @@ def matl_task(self, *args, **kwargs):
 
     # In the case of an interrupt (either through a time limit or a
     # revoke() event, we will still clean things up
-    except (KeyboardInterrupt, SystemExit, SoftTimeLimitExceeded):
-        print 'term event'
-        # Clean things up
+    except (KeyboardInterrupt, SystemExit):
+        self.octave.logger.info('[STDERR]Job cancelled')
         self.on_term()
-
+        raise
+    except SoftTimeLimitExceeded:
         # Propagate the term event up the chain to actually kill the worker
+        self.octave.logger.info('[STDERR]Operation timed out')
+        self.on_term()
         raise
 
     return result
