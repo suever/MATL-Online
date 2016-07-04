@@ -113,7 +113,7 @@ socket.on('status', function(data) {
                     if ( thumb.length ){
                         $(thumb).find('.imshow').attr('src', item.value);
                     } else {
-                        val = '<span class="thumb"><img class="imshow" src="' + item.value + '"><br/></span>';
+                        val = '<span class="thumb"><img class="imshow nn-interp" src="' + item.value + '"><br/></span>';
                         output.append(val);
                         $('.thumb').on('click', function(e) {
                             var url = $(this).find('.imshow').attr('src');
