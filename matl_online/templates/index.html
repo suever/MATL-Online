@@ -1,6 +1,9 @@
 <html>
   <head>
     <title>MATL Online</title>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
@@ -15,7 +18,9 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
             <h4 class="modal-title" id="modaltitle">Explanation</h4>
           </div>
           <div class="modal-body explain">
@@ -30,19 +35,27 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <button type="button" class="close" data-dismiss="modal">
+              <span aria-hidden="true">&times;</span>
+              <span class="sr-only">Close</span>
+            </button>
             <h4 class="modal-title" id="myModalLabel">Image Preview</h4>
           </div>
           <div class="modal-body">
-            <img src="" id="imagepreview" style="width: 100%;" >
-            <div class="imagedetaildiv">
+            <img src="" id="imagepreview">
+            <div class="imagedetaildiv" style="position:relative;">
+              <div id="share" class="flip">
+                <span class="glyphicon glyphicon-share"></span>
+                Share
+              </div>
+              <div id="sharelink" class="flip">
+                <img src="static/images/imgur.png" class="imgur"/>
+                <input id="imgurlink" value="Waiting..." style="height:20px;" size=40 disabled>
+              </div>
               <span class="imagedetails">
                 Actual Size: <span id="dimensions"></span> pixels
               </span>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>

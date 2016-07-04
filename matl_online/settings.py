@@ -14,6 +14,8 @@ class Config(object):
     # CELERY_TASK_SERIALIZER = 'json'
     # CELERY_RESULT_SERIALIZER = 'json'
 
+    IMGUR_CLIENT_ID = os.environ.get('MATL_ONLINE_IMGUR_CLIENT_ID')
+
     SECRET_KEY = str(uuid.uuid4())
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))

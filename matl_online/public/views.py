@@ -1,6 +1,10 @@
+import json
+import requests
 import uuid
 
 from flask import (Blueprint,
+                   abort,
+                   current_app,
                    render_template,
                    request,
                    jsonify,
@@ -13,6 +17,7 @@ from matl_online.matl import help_file
 from matl_online.public.models import Release
 
 from matl_online.extensions import socketio, celery
+from flask_wtf.csrf import validate_csrf
 from matl_online.tasks import matl_task
 
 blueprint = Blueprint('public', __name__, static_folder='../static')
@@ -40,6 +45,38 @@ def home():
                            inputs=inputs,
                            version=version,
                            versions=versions)
+
+
+@blueprint.route('/share', methods=['POST',])
+def share():
+    img = request.values.get('data')
+
+    if not validate_csrf(request.headers.get('X-Csrftoken')):
+        abort(400, 'CSRF token missing or incorrect.')
+
+    result = {'success': True,
+              'link': 'https://imgur.com/opoxoisdf.png'}
+
+    # Add the authorization headers
+    clientid = current_app.config['IMGUR_CLIENT_ID']
+    header = {'Authorization': 'Client-ID %s' % clientid}
+
+    # POST parameters for imgur API
+    payload = {'image': img.split('base64,')[-1],
+               'type': 'base64'}
+
+    resp = requests.post('https://api.imgur.com/3/image',
+                         payload, headers=header)
+    respdata = json.loads(resp.text)
+
+    if respdata['success']:
+        result = {'success': respdata['success'],
+                  'link': respdata['data']['link']}
+
+        return jsonify(result), 200
+
+    else:
+        return jsonify({'success': False}), 400
 
 
 @socketio.on('connect')

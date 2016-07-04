@@ -153,6 +153,49 @@ $('#save').on('click', function(e) {
     e.preventDefault();
 });
 
+// When the image preview dialog is closed, reset the share link
+$('#imagemodal').on('hidden.bs.modal', function () {
+    $('#share').removeClass('flip-side-2').addClass('flip-side-1');
+    $('#sharelink').removeClass('flip-side-1');
+});
+
+// Be sure that we place the CSRF token in all AJAX request headers
+$.ajaxSetup({
+    // Add a header containing the CSRF token if needed
+    beforeSend: function(xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken",
+                $('meta[name=csrf-token]').attr('content'));
+        }
+    }
+});
+
+$('#share').on('click', function(e){
+    // Display loading while we upload to imgur and get the link
+    $('#imgurlink').val('Loading...').css('color', '');
+
+    // Flip over to the link to prevent the user from clicking share again
+    $('#share').addClass('flip-side-2');
+    $('#sharelink').addClass('flip-side-1');
+
+    $.post({
+        url: '/share',
+        data: {'data': $('.thumb').find('.imshow').attr('src')},
+        success: function(resp){
+            // Paste the link into the input box and highlight it
+            $('#imgurlink').val(resp.link)
+                .prop('disabled', false)
+                .css('color', 'black')
+                .select();
+        },
+        error: function(resp){
+            // Some unspecified error happened (could be CSRF or others)
+            $('#imgurlink').val('SERVER ERROR')
+                .css('color', 'red');
+        }
+    });
+});
+
 table = $('#documentation').DataTable({
     paging: false,
     ordering: false,

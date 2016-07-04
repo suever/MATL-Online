@@ -4,7 +4,7 @@ from flask import Flask
 
 from matl_online import public
 from matl_online.assets import assets
-from matl_online.extensions import db, migrate, socketio, celery
+from matl_online.extensions import db, migrate, socketio, celery, csrf
 from matl_online.settings import ProdConfig
 
 
@@ -28,6 +28,7 @@ def register_extensions(app):
     migrate.init_app(app, db)
     socketio.init_app(app, message_queue='redis://')
     celery.conf.update(app.config)
+    csrf.init_app(app)
 
 
 def register_blueprints(app):

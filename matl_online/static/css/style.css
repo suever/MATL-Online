@@ -60,6 +60,10 @@ pre.code {
     cursor: pointer;
 }
 
+#share {
+    cursor: pointer;
+}
+
 .explain {
     max-height: 500px;
     overflow-y: auto;
@@ -67,6 +71,10 @@ pre.code {
 
 #imagepreview {
     border: 1px solid #DDD;
+    width: 90%;
+    margin: auto;
+    margin-bottom: 10px;
+    display: block;
 }
 
 .imshow {
@@ -78,11 +86,27 @@ pre.code {
     padding-top:10px;
     padding-bottom: 5px;
     color: #AAAAAA;
-    font-size: 75%;
+    vertical-align: middle;
 }
 
 .imagedetails {
     float: right;
+    font-size: 75%;
+}
+
+img.imgur {
+    float:left;
+    padding-right:10px;
+    height: 20px;;
+}
+
+#imgurlink {
+    height: 10px;
+    font-size: 75%;
+}
+
+.hspace {
+    width: 10px;
 }
 
 img {
@@ -93,5 +117,63 @@ img {
     image-rendering: pixelated; /* Chrome */
     image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
     -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+}
+
+.popover{
+    z-index:100000000;
+}
+
+.flip {
+    backface-visibility:             hidden;
+        -moz-backface-visibility:    hidden;
+        -ms-backface-visibility:     hidden;
+        -o-backface-visibility:      hidden;
+        -webkit-backface-visibility: hidden;
+    transform-origin:             50% 50% 0px;
+        -moz-transform-origin:    50% 50% 0px;
+        -ms-transform-origin:     50% 50% 0px;
+        -o-transform-origin:      50% 50% 0px;
+        -webkit-transform-origin: 50% 50% 0px;
+    transition: all 1s;
+        -moz-transition:    all 1s;
+        -ms-transition:     all 1s;
+        -o-transition:      all 1s;
+        -webkit-transition: all 1s;
+    width: 300px;    
+    position: absolute;
+    top:5px;
+    display: block;
+}
+
+#share {
+    transform:             rotateX( 0deg );
+        -moz-transform:    rotateX( 0deg );
+        -ms-transform:     rotateX( 0deg );
+        -o-transform:      rotateX( 0deg );
+        -webkit-transform: rotateX( 0deg );
+}
+
+#sharelink {
+    transform:             rotateX( 180deg );
+        -moz-transform:    rotateX( 180deg );
+        -ms-transform:     rotateX( 180deg );
+        -o-transform:      rotateX( 180deg );
+        -webkit-transform: rotateX( 180deg );
+}
+
+.flip-side-1 {    
+    transform:             rotateX( 0deg ) !important;
+        -moz-transform:    rotateX( 0deg ) !important;
+        -ms-transform:     rotateX( 0deg ) !important;
+        -o-transform:      rotateX( 0deg ) !important;
+        -webkit-transform: rotateX( 0deg ) !important;
+}
+
+.flip-side-2 {
+    transform:             rotateX( 180deg ) !important;
+        -moz-transform:    rotateX( 180deg ) !important;
+        -ms-transform:     rotateX( 180deg ) !important;
+        -o-transform:      rotateX( 180deg ) !important;
+        -webkit-transform: rotateX( 180deg ) !important;
 }
 
