@@ -47,7 +47,7 @@ def home():
                            versions=versions)
 
 
-@blueprint.route('/share', methods=['POST',])
+@blueprint.route('/share', methods=['POST'])
 def share():
     img = request.values.get('data')
 
