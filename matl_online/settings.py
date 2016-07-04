@@ -10,9 +10,6 @@ class Config(object):
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
     CELERYD_TASK_SOFT_TIME_LIMIT = 30
     CELERYD_TASK_TIME_LIMIT = 60
-    CELERY_ACCEPT_CONTENT = ['json']
-    CELERY_TASK_SERIALIZER = 'json'
-    CELERY_RESULT_SERIALIZER = 'json'
 
     IMGUR_CLIENT_ID = os.environ.get('MATL_ONLINE_IMGUR_CLIENT_ID')
 
