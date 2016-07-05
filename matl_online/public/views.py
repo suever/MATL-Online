@@ -1,6 +1,9 @@
 import json
+import os
 import requests
 import uuid
+
+from datetime import datetime
 
 from flask import (Blueprint,
                    abort,
@@ -13,6 +16,7 @@ from flask import (Blueprint,
 
 from flask_socketio import emit, rooms
 
+from matl_online.settings import Config
 from matl_online.matl import help_file
 from matl_online.public.models import Release
 
@@ -21,6 +25,9 @@ from flask_wtf.csrf import validate_csrf
 from matl_online.tasks import matl_task
 
 blueprint = Blueprint('public', __name__, static_folder='../static')
+
+modtime = os.stat(os.path.join(Config.PROJECT_ROOT, '.git')).st_mtime
+last_modified = datetime.utcfromtimestamp(modtime).strftime('%Y/%m/%d')
 
 
 @blueprint.route('/')
@@ -44,7 +51,8 @@ def home():
     return render_template('index.html', code=code,
                            inputs=inputs,
                            version=version,
-                           versions=versions)
+                           versions=versions,
+                           modified=last_modified)
 
 
 @blueprint.route('/share', methods=['POST'])

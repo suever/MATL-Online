@@ -202,7 +202,7 @@ table = $('#documentation').DataTable({
     info: false,
     ajax: 'help/' + $('#version').data('version'),
     stripe: true,
-    scrollY: '80vh',
+    scrollY: '75vh',
     scrollX: false,
     scrollCollapse: true,
     order: [[ 0, "asc"]],

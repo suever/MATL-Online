@@ -180,3 +180,40 @@ thead {
         -webkit-transform: rotateX( 180deg ) !important;
 }
 
+html, body {
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+div.main {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -20px;
+}
+
+.footer {
+    position: absolute;
+    bottom: 1;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 20px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #DDD;
+    font-size: x-small;
+    line-height: 20px;
+    vertical-align: middle;
+}
+
+.footer .middle{
+    text-align: center;
+}
+
+.footer .left {
+    text-align: left;
+}
+
+.footer .right {
+    text-align: right;
+}
