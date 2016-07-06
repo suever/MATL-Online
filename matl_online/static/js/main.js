@@ -224,6 +224,19 @@ table = $('#documentation').DataTable({
         }]
 });
 
+// Custom search function to handle single " characters
+$('input[type=search]').on( 'keyup', function () {
+
+    var searchStr = this.value;
+
+    // If only one " then replace with ""
+    if ( (searchStr.match(/"/g) || []).length == 1 ){
+        searchStr = searchStr.replace(/"/g, '""');
+    }
+
+    table.search( searchStr ).draw();
+} );
+
 function countChar(val) {
     var count = val.value.length;
 
