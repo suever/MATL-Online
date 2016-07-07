@@ -15,6 +15,11 @@ function matl_runner(flags, command, varargin)
     % Go ahead and disable all warnings
     warning off %#ok
 
+    % Create a multi-line string if necessary
+    if iscell(command)
+        command = strjoin(command, '\n');
+    end
+
     try
         % Execute the command
         matl(flags, command)
