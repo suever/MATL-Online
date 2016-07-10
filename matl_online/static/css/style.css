@@ -247,6 +247,9 @@ div.main {
 #right_div {
     height: 100%;
     background-color: white;
+    box-shadow: none;
+    border-left: 0px;
+    -webkit-box-shadow: none;
 }
 
 .inner-container {
