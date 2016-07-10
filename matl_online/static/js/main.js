@@ -272,3 +272,7 @@ $('#doctoggle').on('click', function(evnt){
     toggleDocumentation();
     evnt.preventDefault();
 });
+
+$('#docbutton').on('click', function(evnt){
+    toggleDocumentation();
+});

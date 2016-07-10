@@ -2,6 +2,7 @@
   <head>
     <title>MATL Online</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
@@ -69,29 +70,43 @@
       <div class="row">
         <div class="col-md-12 navbar navbar-default">
           <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#right_nav">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <button type="button" id="docbutton" class="navbar-toggle" data-toggle="tooltip" title="Toggle Documentation">
+              <span class="glyphicon glyphicon-book"></span>
+            </button>
             <a class="navbar-brand" href="https://github.com/lmendo/MATL">MATL Online</a>
           </div>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a id="doctoggle" href="#">Documentation</a></li>
-            <li class="dropdown">
 
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                <span id="version" class="version" data-version="{{ version.tag }}">
-                  {% if version == versions[0] %}
-                  latest
-                  {% else %}
-                  {{ version.tag }}
-                  {% endif %}
-                </span>
-                <span class="caret"></span>
-              </a>
-              <ul id="versiondrop" class="dropdown-menu">
-                {% for item in versions %}
+          <!-- Right portion of navbar for docs / version -->
+          <div class="collapse navbar-collapse" id="right_nav">
+            <ul class="nav navbar-nav navbar-right">
+              <li id="docmenutoggle" data-toggle="tooltip" title="Toggle Documentation">
+                <a id="doctoggle" href="#">Documentation</a>
+              </li>
+              <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" title="Change Version" aria-expanded="false">
+                v:
+                  <span id="version" data-version="{{ version.tag }}">
+                    {% if version == versions[0] %}
+                    latest
+                    {% else %}
+                    {{ version.tag }}
+                    {% endif %}
+                  </span>
+                  <span class="caret"></span>
+                </a>
+                <ul id="versiondrop" class="dropdown-menu">
+                  {% for item in versions %}
                   <li><a class="version" href="#" data-version="{{ item.tag }}" data-toggle="tooltip" title="{{ item.date }}">{{ item.tag }}</a></li>
-                {% endfor %}
-              </ul>
-            </li>
-          </ul>
+                  {% endfor %}
+                </ul>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -100,8 +115,10 @@
           <form id="codeform" action="#" method="POST">
             <div class="form-group">
               <label for="code">Source Code</label> 
-              <span id="explain" data-toggle="tooltip" title="Show Explanation" style="color: #BBB;" class="glyphicon glyphicon-question-sign"></span>
-              <span class="annotation" id="charcount">({{ code|length }} character{% if code|length != 1 %}s{% endif %})</span>
+              <span id="explain" data-toggle="tooltip" title="Show Explanation" class="glyphicon glyphicon-question-sign"></span>
+              <span class="annotation" id="charcount">
+                ({{ code|length }} character{% if code|length != 1 %}s{% endif %})
+              </span>
               <textarea id="code" onkeyup="countChar(this);" class="code form-control" name="code">{% if code %}{{ code }}{% endif %}</textarea>
             </div>
 
@@ -133,7 +150,7 @@
           </div>
         </div>
 
-        <div id="right_div" class="drawer drawer-right drawer-inside fold dw-xs-6 documentation">
+        <div id="right_div" class="drawer drawer-right drawer-inside fold dw-lg-6 dw-md-6 dw-s-6 dw-xs-12 documentation">
           <table class="table-striped table" id="documentation">
             <thead>
               <tr>
@@ -149,15 +166,17 @@
     </div>
 
     <footer class="footer">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-4 left text-muted"></div>
-        <div class="col-md-4 middle text-muted">
-          <a href="https://github.com/suever/matl-online" target="_blank">
-            Copyright &copy; 2016
-          </a>
+      <div class="container">
+        <div class="row">
+          <div class="text-muted middle">
+            <span class="footer-item">
+              <a href="https://github.com/suever/matl-online" target="_blank">
+                Copyright &copy; 2016
+              </a>
+            </span>|
+            <span class="footer-item">Updated: {{ modified }}</span>
+          </div>
         </div>
-        <div class="col-md-4 right text-muted">Updated: {{ modified }}</div>
       </div>
     </footer>
 

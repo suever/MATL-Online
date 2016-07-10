@@ -69,6 +69,10 @@ pre.code {
     overflow-y: auto;
 }
 
+#explain {
+    color: #BBB;
+}
+
 #imagepreview {
     border: 1px solid #DDD;
     width: 90%;
@@ -172,6 +176,7 @@ thead {
     font-size: 14px;
 }
 
+
 .flip-side-2 {
     transform:             rotateX( 180deg ) !important;
         -moz-transform:    rotateX( 180deg ) !important;
@@ -206,6 +211,14 @@ div.main {
     vertical-align: middle;
 }
 
+
+@media(max-width:767px)
+{
+    #docmenutoggle {
+        display: none;
+    }
+}
+
 .footer .middle{
     text-align: center;
 }
@@ -228,7 +241,7 @@ div.main {
 }
 
 .dropdown {
-    z-index: 999999;
+    z-index: 1036;
 }
 
 .col-sm-0 {
@@ -238,6 +251,11 @@ div.main {
     margin: 0px;
     padding: 0px;
     min-height: 1px;
+}
+
+.footer-item {
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 #left_div {
