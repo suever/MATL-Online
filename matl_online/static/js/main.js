@@ -138,7 +138,10 @@ socket.on('status', function(data) {
 });
 
 function refreshHelp() {
-    table.ajax.url('help/' + $('#version').data('version')).load();
+    // If the table is initialized, then refresh it
+    if ( table ) {
+        table.ajax.url('help/' + $('#version').data('version')).load();
+    }
 }
 
 $('.version').on('click', function(e) {
@@ -195,35 +198,6 @@ $('#share').on('click', function(e){
         }
     });
 });
-
-table = $('#documentation').DataTable({
-    paging: false,
-    ordering: false,
-    info: false,
-    ajax: 'help/' + $('#version').data('version'),
-    stripe: true,
-    scrollY: '75vh',
-    scrollX: false,
-    scrollCollapse: true,
-    order: [[ 0, "asc"]],
-    columns: [
-        {
-            data: 'source',
-            orderable: true
-        },
-        {
-            data: null,
-            orderable: false,
-            render: function(data) {
-                output = '<strong>' + data.brief + '</strong>';
-                if ( data.arguments ){
-                    output = output + '\n' + data.arguments;
-                }
-                return output + '\n' + data.description;
-            }
-        }]
-});
-
 // Custom search function to handle single " characters
 $('input[type=search]').on( 'keyup', function () {
 
@@ -246,3 +220,55 @@ function countChar(val) {
         $('#charcount').text('(' + count + ' characters)');
     }
 }
+
+function toggleDocumentation(){
+
+    var navitem = $('#doctoggle').parent();
+    var activeClasses = 'col-md-6 col-lg-6 col-sm-6';
+
+    if ( navitem.hasClass('active') ){
+        navitem.removeClass('active');
+        $('#left_div').removeClass(activeClasses);
+        $('.drawer').drawer('hide');
+    } else {
+        navitem.addClass('active');
+        $('#left_div').addClass(activeClasses);
+        $('.drawer').drawer('show');
+
+        // Create the datatable if it doesn't exist already
+        if ( table == null ){
+            table = $('#documentation').DataTable({
+                paging: false,
+                ordering: false,
+                info: false,
+                ajax: 'help/' + $('#version').data('version'),
+                stripe: true,
+                scrollY: '100vh',
+                scrollX: false,
+                scrollCollapse: true,
+                order: [[ 0, "asc"]],
+                columns: [
+                    {
+                        data: 'source',
+                        orderable: true
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function(data) {
+                            output = '<strong>' + data.brief + '</strong>';
+                            if ( data.arguments ){
+                                output = output + '\n' + data.arguments;
+                            }
+                            return output + '\n' + data.description;
+                        }
+                    }]
+            });
+        }
+    }
+}
+
+$('#doctoggle').on('click', function(evnt){
+    toggleDocumentation();
+    evnt.preventDefault();
+});

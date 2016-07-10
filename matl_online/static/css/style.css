@@ -195,7 +195,7 @@ div.main {
 
 .footer {
     position: absolute;
-    bottom: 1;
+    bottom: 1px;
     width: 100%;
     /* Set the fixed height of the footer here */
     height: 20px;
@@ -217,3 +217,39 @@ div.main {
 .footer .right {
     text-align: right;
 }
+
+.transition-width {
+    transition: width 0.25s ease-out;
+    webkit-transition: width 0.25s ease-out;
+}
+
+.documentation {
+    padding-left: 20px;
+    background-color: inherit;
+}
+
+.dropdown {
+    z-index: 999999;
+}
+
+.col-sm-0 {
+    width: 0px;
+    float: left;
+    overflow: hidden;
+    margin: 0px;
+    padding: 0px;
+    min-height: 1px;
+}
+
+#left_div {
+    min-height: 80%;
+}
+
+#right_div {
+    height: 100%;
+}
+
+.inner-container {
+    min-height: calc(100% - 80px);
+}
+
