@@ -225,7 +225,6 @@ div.main {
 
 .documentation {
     padding-left: 20px;
-    background-color: white;
 }
 
 .dropdown {
@@ -247,6 +246,7 @@ div.main {
 
 #right_div {
     height: 100%;
+    background-color: white;
 }
 
 .inner-container {
