@@ -144,6 +144,92 @@ function refreshHelp() {
     }
 }
 
+function checkInputType(obj){
+    // If contains any alpha-numeric characters
+    var str = $(obj).val();
+
+    if ( str.toLowerCase() === str.toUpperCase() ){
+        // Then we assume that this is numeric
+        $('#array_input').prop('checked', true);
+        $('#string_input').prop('checked', false);
+    } else {
+        $('#array_input').prop('checked', false);
+        $('#string_input').prop('checked', true);
+    }
+}
+
+function parseArray(str){
+    // Replace ][ with ; and [[ with [ and ]] with ]
+    return str.replace(/\]\s*,?\s*\[/g, '; ').
+               replace(/\[\s*\[\s*/g, '[').
+               replace(/\]\s*\]\s*/g, ']').
+               replace(/\s+/g, ' ').
+               replace(/\s*,\s*/g, ', ');
+}
+
+function parseString(str){
+    // Parse as raw string
+    str = str.split('\n');
+
+    // Now pad any strings as needed
+    var maxLength = 0;
+    $.each(str, function(index, val){
+        maxLength = Math.max(maxLength, val.length);
+    });
+
+
+    if ( str.length > 1 ){
+        output = "[";
+    } else {
+        output = '';
+    }
+
+    for ( var k = 0; k < str.length; ++k ){
+        num2pad = maxLength - str[k].length;
+        str[k] += new Array(num2pad+1).join(' ');
+        output = output + "'" + str[k] + "';";
+    }
+
+    output = output.replace(/;$/g, '');
+
+    if ( str.length > 1 ){
+        output = output + ']';
+    }
+
+    return output;
+}
+
+$('#paste_apply').on('click', function(evnt){
+
+    var input = $('#paste_input_field').val();
+
+    switch ( $("input[name=format]:checked").val() ) {
+        case 'array':
+            input = parseArray(input);
+            break;
+        case 'string':
+            input = parseString(input);
+            break;
+    }
+
+    if ( $('#inputs').val().length ){
+        input = '\n' + input;
+    }
+
+    $('#inputs').val($('#inputs').val() + input);
+    $('#pastemodal').modal('toggle');
+    $('#paste_input_field').val('');
+});
+
+$('#paste_input').on('click', function(evnt){
+    // Open up modal dialog to add data
+    $('#pastemodal').modal();
+});
+
+$('#pastemodal').on('shown.bs.modal', function(){
+    $('#paste_input_field').focus();
+});
+
 $('.version').on('click', function(e) {
     $('#version').text(e.target.text).data('version', $(e.target).data('version'));
     refreshHelp();

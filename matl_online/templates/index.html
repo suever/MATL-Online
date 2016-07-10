@@ -35,6 +35,31 @@
       </div>
     </div>
 
+    <div class="modal fade" id="pastemodal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+              <span class="sr-only">Close</span>
+            </button>
+            <h4 class="modal-title">Paste Input Argument</h4>
+          </div>
+          <div class="modal-body explain">
+            <textarea id="paste_input_field" onkeyup='checkInputType(this);' class="code" placeholder="Paste Input Here"></textarea>
+            <div class="modal-footer">
+              <div style="float:left;">
+                <label class="radio-inline"><input id="array_input" type="radio" name="format" value="array" checked/>Python Array</label>
+                <label class="radio-inline"><input id="string_input" type="radio" name="format" value="string"/>Multi-line String</label>
+              </div>
+              <button type="button" id="paste_apply" class="btn btn-secondary">Apply</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <!-- Creates the bootstrap modal where the image will appear -->
     <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -48,7 +73,7 @@
           </div>
           <div class="modal-body">
             <img src="" id="imagepreview" class="nn-interp">
-            <div class="imagedetaildiv" style="position:relative;">
+            <div class="imagedetaildiv">
               <div id="share" class="flip">
                 <span class="glyphicon glyphicon-share"></span>
                 Share
@@ -89,7 +114,6 @@
               </li>
               <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" title="Change Version" aria-expanded="false">
-                v:
                   <span id="version" data-version="{{ version.tag }}">
                     {% if version == versions[0] %}
                     latest
@@ -125,7 +149,11 @@
             <div class="form-group">
               <label for="inputs">Input Arguments</label>
               <!--<input class="annotation" placeholder="Lines Per Run" name="lines_per"></input>-->
-              <textarea id="inputs" rows=8 class="code form-control" name="inputs">{% if inputs %}{{ inputs }}{% endif %}</textarea><br>
+              <div style="position: relative;">
+                <textarea id="inputs" rows=8 class="code form-control" name="inputs">{% if inputs %}{{ inputs }}{% endif %}</textarea>
+                <i id="paste_input" data-toggle="tooltip" title="Paste Input" class="glyphicon glyphicon-plus pull-right"></i>
+              </div>
+                <br>
               <button id="run" class="btn btn-secondary" style="width:100px;">Run</button>
               &nbsp;&nbsp;
               <button id="save" class="btn btn-secondary" style="width: 100px;">Save</button>

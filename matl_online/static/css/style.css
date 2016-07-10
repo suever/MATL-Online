@@ -87,6 +87,7 @@ pre.code {
 }
 
 .imagedetaildiv {
+    position: relative;
     padding-top:10px;
     padding-bottom: 5px;
     color: #AAAAAA;
@@ -96,6 +97,12 @@ pre.code {
 .imagedetails {
     float: right;
     font-size: 75%;
+}
+
+#paste_input_field {
+    width: 100%;
+    min-height: 200px;
+    border: 1px solid #666;
 }
 
 img.imgur {
@@ -211,6 +218,13 @@ div.main {
     vertical-align: middle;
 }
 
+#paste_input {
+    position: relative;
+    right: 0px;
+    padding: 5px;
+    margin-top: -25px;
+    color: #DDD;
+}
 
 @media(max-width:767px)
 {
