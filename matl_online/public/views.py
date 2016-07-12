@@ -63,20 +63,6 @@ def home():
 @blueprint.route('/hook', methods=['POST'])
 def github_hook():
 
-    # Validate that the source IP was one of github's IP addresses
-    source_address = ip_address(u'{}'.format(request.remote_addr))
-
-    # Download the whitelist from the Github API
-    resp = requests.get('%s/meta' % Config.GITHUB_API)
-    whitelist = resp.json()['hooks']
-
-    # Now check to see if the source IP is in this list
-    for address in whitelist:
-        if source_address in ip_network(address):
-            break
-    else:
-        abort(403)
-
     # Now verify that the secret is correct
     secret = current_app.config['GITHUB_HOOK_SECRET']
 
