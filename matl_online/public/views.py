@@ -19,7 +19,6 @@ from flask_socketio import emit, rooms
 from flask_wtf.csrf import validate_csrf
 
 from hashlib import sha1
-from ipaddress import ip_address, ip_network
 from sys import hexversion
 
 from matl_online.extensions import socketio, celery, csrf
