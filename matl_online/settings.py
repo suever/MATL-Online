@@ -32,6 +32,17 @@ class Config(object):
     GITHUB_API = 'https://api.github.com'
     GITHUB_HOOK_SECRET = os.environ.get('MATL_ONLINE_GITHUB_HOOK_SECRET')
 
+    # Flower configuration
+    FLOWER_OAUTH2_KEY = os.environ.get('MATL_ONLINE_GITHUB_CLIENT_ID')
+    FLOWER_OAUTH2_SECRET = os.environ.get('MATL_ONLINE_GITHUB_CLIENT_SECRET')
+    FLOWER_OAUTH2_REDIRECT_URI = 'https://matl.suever.net/admin/login'
+    FLOWER_BROKER_API = CELERY_BROKER_URL
+    FLOWER_URL_PREFIX = 'admin'
+    FLOWER_PERSISTENT = True
+    FLOWER_AUTH_PROVIDER = 'flower.views.auth.GithubLoginHandler'
+    FLOWER_COOKIE_SECRET = SECRET_KEY
+    FLOWER_AUTH = os.environ.get('MATL_ONLINE_FLOWER_AUTH')
+
 
 class ProdConfig(Config):
     """Production configuration."""

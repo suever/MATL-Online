@@ -33,3 +33,6 @@ Flask-Script==2.0.5
 
 # Forms
 flask_wtf==0.12
+
+# Flower
+flower==8.0.2
