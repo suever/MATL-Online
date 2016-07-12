@@ -1,4 +1,5 @@
 import json
+import hmac
 import os
 import requests
 import uuid
@@ -15,13 +16,16 @@ from flask import (Blueprint,
                    session)
 
 from flask_socketio import emit, rooms
-
-from matl_online.settings import Config
-from matl_online.matl import help_file
-from matl_online.public.models import Release
-
-from matl_online.extensions import socketio, celery
 from flask_wtf.csrf import validate_csrf
+
+from hashlib import sha1
+from ipaddress import ip_address, ip_network
+from sys import hexversion
+
+from matl_online.extensions import socketio, celery, csrf
+from matl_online.matl import help_file, refresh_releases
+from matl_online.public.models import Release
+from matl_online.settings import Config
 from matl_online.tasks import matl_task
 
 blueprint = Blueprint('public', __name__, static_folder='../static')
@@ -53,6 +57,67 @@ def home():
                            version=version,
                            versions=versions,
                            modified=last_modified)
+
+
+@csrf.exempt
+@blueprint.route('/hook', methods=['POST'])
+def github_hook():
+
+    # Validate that the source IP was one of github's IP addresses
+    source_address = ip_address(u'{}'.format(request.remote_addr))
+
+    # Download the whitelist from the Github API
+    resp = requests.get('%s/meta' % Config.GITHUB_API)
+    whitelist = resp.json()['hooks']
+
+    # Now check to see if the source IP is in this list
+    for address in whitelist:
+        if source_address in ip_network(address):
+            break
+    else:
+        abort(403)
+
+    # Now verify that the secret is correct
+    secret = current_app.config['GITHUB_HOOK_SECRET']
+
+    # Extract the signature from the custom header
+    signature = request.headers.get('X-Hub-Signature')
+    if signature is None:
+        abort(403)
+
+    method, signature = signature.split('=')
+    if method != 'sha1':
+        abort(501)
+
+    mac = hmac.new(str(secret), msg=request.data, digestmod=sha1)
+
+    if hexversion >= 0x020707F0:
+        if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
+            abort(403)
+        else:
+            if not str(mac.hexdigest()) == str(signature):
+                abort(403)
+
+    # Implement ping
+    event = request.headers.get('X-GitHub-Event', 'ping')
+    if event == 'ping':
+        return jsonify({'msg': 'pong'})
+
+    try:
+        payload = json.loads(request.data)
+    except:
+        abort(400)
+
+    # Ignore any non-release events
+    if 'release' not in payload:
+        return '', 200
+
+    # We don't actually care if this is a modification, a new release, or
+    # whatever. We will simply refresh our local catalog of release
+    # information regardless.
+    refresh_releases()
+
+    return '', 200
 
 
 @blueprint.route('/share', methods=['POST'])

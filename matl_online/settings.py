@@ -30,6 +30,7 @@ class Config(object):
     # Github / Repo settings
     MATL_REPO = 'lmendo/MATL'
     GITHUB_API = 'https://api.github.com'
+    GITHUB_HOOK_SECRET = os.environ.get('MATL_ONLINE_GITHUB_HOOK_SECRET')
 
 
 class ProdConfig(Config):

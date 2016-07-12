@@ -3,12 +3,15 @@ import json
 import os
 import re
 import requests
+import shutil
 import StringIO
 
+from flask import current_app
 from scipy.io import loadmat
 
+from matl_online.public.models import Release
 from matl_online.settings import Config
-from matl_online.utils import unzip
+from matl_online.utils import unzip, parse_iso8601
 
 
 def install_matl(version, folder):
@@ -17,8 +20,8 @@ def install_matl(version, folder):
     location.
     """
 
-    url = 'https://api.github.com/repos/%s/releases/tags/%s'
-    url = url % (Config.MATL_REPO, version)
+    url = '%s/repos/%s/releases/tags/%s'
+    url = url % (Config.GITHUB_API, Config.MATL_REPO, version)
 
     resp = requests.get(url)
 
@@ -80,7 +83,7 @@ def help_file(version):
     return outfile
 
 
-def get_matl_folder(version):
+def get_matl_folder(version, install=True):
     """
     Check if folder exists and download the source code if necessary
     """
@@ -88,7 +91,10 @@ def get_matl_folder(version):
     matl_folder = os.path.join(Config.MATL_FOLDER, version)
 
     if not os.path.isdir(matl_folder):
-        install_matl(version, matl_folder)
+        if install:
+            install_matl(version, matl_folder)
+        else:
+            matl_folder = None
 
     return matl_folder
 
@@ -170,3 +176,39 @@ def matl(octave, flags, code='', inputs='', version='', folder=''):
     # Change back to the original directory
     cmd = "cd('%s')" % escape(Config.PROJECT_ROOT)
     octave.eval(cmd)
+
+
+def refresh_releases():
+    """
+    Fetch new release information from Github and update local database
+    """
+
+    repo = current_app.config['MATL_REPO']
+    resp = requests.get('https://api.github.com/repos/%s/releases' % repo)
+
+    for item in resp.json():
+        # Skip any pre-releases since they aren't ready for prime-time
+        if item['prerelease']:
+            continue
+
+        print item['tag_name']
+
+        pubdate = parse_iso8601(item['published_at'])
+
+        # Query the database for this release number
+        release = Release.query.filter_by(tag=item['tag_name']).first()
+
+        if release is None:
+            # This is a new release and we don't need to do much
+            Release.create(tag=item['tag_name'], date=pubdate)
+
+        elif release.date != pubdate:
+            # We have an updated release and we need to clean up
+            source_dir = get_matl_folder(item['tag_name'], install=False)
+
+            # If we had previously downloaded this code, then delete it
+            if source_dir is not None:
+                shutil.rmtree(source_dir)
+
+            # Now update the database entry
+            release.update(date=pubdate)
