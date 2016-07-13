@@ -1,3 +1,5 @@
+from sqlalchemy import desc
+
 from matl_online.database import db, Model, Column
 
 
@@ -11,3 +13,7 @@ class Release(Model):
 
     def __repr__(self):
         return '<Release %r>' % self.tag
+
+    @classmethod
+    def latest(cls):
+        return cls.query.order_by(desc(cls.date)).first()
