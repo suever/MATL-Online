@@ -10,7 +10,6 @@ from flask import current_app
 from scipy.io import loadmat
 
 from matl_online.public.models import Release
-from matl_online.settings import Config
 from matl_online.utils import unzip, parse_iso8601
 
 
@@ -21,7 +20,8 @@ def install_matl(version, folder):
     """
 
     url = '%s/repos/%s/releases/tags/%s'
-    url = url % (Config.GITHUB_API, Config.MATL_REPO, version)
+    url = url % (current_app.config['GITHUB_API'],
+                 current_app.config['MATL_REPO'], version)
 
     resp = requests.get(url)
 
@@ -88,7 +88,7 @@ def get_matl_folder(version, install=True):
     Check if folder exists and download the source code if necessary
     """
 
-    matl_folder = os.path.join(Config.MATL_FOLDER, version)
+    matl_folder = os.path.join(current_app.config['MATL_FOLDER'], version)
 
     if not os.path.isdir(matl_folder):
         if install:
@@ -174,7 +174,7 @@ def matl(octave, flags, code='', inputs='', version='', folder=''):
     octave.eval(cmd)
 
     # Change back to the original directory
-    cmd = "cd('%s')" % escape(Config.PROJECT_ROOT)
+    cmd = "cd('%s')" % escape(current_app.config['PROJECT_ROOT'])
     octave.eval(cmd)
 
 
