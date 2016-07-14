@@ -1,7 +1,43 @@
 import base64
 import os
 
-from matl_online.matl import parse_matl_results
+from matl_online.matl import parse_matl_results, get_matl_folder
+
+
+class TestSourceCache:
+    def test_no_source_no_install(self, app, tmpdir):
+        # The source folder does not exist and we won't create it
+        app.config['MATL_FOLDER'] = tmpdir.strpath
+        folder = get_matl_folder('18.3.0', install=False)
+
+        # In this case, the result should simply be None
+        assert folder is None
+
+    def test_no_source_install(self, app, tmpdir, mocker):
+        # The source folder does not exist but we'll fetch the source
+
+        mock_install = mocker.patch('matl_online.matl.install_matl')
+        app.config['MATL_FOLDER'] = tmpdir.strpath
+
+        version = '0.0.0'
+
+        folder = get_matl_folder(version)
+        expected = os.path.join(tmpdir.strpath, version)
+
+        mock_install.assert_called_once_with(version, expected)
+        assert folder == expected
+
+    def test_source_folder_exists(self, app, tmpdir):
+        # Source folder exists so simply return it
+        app.config['MATL_FOLDER'] = tmpdir.strpath
+
+        # Create the source folder
+        version = '13.4.0'
+        versiondir = tmpdir.mkdir(version)
+        folder = get_matl_folder(version, install=False)
+
+        # Make sure that we only return the source folder
+        assert folder == versiondir.strpath
 
 
 class TestResults:
