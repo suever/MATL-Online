@@ -13,10 +13,8 @@ class TestRelease:
         # Create 3 release each time checking that the latest is the latest
         # release
         for k in range(3):
-            release = ReleaseFactory(date=datetime.now())
-
             # Ensure that this is the latest release
-            assert release == Release.latest()
+            assert ReleaseFactory() == Release.latest()
 
         # Now add a new entry that has an old date
         release = ReleaseFactory(date=datetime(2000,1,1))
