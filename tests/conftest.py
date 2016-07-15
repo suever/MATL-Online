@@ -2,10 +2,18 @@ import os
 import pytest
 import signal
 
+from webtest import TestApp
+
 from matl_online.app import create_app
 from matl_online.database import db as _db
 from matl_online.settings import TestConfig
 from matl_online.tasks import _initialize_process
+
+
+@pytest.fixture(scope='function')
+def testapp(app):
+    """A Webtest app."""
+    return TestApp(app)
 
 
 @pytest.yield_fixture(scope='function')

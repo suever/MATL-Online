@@ -70,9 +70,11 @@ def github_hook():
     if signature is None:
         abort(403)
 
-    method, signature = signature.split('=')
-    if method != 'sha1':
+    pieces = signature.split('=')
+    if pieces[0] != 'sha1' or len(pieces) != 2:
         abort(501)
+
+    signature = pieces[1]
 
     mac = hmac.new(str(secret), msg=request.data, digestmod=sha1)
 
@@ -102,7 +104,7 @@ def github_hook():
     # information regardless.
     refresh_releases()
 
-    return '', 200
+    return jsonify({'success': True}), 200
 
 
 @blueprint.route('/share', methods=['POST'])
