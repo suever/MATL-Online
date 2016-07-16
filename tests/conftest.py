@@ -6,6 +6,7 @@ from webtest import TestApp
 
 from matl_online.app import create_app
 from matl_online.database import db as _db
+from matl_online.extensions import socketio
 from matl_online.settings import TestConfig
 from matl_online.tasks import _initialize_process
 
@@ -14,6 +15,12 @@ from matl_online.tasks import _initialize_process
 def testapp(app):
     """A Webtest app."""
     return TestApp(app)
+
+
+@pytest.yield_fixture(scope='function')
+def socketclient(app):
+    socketio.init_app(app)
+    yield socketio.test_client(app)
 
 
 @pytest.yield_fixture(scope='function')
