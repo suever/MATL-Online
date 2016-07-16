@@ -64,7 +64,7 @@ class TestReleaseHook:
         headers.update({'X-GitHub-Event': 'release'})
 
         # Mock the refresh_releases method
-        mocker.patch('matl_online.public.views.refresh_releases')
+        refresh = mocker.patch('matl_online.public.views.refresh_releases')
 
         # Post the data
         resp = testapp.post_json(url, data, headers=headers)
@@ -74,7 +74,7 @@ class TestReleaseHook:
         assert resp.json.get('success')
 
         # Make sure that we would have called the refresh_releases method
-        matl_online.public.views.refresh_releases.assert_called_once()
+        refresh.assert_called_once()
 
     def test_non_release_event(self, app, testapp, mocker):
         # Create a valid POST that isn't a release event
@@ -86,7 +86,7 @@ class TestReleaseHook:
         headers.update({'X-GitHub-Event': 'not-release'})
 
         # Mock refresh_releases method
-        mocker.patch('matl_online.public.views.refresh_releases')
+        refresh = mocker.patch('matl_online.public.views.refresh_releases')
 
         # Do the post
         resp = testapp.post_json(url, data, headers=headers)
@@ -96,7 +96,7 @@ class TestReleaseHook:
         assert resp.text == ''
 
         # Make sure that we never refresh the releases for these events
-        assert not matl_online.public.views.refresh_releases.called
+        assert not refresh.called
 
     def get_signature(self, app, data):
         # Using the secret and payload create a signature header
