@@ -127,11 +127,11 @@ socket.on('status', function(data) {
 
                     break;
                 case 'stderr':
-                    errors.append(item.value + '\n');
+                    errors.append(document.createTextNode(item.value + '\n'));
                     $('#errorconsoletab').css('font-weight', 'bold');
                     break;
                 default:
-                    $('#output').append(item.value);
+                    output.append(document.createTextNode(item.value));
             }
         });
     }
