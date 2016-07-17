@@ -5,6 +5,9 @@ env
 # Ignore database
 *.db
 
+# Ignore any cache
+.cache
+
 # Ignore coverage intermediate files
 htmlcov
 .coverage

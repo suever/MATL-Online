@@ -17,7 +17,7 @@ class TestRelease:
             assert ReleaseFactory() == Release.latest()
 
         # Now add a new entry that has an old date
-        release = Release.create(date=datetime(2000,1,1), tag='1.2.3')
+        release = Release.create(date=datetime(2000, 1, 1), tag='1.2.3')
 
         # Make sure that this is NOT the latest release
         assert release != Release.latest()

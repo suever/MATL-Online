@@ -35,9 +35,6 @@ last_modified = datetime.utcfromtimestamp(modtime).strftime('%Y/%m/%d')
 
 @blueprint.route('/')
 def home():
-
-    session['uid'] = str(uuid.uuid4())
-
     code = request.values.get('code', '')
     inputs = request.values.get('inputs', '')
 

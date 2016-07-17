@@ -2,7 +2,6 @@ import hmac
 import json
 from hashlib import sha1
 from flask import url_for
-import matl_online
 
 
 class TestReleaseHook:
