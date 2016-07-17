@@ -40,6 +40,29 @@ class TestRelease:
         assert len(releases) == nRelease - 1
         assert Release.query.filter_by(tag=last_release.tag).all() == []
 
+    def test_release_update(self):
+        olddate = datetime(2000, 1, 1)
+        oldtag = '1.2.3'
+        release = Release.create(date=olddate, tag=oldtag)
+
+        assert release.date == olddate
+
+        # Make sure that we can update the time
+        newdate = datetime(2001, 1, 1)
+
+        release.update(date=newdate)
+
+        assert release.date == newdate
+
+        # Make sure we can update the tag
+        newtag = '4.5.6'
+
+        assert release.tag == oldtag
+
+        release.update(tag=newtag)
+
+        assert release.tag == newtag
+
     def test_release_repr(self):
         # Check that the release is displayed properly if coerced
         release = ReleaseFactory(tag='1.2.3')
