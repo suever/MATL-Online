@@ -3,12 +3,14 @@ import zipfile
 
 from datetime import datetime
 
+ISO8601_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
 
 def parse_iso8601(date):
     """
     Convert a date in ISO 8601 format (used by github) to a datetime object
     """
-    return datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
+    return datetime.strptime(date, ISO8601_FORMAT)
 
 
 def get_members(zip_file):

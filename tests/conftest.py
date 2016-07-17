@@ -42,6 +42,14 @@ def logger():
     logger = logging.getLogger(str(uuid.uuid4()))
     logger.setLevel(logging.INFO)
     yield logger
+
+
+@pytest.yield_fixture(scope='function')
+def moctave(mocker):
+    moctave = mocker.patch('oct2py.octave')
+    moctave.evals = list()
+    moctave.eval = lambda x: moctave.evals.append(x)
+    yield moctave
 def octave():
     _initialize_process()
     from oct2py import octave as _octave
