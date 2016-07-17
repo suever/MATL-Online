@@ -1,6 +1,8 @@
+import logging
 import os
 import pytest
 import signal
+import uuid
 
 from webtest import TestApp
 
@@ -35,6 +37,11 @@ def app():
 
 
 @pytest.yield_fixture(scope='function')
+def logger():
+    # Create a new random log
+    logger = logging.getLogger(str(uuid.uuid4()))
+    logger.setLevel(logging.INFO)
+    yield logger
 def octave():
     _initialize_process()
     from oct2py import octave as _octave

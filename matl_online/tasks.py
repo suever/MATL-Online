@@ -37,8 +37,6 @@ class OutputHandler(StreamHandler):
     def send(self):
         """ Send a message out to the specified rooms """
         output = parse_matl_results(self.getMessages())
-        print 'messages'
-        print self.getMessages()
         result = {'data': output, 'session': self.task.session_id}
         socket.emit('status', result, room=self.task.session_id)
         return result
