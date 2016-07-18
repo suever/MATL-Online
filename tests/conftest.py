@@ -1,7 +1,5 @@
 import logging
-import os
 import pytest
-import signal
 import uuid
 
 from webtest import TestApp
@@ -10,7 +8,7 @@ from matl_online.app import create_app
 from matl_online.database import db as _db
 from matl_online.extensions import socketio
 from matl_online.settings import TestConfig
-from matl_online.tasks import _initialize_process, OutputHandler
+from matl_online.tasks import OutputHandler
 
 
 @pytest.fixture(scope='function')

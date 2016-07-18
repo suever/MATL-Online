@@ -6,7 +6,6 @@ import shutil
 
 from datetime import datetime
 
-from matl_online.matl import parse_matl_results, get_matl_folder, help_file, install_matl
 from matl_online import matl
 from matl_online.utils import parse_iso8601, ISO8601_FORMAT
 from matl_online.public.models import Release
@@ -18,7 +17,7 @@ class TestSourceCache:
     def test_no_source_no_install(self, app, tmpdir):
         # The source folder does not exist and we won't create it
         app.config['MATL_FOLDER'] = tmpdir.strpath
-        folder = get_matl_folder('18.3.0', install=False)
+        folder = matl.get_matl_folder('18.3.0', install=False)
 
         # In this case, the result should simply be None
         assert folder is None
@@ -31,7 +30,7 @@ class TestSourceCache:
 
         version = '0.0.0'
 
-        folder = get_matl_folder(version)
+        folder = matl.get_matl_folder(version)
         expected = os.path.join(tmpdir.strpath, version)
 
         mock_install.assert_called_once_with(version, expected)
@@ -44,7 +43,7 @@ class TestSourceCache:
         # Create the source folder
         version = '13.4.0'
         versiondir = tmpdir.mkdir(version)
-        folder = get_matl_folder(version, install=False)
+        folder = matl.get_matl_folder(version, install=False)
 
         # Make sure that we only return the source folder
         assert folder == versiondir.strpath
@@ -55,7 +54,7 @@ class TestResults:
     def test_error_parsing(self):
 
         msg = 'single error'
-        result = parse_matl_results('[STDERR]' + msg)
+        result = matl.parse_matl_results('[STDERR]' + msg)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -65,7 +64,7 @@ class TestResults:
     def test_invalid_image_parsing(self):
         # Test with a bad filename and ensure no result
         filename = '/ignore/this/filename.png'
-        result = parse_matl_results('[IMAGE]' + filename)
+        result = matl.parse_matl_results('[IMAGE]' + filename)
 
         assert isinstance(result, list)
         assert len(result) == 0
@@ -76,7 +75,7 @@ class TestResults:
         fileobj.write(contents)
 
         # Parse the string
-        result = parse_matl_results('[IMAGE]' + fileobj.strpath)
+        result = matl.parse_matl_results('[IMAGE]' + fileobj.strpath)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -92,7 +91,7 @@ class TestResults:
     def test_stdout2_parsing(self):
         # This may be of use in the future...not sure
         expected = 'ouptut2'
-        result = parse_matl_results('[STDOUT]' + expected)
+        result = matl.parse_matl_results('[STDOUT]' + expected)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -103,7 +102,7 @@ class TestResults:
 
         # Single line
         expected = 'standard output'
-        result = parse_matl_results(expected)
+        result = matl.parse_matl_results(expected)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -113,7 +112,7 @@ class TestResults:
     def test_stdout_multi_line_parsing(self):
         # Multi-line
         expected = 'standard\noutput'
-        result = parse_matl_results(expected)
+        result = matl.parse_matl_results(expected)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -132,7 +131,7 @@ class TestHelpParsing:
         shutil.copy(os.path.join(TEST_DATA_DIR, 'help.mat'),
                     os.path.join(tmpdir.strpath, 'help.mat'))
 
-        outfile = help_file('1.2.3')
+        outfile = matl.help_file('1.2.3')
 
         assert outfile == os.path.join(folder.return_value, 'help.json')
 
@@ -175,7 +174,7 @@ class TestHelpParsing:
         contents = 'placeholder'
         jsonfile.write(contents)
 
-        outfile = help_file('1.2.3')
+        outfile = matl.help_file('1.2.3')
 
         assert outfile == jsonfile.strpath
 
@@ -195,7 +194,7 @@ class TestInstall:
 
         zipper = mocker.patch('matl_online.matl.unzip')
 
-        install_matl('1.2.3', tmpdir.strpath)
+        matl.install_matl('1.2.3', tmpdir.strpath)
 
         assert zipper.called
         assert zipper.call_args[0][0].read() == content
@@ -206,7 +205,7 @@ class TestInstall:
         get.return_value.status_code = 404
 
         with pytest.raises(KeyError):
-            install_matl('3.4.5', tmpdir.strpath)
+            matl.install_matl('3.4.5', tmpdir.strpath)
 
 
 class TestReleaseRefresh:
