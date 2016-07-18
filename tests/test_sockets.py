@@ -1,6 +1,10 @@
 from matl_online.extensions import socketio
 
 
+def session(client):
+    return socketio.server.environ[client.sid].get('saved_session', {})
+
+
 class TestSockets:
 
     def test_connection(self, socketclient):
@@ -46,7 +50,57 @@ class TestSockets:
                            'code': 'D',
                            'inputs': '1'})
 
-        session = socketio.server.environ[socketclient.sid]['saved_session']
-
         assert task.call_count == 1
-        assert session.get('taskid') == task_id
+        assert session(socketclient).get('taskid') == task_id
+
+    def test_kill_task_no_task(self, socketclient, mocker):
+
+        socketclient.get_received()
+
+        mocker.patch('matl_online.tasks.matl_task')
+
+        assert session(socketclient).get('taskid') is None
+
+        # Try to kill a task without starting one
+        socketclient.emit('kill', {})
+
+        # We should get a confirmation back regardless
+        received = socketclient.get_received()
+
+        assert len(received) == 1
+
+        payload = received[0]['args'][0]
+        assert payload.get('message') == 'User terminated the job'
+        assert payload.get('success') is False
+
+        # Make sure that no task id was aassigned
+        assert session(socketclient).get('taskid') is None
+
+    def test_kill_task(self, socketclient, mocker):
+
+        socketclient.get_received()
+
+        mocker.patch('matl_online.tasks.matl_task')
+        revoke = mocker.patch('matl_online.public.views.celery.control.revoke')
+
+        # Start a job to set the session variable
+        self.test_real_submit(socketclient, mocker)
+
+        # Get the task id
+        taskid = session(socketclient).get('taskid')
+
+        socketclient.emit('kill', {})
+
+        # Make sure that a message was sent to kill the tasks
+        revoke.assert_called_once_with(taskid, terminate=True)
+
+        received = socketclient.get_received()
+
+        assert len(received) == 1
+
+        payload = received[0]['args'][0]
+        assert payload.get('message') == 'User terminated the job'
+        assert payload.get('success') is False
+
+        # Make sure that the task id was cleared
+        assert session(socketclient).get('taskid') is None
