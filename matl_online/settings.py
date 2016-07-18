@@ -67,5 +67,7 @@ class TestConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
 
+    WTF_CSRF_ENABLED = False
+
     # Ensure that celery tasks are executed locally
     CELERY_ALWAYS_EAGER = True

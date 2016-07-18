@@ -6,6 +6,64 @@ from .factories import ReleaseFactory
 from matl_online.public.models import Release
 
 
+class TestShare:
+    def test_share_with_csrf(self, app, testapp, mocker):
+        csrf = mocker.patch('matl_online.public.views.validate_csrf')
+        csrf.return_value = True
+
+        post = mocker.patch('matl_online.public.views.requests.post')
+        data = {'success': True, 'data': {'link': 'http://link'}}
+        post.return_value.text = json.dumps(data)
+
+        url = url_for('public.share', data='base64,data')
+
+        response = testapp.post(url)
+
+        # Make sure that CSRF token was actually checked
+        csrf.assert_called_once()
+        post.assert_called_once()
+
+        ignore, args, kwargs = post.mock_calls[0]
+
+        assert args[0] == 'https://api.imgur.com/3/image'
+        assert args[1].get('image') == 'data'
+        assert args[1].get('type') == 'base64'
+
+        # Make sure that an authorization header was passed to imgur
+        expected = 'Client-ID ' + app.config['IMGUR_CLIENT_ID']
+        assert kwargs.get('headers', {}).get('Authorization') == expected
+
+        # Make sure that the response was correct
+        assert response.status_code == 200
+
+        payload = response.json
+
+        assert payload.get('success') is True
+        assert payload.get('link') == data['data']['link']
+
+    def test_share_without_csrf(self, testapp):
+        url = url_for('public.share', data='')
+        resp = testapp.post_json(url, '', expect_errors=True)
+        assert resp.status_code == 400
+
+    def test_failed_upload(self, testapp, mocker):
+        csrf = mocker.patch('matl_online.public.views.validate_csrf')
+        csrf.return_value = True
+
+        post = mocker.patch('matl_online.public.views.requests.post')
+        post.return_value.text = json.dumps({'success': False})
+
+        url = url_for('public.share', data='data')
+
+        response = testapp.post(url, expect_errors=True)
+
+        csrf.assert_called_once()
+        post.assert_called_once()
+
+        assert response.status_code == 400
+        assert response.json.get('success') is False
+
+
 class TestHome:
     def test_defaults(self, testapp, mocker, db):
         url = url_for('public.home')
