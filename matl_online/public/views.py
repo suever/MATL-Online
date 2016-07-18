@@ -19,7 +19,6 @@ from flask_socketio import emit, rooms
 from flask_wtf.csrf import validate_csrf
 
 from hashlib import sha1
-from sys import hexversion
 
 from matl_online.extensions import socketio, celery, csrf
 from matl_online.matl import help_file, refresh_releases
@@ -75,22 +74,15 @@ def github_hook():
 
     mac = hmac.new(str(secret), msg=request.data, digestmod=sha1)
 
-    if hexversion >= 0x020707F0:
-        if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
-            abort(403)
-        else:
-            if not str(mac.hexdigest()) == str(signature):
-                abort(403)
+    if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
+        abort(403)
 
     # Implement ping
     event = request.headers.get('X-GitHub-Event', 'ping')
     if event == 'ping':
         return jsonify({'msg': 'pong'})
 
-    try:
-        payload = json.loads(request.data)
-    except:
-        abort(400)
+    payload = json.loads(request.data)
 
     # Ignore any non-release events
     if 'release' not in payload:
