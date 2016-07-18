@@ -10,7 +10,7 @@ from matl_online.app import create_app
 from matl_online.database import db as _db
 from matl_online.extensions import socketio
 from matl_online.settings import TestConfig
-from matl_online.tasks import _initialize_process
+from matl_online.tasks import _initialize_process, OutputHandler
 
 
 @pytest.fixture(scope='function')
@@ -41,22 +41,27 @@ def logger():
     # Create a new random log
     logger = logging.getLogger(str(uuid.uuid4()))
     logger.setLevel(logging.INFO)
+
     yield logger
 
+    for handler in logger.handlers:
+        if isinstance(handler, OutputHandler):
+            handler.clear()
 
-@pytest.yield_fixture(scope='function')
-def moctave(mocker):
+    logger.handlers = []
+
+
+@pytest.fixture
+def moctave(mocker, logger):
     moctave = mocker.patch('oct2py.octave')
     moctave.evals = list()
-    moctave.eval = lambda x: moctave.evals.append(x)
-    yield moctave
-def octave():
-    _initialize_process()
-    from oct2py import octave as _octave
 
-    yield _octave
+    def moctave_eval(*args, **kwargs):
+        moctave.evals.append(*args)
 
-    octave.restart()
+    moctave.eval = moctave_eval
+    moctave.logger = logger
+    return moctave
 
 
 @pytest.yield_fixture(scope='function')
