@@ -39,13 +39,11 @@ def home():
 
     # Get the list of versions to show in the list
     versions = Release.query.order_by(Release.date.desc()).all()
-    version = request.values.get('version', '')
-
+    version = request.values.get('version')
     version = Release.query.filter(Release.tag == version).first()
 
-    # Default to the latest version
     if version is None:
-        version = versions[0]
+        version = Release.latest()
 
     return render_template('index.html', code=code,
                            inputs=inputs,
@@ -176,7 +174,7 @@ def submit_job(data):
 @blueprint.route('/explain', methods=['POST', 'GET'])
 def explain():
     code = request.values.get('code', '')
-    version = request.values.get('version', '18.3.0')
+    version = request.values.get('version', Release.latest().tag)
 
     result = matl_task.delay('-eo', code, version=version).wait()
     return jsonify(result), 200
