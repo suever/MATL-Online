@@ -163,14 +163,17 @@ def matl(octave, flags, code='', inputs='', version='', folder=''):
     cmd = "addpath('%s')" % escape(matl_folder)
     octave.eval(cmd)
 
-    inputs = ["'%s'" % escape(item) for item in inputs.split('\n')]
-
     code = ["'%s'" % escape(item) for item in code.split('\n')]
     code = '{' + ','.join(code) + '}'
 
+    if len(inputs):
+        inputs = ["'%s'" % escape(item) for item in inputs.split('\n')]
+        cmd = "matl_runner('%s', %s, %s);" % (flags, code, ','.join(inputs))
+    else:
+        inputs = None
+        cmd = "matl_runner('%s', %s);" % (flags, code)
+
     # Actually run the MATL code
-    cmd = "matl_runner('%s', %s, %s);" % \
-        (flags, code, ','.join(inputs))
     octave.eval(cmd)
 
     # Change back to the original directory
