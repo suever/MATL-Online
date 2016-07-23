@@ -1,24 +1,27 @@
+"""Module for creating some cusotm mock objects."""
+
+
 class MockZipFile:
-    """
-    Mock zip file that implements only the methods we use for testing
-    """
+    """Mock zip file that implements only the methods we use for testing."""
 
     def __init__(self, *args, **kwargs):
+        """Initialize the mock object."""
         self.files = []
         self.extract_arguments = ()
 
-    def addFiles(self, *args):
-        """
-        Method to add files to this archive
-        """
+    def add_files(self, *args):
+        """Method to add files to this archive."""
         self.files.extend(args)
 
     def namelist(self):
+        """Get a list of all files in the archive."""
         return self.files
 
     def infolist(self):
+        """Get metadata about all of the files."""
         # filename: filename
         return [type('info', (object,), {'filename': x}) for x in self.files]
 
     def extractall(self, *args):
+        """Pretend to extract all of the files and record inputs."""
         self.extract_arguments = args

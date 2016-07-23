@@ -1,3 +1,5 @@
+"""Unit tests for module for interacting with octave / MATL."""
+
 import base64
 import json
 import os
@@ -14,8 +16,10 @@ TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
 
 class TestSourceCache:
+    """Series of tests to check if source code is managed properly."""
+
     def test_no_source_no_install(self, app, tmpdir):
-        # The source folder does not exist and we won't create it
+        """The source folder does not exist and we won't create it."""
         app.config['MATL_FOLDER'] = tmpdir.strpath
         folder = matl.get_matl_folder('18.3.0', install=False)
 
@@ -23,8 +27,7 @@ class TestSourceCache:
         assert folder is None
 
     def test_no_source_install(self, app, tmpdir, mocker):
-        # The source folder does not exist but we'll fetch the source
-
+        """The source folder does not exist but we'll fetch the source."""
         mock_install = mocker.patch('matl_online.matl.install_matl')
         app.config['MATL_FOLDER'] = tmpdir.strpath
 
@@ -37,7 +40,7 @@ class TestSourceCache:
         assert folder == expected
 
     def test_source_folder_exists(self, app, tmpdir):
-        # Source folder exists so simply return it
+        """Source folder exists so simply return it."""
         app.config['MATL_FOLDER'] = tmpdir.strpath
 
         # Create the source folder
@@ -50,9 +53,10 @@ class TestSourceCache:
 
 
 class TestResults:
+    """Series of tests to ensure proper MATL output parsing."""
 
     def test_error_parsing(self):
-
+        """All errors are correctly classified."""
         msg = 'single error'
         result = matl.parse_matl_results('[STDERR]' + msg)
 
@@ -62,7 +66,7 @@ class TestResults:
         assert result[0]['value'] == msg
 
     def test_invalid_image_parsing(self):
-        # Test with a bad filename and ensure no result
+        """Test with a bad filename and ensure no result."""
         filename = '/ignore/this/filename.png'
         result = matl.parse_matl_results('[IMAGE]' + filename)
 
@@ -70,6 +74,7 @@ class TestResults:
         assert len(result) == 0
 
     def test_image_parsing(self, tmpdir):
+        """Test valid image result."""
         fileobj = tmpdir.join('image.png')
         contents = 'hello'
         fileobj.write(contents)
@@ -89,7 +94,7 @@ class TestResults:
         assert os.path.isfile(fileobj.strpath)
 
     def test_stdout2_parsing(self):
-        # This may be of use in the future...not sure
+        """Test potential to have a second type of STDOUT."""
         expected = 'ouptut2'
         result = matl.parse_matl_results('[STDOUT]' + expected)
 
@@ -99,8 +104,7 @@ class TestResults:
         assert result[0]['value'] == expected
 
     def test_stdout_single_line_parsing(self):
-
-        # Single line
+        """A single line of output is handled as STDOUT."""
         expected = 'standard output'
         result = matl.parse_matl_results(expected)
 
@@ -110,7 +114,7 @@ class TestResults:
         assert result[0]['value'] == expected
 
     def test_stdout_multi_line_parsing(self):
-        # Multi-line
+        """Multi-line output is also handled as STDOUT if not specified."""
         expected = 'standard\noutput'
         result = matl.parse_matl_results(expected)
 
@@ -121,9 +125,10 @@ class TestResults:
 
 
 class TestHelpParsing:
+    """Series of tests for checking help to JSON conversion."""
 
     def test_generate_help_json(self, tmpdir, mocker):
-
+        """Check all reading / parsing of help .mat file."""
         folder = mocker.patch('matl_online.matl.get_matl_folder')
         folder.return_value = tmpdir.strpath
 
@@ -167,6 +172,7 @@ class TestHelpParsing:
         assert item.get('brief') == 'any'
 
     def test_help_json_exists(self, tmpdir, mocker):
+        """Verify correctness of output JSON."""
         folder = mocker.patch('matl_online.matl.get_matl_folder')
         folder.return_value = tmpdir.strpath
 
@@ -184,8 +190,10 @@ class TestHelpParsing:
 
 
 class TestInstall:
+    """Tests to check if MATL is properly downloaded and installed."""
 
     def test_valid_version(self, tmpdir, mocker, app):
+        """Test using a version which we know to exist on github."""
         get = mocker.patch('matl_online.matl.requests.get')
         get.return_value.status_code = 200
         get.return_value.json = lambda: {'zipball_url': 'zipball'}
@@ -201,6 +209,7 @@ class TestInstall:
         assert zipper.call_args[0][1] == tmpdir.strpath
 
     def test_invalid_version(self, tmpdir, mocker, app):
+        """Try to install a version which does NOT exist on github."""
         get = mocker.patch('matl_online.matl.requests.get')
         get.return_value.status_code = 404
 
@@ -209,8 +218,10 @@ class TestInstall:
 
 
 class TestReleaseRefresh:
+    """Tests for updating our local release database from github."""
 
     def test_all_new(self, mocker, app, db):
+        """Completely populate the database (no previous entries)."""
         get = mocker.patch('matl_online.matl.requests.get')
 
         with open(os.path.join(TEST_DATA_DIR, 'releases.json')) as fid:
@@ -228,6 +239,7 @@ class TestReleaseRefresh:
             assert release.tag == data[k]['tag_name']
 
     def test_prerelease(self, mocker, app, db):
+        """Ensure that pre-releases are ignored."""
         # Change one of the releases to a pre release and hope it's ignored
         get = mocker.patch('matl_online.matl.requests.get')
 
@@ -247,6 +259,7 @@ class TestReleaseRefresh:
             assert release.tag == data[k]['tag_name']
 
     def test_updated_release(self, mocker, app, db):
+        """Updated releases should be updated in our database."""
         get = mocker.patch('matl_online.matl.requests.get')
 
         with open(os.path.join(TEST_DATA_DIR, 'releases.json')) as fid:
@@ -280,7 +293,7 @@ class TestReleaseRefresh:
         assert updated.date == newdate
 
     def test_updated_release_with_source(self, mocker, app, db, tmpdir):
-
+        """Updated releases should remove the old source code."""
         matl_folder = mocker.patch('matl_online.matl.get_matl_folder')
         matl_folder.return_value = tmpdir.strpath
 
@@ -292,8 +305,10 @@ class TestReleaseRefresh:
 
 
 class TestMATLInterface:
+    """Some basic tests to check that the MATL interface is working."""
 
     def test_empty_inputs(self, mocker, app, moctave):
+        """If no inputs are provided, MATL shouldn't receive any."""
         get_matl_folder = mocker.patch('matl_online.matl.get_matl_folder')
         foldername = 'folder'
         get_matl_folder.return_value = foldername
@@ -312,7 +327,34 @@ class TestMATLInterface:
         # Make sure we cleanup at the end
         assert moctave.evals[-1].startswith('cd(')
 
+    def test_single_input(self, mocker, app, moctave):
+        """Single input parameter should be send to matl_runner."""
+        get_matl_folder = mocker.patch('matl_online.matl.get_matl_folder')
+        get_matl_folder.return_value = ''
+
+        matl.matl(moctave, '-ro', code='D', inputs='12')
+
+        # Find the call to matl_runner
+        call = [x for x in moctave.evals if x.startswith('matl_runner')]
+
+        assert len(call) == 1
+        assert call[0] == "matl_runner('-ro', {'D'}, '12');"
+
+    def test_multiple_inputs(self, mocker, app, moctave):
+        """Multiple input parameters should be send to matl_runner."""
+        get_matl_folder = mocker.patch('matl_online.matl.get_matl_folder')
+        get_matl_folder.return_value = ''
+
+        matl.matl(moctave, '-ro', code='D', inputs='12\n13')
+
+        # Find the call to matl_runner
+        call = [x for x in moctave.evals if x.startswith('matl_runner')]
+
+        assert len(call) == 1
+        assert call[0] == "matl_runner('-ro', {'D'}, '12','13');"
+
     def test_string_escape(self, mocker, app, moctave):
+        """All single quotes need to be escaped properly."""
         get_matl_folder = mocker.patch('matl_online.matl.get_matl_folder')
         get_matl_folder.return_value = ''
 

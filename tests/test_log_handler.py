@@ -1,9 +1,13 @@
+"""Unit tests for checking our realtime log handler."""
+
 from matl_online.tasks import OutputHandler
 
 
 class TestLogHandler:
+    """Series of tests for the OutputHandler logging handler."""
 
     def test_initialization(self, logger):
+        """Make sure that all necessary properties are set."""
         task = type('task', (object,), {'session_id': '123'})
         handler = OutputHandler(task)
         logger.addHandler(handler)
@@ -12,9 +16,10 @@ class TestLogHandler:
 
         # There should be no messages initially
         assert len(handler.contents) == 0
-        assert handler.getMessages() == ''
+        assert handler.messages() == ''
 
     def test_stdout_log(self, logger):
+        """STDOUT events should create appropriate messages."""
         task = type('task', (object,), {'session_id': '123'})
         handler = OutputHandler(task)
         logger.addHandler(handler)
@@ -24,9 +29,10 @@ class TestLogHandler:
         logger.info(msg)
 
         assert len(handler.contents) == 1
-        assert handler.getMessages() == msg
+        assert handler.messages() == msg
 
     def test_clc_log(self, logger, mocker):
+        """CLC should flush the contents."""
         task = type('task', (object,), {'session_id': '123'})
         handler = OutputHandler(task)
         logger.addHandler(handler)
@@ -43,13 +49,13 @@ class TestLogHandler:
         logger.info('[CLC]')
 
         # Make sure that the send function was called
-        send_func.assert_called_once()
+        assert send_func.call_count == 1
 
         # Make sure all messages were flushed
         assert len(handler.contents) == 0
 
     def test_pause(self, logger, mocker):
-        # For a pause event, we should have data sent but NOT cleared
+        """For a pause event, we should have data sent but NOT cleared."""
         task = type('task', (object,), {'session_id': '123'})
         handler = OutputHandler(task)
         logger.addHandler(handler)
@@ -68,15 +74,14 @@ class TestLogHandler:
         logger.info('[PAUSE]')
 
         # Make sure that the send function was called
-        send_func.assert_called_once()
+        assert send_func.call_count == 1
 
         # Make sure all messages were flushed
         assert len(handler.contents) == 1
-        assert handler.getMessages() == msg
+        assert handler.messages() == msg
 
     def test_ignore_octave_warning(self, logger, mocker):
-        # Occassionally octave will print warning: messages to stdout which
-        # should not be handled by this handler
+        """Occassionally octave will print warning: messages to be ignored."""
         task = type('task', (object,), {'session_id': '123'})
         handler = OutputHandler(task)
         logger.addHandler(handler)
@@ -90,6 +95,7 @@ class TestLogHandler:
         assert len(handler.contents) == 0
 
     def test_matl_error_handling(self, logger, mocker):
+        """Error messages are prefaced with [STDERR]."""
         task = type('task', (object,), {'session_id': '123'})
         handler = OutputHandler(task)
         logger.addHandler(handler)
@@ -107,7 +113,7 @@ class TestLogHandler:
         assert handler.contents[2].msg == '[STDERR]line 2'
 
     def test_dash_filter(self, logger, mocker):
-        # Make sure that lines with --- are ignored
+        """Make sure that lines with --- are ignored."""
         task = type('task', (object,), {'session_id': '123'})
         handler = OutputHandler(task)
         logger.addHandler(handler)
@@ -123,11 +129,11 @@ class TestLogHandler:
         logger.info(msg2)
 
         send_func.assert_not_called()
-        assert handler.getMessages() == '\n'.join([msg1, msg2])
+        assert handler.messages() == '\n'.join([msg1, msg2])
         assert len(handler.contents) == 2
 
     def test_filter(self, logger, mocker):
-        # Ensure that we ONLY get info events
+        """Ensure that we ONLY get info events."""
         task = type('task', (object,), {'session_id': '123'})
         handler = OutputHandler(task)
         logger.addHandler(handler)
@@ -142,8 +148,9 @@ class TestLogHandler:
         send_func.assert_not_called()
 
     def test_send(self, logger, mocker):
-        ID = '123'
-        task = type('task', (object,), {'session_id': ID})
+        """Make sure socket events are issued as expected."""
+        identifier = '123'
+        task = type('task', (object,), {'session_id': identifier})
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
@@ -159,10 +166,10 @@ class TestLogHandler:
         event, payload = emit.call_args[0]
 
         # TODO: Look into if we really want a trailing newline here
-        expected_data = {'session': ID,
+        expected_data = {'session': identifier,
                          'data': [{'type': 'stdout', 'value': 'test1\n'},
                                   {'type': 'stderr', 'value': 'error'}]}
 
         assert payload == expected_data
         assert event == 'status'
-        assert emit.call_args[1].get('room') == ID
+        assert emit.call_args[1].get('room') == identifier

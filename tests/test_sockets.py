@@ -1,13 +1,18 @@
+"""Unit tests for socket interaction between server and client."""
+
 from matl_online.extensions import socketio
 
 
 def session(client):
+    """Helper function for retrieving a client's session."""
     return socketio.server.environ[client.sid].get('saved_session', {})
 
 
 class TestSockets:
+    """Series of tests to ensure the expected data is passed via sockets."""
 
     def test_connection(self, socketclient):
+        """During initial connection, session ID's should be sent."""
         events = socketclient.get_received()
 
         assert len(events) == 1
@@ -21,8 +26,7 @@ class TestSockets:
         assert payload[0]['session_id'] == socketclient.sid
 
     def test_submit_empty(self, socketclient, mocker):
-        # No task code should be run for empty code input
-
+        """If no code is provided, no tasks should ever run."""
         # Clear previous events
         socketclient.get_received()
 
@@ -35,8 +39,7 @@ class TestSockets:
         task.assert_not_called()
 
     def test_real_submit(self, socketclient, mocker):
-        # When we submit inputs and code the matl_task should be run
-
+        """A matl_task should run with valid inputs."""
         socketclient.get_received()
         # The task ID should be stored in the session
 
@@ -50,11 +53,11 @@ class TestSockets:
                            'code': 'D',
                            'inputs': '1'})
 
-        task.assert_called_once()
+        assert task.call_count == 1
         assert session(socketclient).get('taskid') == task_id
 
     def test_kill_task_no_task(self, socketclient, mocker):
-
+        """Kill events for invalid tasks should be handled gracefully."""
         socketclient.get_received()
 
         mocker.patch('matl_online.tasks.matl_task')
@@ -77,7 +80,7 @@ class TestSockets:
         assert session(socketclient).get('taskid') is None
 
     def test_kill_task(self, socketclient, mocker):
-
+        """Kill events result in a task being revoked and terminated."""
         socketclient.get_received()
 
         mocker.patch('matl_online.tasks.matl_task')

@@ -1,3 +1,5 @@
+"""Shared database base classes."""
+
 from sqlalchemy.orm import relationship
 
 from .extensions import db
@@ -8,10 +10,7 @@ relationship = relationship
 
 
 class CRUDMixin(object):
-    """
-    Mixin that adds convenience methods for CRUD (create, read, update,
-    delete) operations.
-    """
+    """Mixin that adds convenience methods for CRUD operations."""
 
     @classmethod
     def create(cls, **kwargs):

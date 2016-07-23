@@ -1,3 +1,5 @@
+"""Celery tasks for running MATL programs."""
+
 import os
 import tempfile
 import shutil
@@ -20,30 +22,31 @@ socket = SocketIO(message_queue='redis://')
 
 
 class OutputHandler(StreamHandler):
+    """Custom handler for converting logged data to socket events."""
+
     def __init__(self, task, *args, **kwargs):
-        """ Initialize the handler with the task we are handling """
+        """Initialize the handler with the task we are handling."""
         StreamHandler.__init__(self, *args, **kwargs)
         self.task = task
         self.clear()
 
     def clear(self):
-        """ Clears all messages that have been logged so far """
+        """Clear all messages that have been logged so far."""
         self.contents = []
 
-    def getMessages(self):
-        """ Concatenates all messages into a long stream """
+    def messages(self):
+        """Concatenate all messages into a long stream."""
         return '\n'.join([x.getMessage() for x in self.contents])
 
     def send(self):
-        """ Send a message out to the specified rooms """
-        output = parse_matl_results(self.getMessages())
+        """Send a message out to the specified rooms."""
+        output = parse_matl_results(self.messages())
         result = {'data': output, 'session': self.task.session_id}
         socket.emit('status', result, room=self.task.session_id)
         return result
 
     def emit(self, record):
-        """ Overloaded emit method to receive LogRecord instances """
-
+        """Overloaded emit method to receive LogRecord instances."""
         # Look to see if there are any special commands in here. These
         # commands will clear the output:
         #
@@ -81,6 +84,8 @@ class OutputHandler(StreamHandler):
 
 
 class OctaveTask(Task):
+    """Custom Task type for interacting with octave."""
+
     abstract = True
     _octave = None
     _tempfolder = None
@@ -88,10 +93,12 @@ class OctaveTask(Task):
     _handler = None
 
     def __init__(self, *args, **kwargs):
+        """Initialize task."""
         super(OctaveTask, self).__init__(*args, **kwargs)
 
     @property
     def octave(self):
+        """Dependent property which automatically spawns octave if needed."""
         if self._octave is None:
             # We hide this import within this property getter so that
             # non-worker processes don't start up an octave instance. This
@@ -120,6 +127,7 @@ class OctaveTask(Task):
 
     @property
     def folder(self):
+        """Dependent property that creates a session-specific folder if needed."""
         if self._tempfolder is None:
             # Generate the temporary folder
             if self.session_id:
@@ -135,10 +143,12 @@ class OctaveTask(Task):
         return self._tempfolder
 
     def emit(self, *args, **kwargs):
+        """Send an event to any listening clients."""
         socket.emit(*args, room=self.session_id, **kwargs)
 
     def on_term(self):
-        """
+        """Clean up after termination event.
+
         This is a time-limit exceed so the worker will NOT be restarted,
         we just need to halt the current process and get it to a point
         where we can process new tasks
@@ -151,11 +161,13 @@ class OctaveTask(Task):
         _initialize_process()
 
     def on_success(self, *args, **kwargs):
+        """Send a completion messages upon successful completion."""
         self.emit('complete', {'success': True,
                                'message': ''})
 
     def on_kill(self):
-        """
+        """Clean up after a task is killed.
+
         This is a hard kill by celery so this worker will be destroyed. No
         need to restart octave
         """
@@ -163,27 +175,25 @@ class OctaveTask(Task):
         self.on_failure()
 
     def send_results(self):
-        """ Local forwarder for all send events """
+        """Local forwarder for all send events."""
         return self._handler.send()
 
     def after_return(self, *args, **kwargs):
+        """Callback to be executed after task completes."""
         self._handler.clear()
 
         if os.path.isdir(self.folder):
             shutil.rmtree(self.folder)
 
     def on_failure(self, *args, **kwargs):
-        # Send a message that we failed
+        """Send a message if the task failed for any reason."""
         self.send_results()
         self.emit('complete', {'success': False})
 
 
 @celery.task(base=OctaveTask, bind=True)
 def matl_task(self, *args, **kwargs):
-    """
-    Celery for processing a MATL command and returning the result
-    """
-
+    """Celery task for processing a MATL command and returning the result."""
     self.session_id = kwargs.pop('session', '')
 
     try:
@@ -206,11 +216,11 @@ def matl_task(self, *args, **kwargs):
 
 
 def _initialize_process(**kwargs):
-    """
+    """Initialize the the octave instance.
+
     Function to be called when a worker process is spawned. We use this to
     opportunity to actually launch octave and execute a quick MATL program
     """
-
     # Import oct2py within here because it creates a new instance of octave
     import oct2py
 

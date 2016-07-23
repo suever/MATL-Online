@@ -1,3 +1,5 @@
+"""Unit tests for checking database models and behavior."""
+
 import pytest
 
 from datetime import datetime
@@ -8,8 +10,10 @@ from .factories import ReleaseFactory
 
 @pytest.mark.usefixtures('db')
 class TestRelease:
+    """Series of tests for the Release database model."""
 
     def test_get_latest(self):
+        """Make sure that the expected release is returned as the latest."""
         # Create 3 release each time checking that the latest is the latest
         # release
         for k in range(3):
@@ -23,13 +27,13 @@ class TestRelease:
         assert release != Release.latest()
 
     def test_remove_release(self):
-        # Make sure that we can delete a release if needed
-        nRelease = 10
-        ReleaseFactory.create_batch(size=nRelease)
+        """Make sure that we can delete a release if needed."""
+        num = 10
+        ReleaseFactory.create_batch(size=num)
 
         releases = Release.query.all()
 
-        assert len(releases) == nRelease
+        assert len(releases) == num
 
         # Remove the last release
         last_release = releases[-1]
@@ -37,10 +41,11 @@ class TestRelease:
 
         releases = Release.query.all()
 
-        assert len(releases) == nRelease - 1
+        assert len(releases) == num - 1
         assert Release.query.filter_by(tag=last_release.tag).all() == []
 
     def test_release_update(self):
+        """Any details of a release can be updated programmatically."""
         olddate = datetime(2000, 1, 1)
         oldtag = '1.2.3'
         release = Release.create(date=olddate, tag=oldtag)
@@ -64,15 +69,12 @@ class TestRelease:
         assert release.tag == newtag
 
     def test_release_repr(self):
-        # Check that the release is displayed properly if coerced
+        """Check that the release is displayed properly if coerced."""
         release = ReleaseFactory(tag='1.2.3')
         assert release.__repr__() == '<Release %r>' % '1.2.3'
 
     def test_factory(self, db):
-        """
-        Ensure that the factory is working as expected
-        """
-
+        """Ensure that the factory is working as expected."""
         now = datetime.now()
         release = ReleaseFactory(date=now)
         db.session.commit()

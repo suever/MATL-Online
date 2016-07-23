@@ -1,9 +1,6 @@
 #!/usr/bin/env python
-
-import eventlet
-eventlet.monkey_patch()
-
 """Management script."""
+import eventlet
 import os
 
 from glob import glob
@@ -17,6 +14,8 @@ from matl_online.app import create_app, socketio
 from matl_online.database import db
 from matl_online import matl
 from matl_online.settings import DevConfig, ProdConfig
+
+eventlet.monkey_patch()
 
 if os.environ.get('MATL_ONLINE_ENV') == 'prod':
     CONFIG = ProdConfig
@@ -33,10 +32,7 @@ migrate = Migrate(app, db)
 
 
 def _make_context():
-    """
-    Return context dict for a shell session so you can access app, db,
-    and the User model by default.
-    """
+    """Return context dict for a shell session."""
     return {'app': app, 'db': db}
 
 
@@ -50,6 +46,7 @@ def test():
 
 @manager.command
 def refresh_releases():
+    """Command for updating all release information."""
     matl.refresh_releases()
 
 
@@ -96,6 +93,7 @@ class Lint(Command):
 
 @manager.command
 def run():
+    """Command for creating an eventlet instance."""
     socketio.run(app,
                  host='127.0.0.1',
                  port=5000,

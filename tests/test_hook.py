@@ -1,3 +1,5 @@
+"""Unit tests for checking Github Release web hook."""
+
 import hmac
 import json
 from hashlib import sha1
@@ -5,9 +7,10 @@ from flask import url_for
 
 
 class TestReleaseHook:
-    def test_ping(self, app, testapp, mocker):
-        # Send a valid ping event and check the response
+    """Tests for interacting with the /hook route."""
 
+    def test_ping(self, app, testapp, mocker):
+        """Send a valid ping event and check the response."""
         # Get a valid header
         headers = self.get_signature(app, '')
         url = url_for('public.github_hook')
@@ -23,13 +26,13 @@ class TestReleaseHook:
         assert resp.json.get('msg', '') == 'pong'
 
     def test_no_signature(self, testapp):
-        # No signature header at all - Should return a 403
+        """No signature header at all - Should return a 403."""
         url = url_for('public.github_hook')
         resp = testapp.post(url, expect_errors=True)
         assert resp.status_code == 403
 
     def test_invalid_signature_type(self, testapp):
-        # Invalid type of signature (not sha1)
+        """Invalid type of signature (not sha1)."""
         signatures = ['fake_signature', 'fake=signature']
         url = url_for('public.github_hook')
 
@@ -42,7 +45,7 @@ class TestReleaseHook:
             assert resp.status_code == 501
 
     def test_invalid_signature(self, testapp):
-        # sha1 signature that doesn't use the right secret
+        """sha1 signature that doesn't use the right secret."""
         url = url_for('public.github_hook')
         headers = {'X-Hub-Signature': 'sha1=fake'}
 
@@ -52,7 +55,7 @@ class TestReleaseHook:
         assert resp.status_code == 403
 
     def test_release_event(self, app, testapp, mocker):
-        # Create a valid release github event
+        """Create a valid release github event."""
         url = url_for('public.github_hook')
 
         # Data must contain at least the release number
@@ -73,10 +76,10 @@ class TestReleaseHook:
         assert resp.json.get('success')
 
         # Make sure that we would have called the refresh_releases method
-        refresh.assert_called_once()
+        assert refresh.call_count == 1
 
     def test_non_release_event(self, app, testapp, mocker):
-        # Create a valid POST that isn't a release event
+        """Create a valid POST that isn't a release event."""
         url = url_for('public.github_hook')
         data = {'not_a_release': 'true'}
 
@@ -98,7 +101,7 @@ class TestReleaseHook:
         refresh.assert_not_called()
 
     def get_signature(self, app, data):
-        # Using the secret and payload create a signature header
+        """Using the secret and payload create a signature header."""
         secret = app.config['GITHUB_HOOK_SECRET']
         sign = hmac.new(str(secret), msg=data, digestmod=sha1).hexdigest()
         return {'X-Hub-Signature': 'sha1=' + sign}

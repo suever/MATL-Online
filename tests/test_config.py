@@ -1,3 +1,5 @@
+"""Unit tests for testing the development and production configurations."""
+
 from matl_online.app import create_app
 from matl_online.settings import DevConfig, ProdConfig
 

@@ -1,3 +1,5 @@
+"""Javascript and CSS assets for the application."""
+
 from flask_assets import Bundle, Environment
 
 css = Bundle(

@@ -1,3 +1,5 @@
+"""Module for interacting with MATL and it's source code."""
+
 import base64
 import json
 import os
@@ -14,11 +16,7 @@ from matl_online.utils import unzip, parse_iso8601
 
 
 def install_matl(version, folder):
-    """
-    Downloads the specified version of the MATL source code to the desired
-    location.
-    """
-
+    """Download a specific version of MATL source code."""
     url = '%s/repos/%s/releases/tags/%s'
     url = url % (current_app.config['GITHUB_API'],
                  current_app.config['MATL_REPO'], version)
@@ -35,10 +33,7 @@ def install_matl(version, folder):
 
 
 def help_file(version):
-    """
-    Grab the help data for the specified version
-    """
-
+    """Grab the help data for the specified version."""
     folder = get_matl_folder(version)
     outfile = os.path.join(folder, 'help.json')
 
@@ -54,15 +49,15 @@ def help_file(version):
     result = []
 
     # Sort everything by the plain source
-    sortfunc = lambda x: x[1].swapcase()
     src = info.sourcePlain
-    sortinds = [x[0] for x in sorted(enumerate(src), key=sortfunc)]
+    sortinds = [x[0] for x in sorted(enumerate(src),
+                                     key=lambda x: x[1].swapcase())]
 
     for k in sortinds:
         if not info.inOutTogether[k] or len(info.out[k]) == 0:
-            arguments = ""
+            arguments = ''
         else:
-            arguments = "%s;  %s" % \
+            arguments = '%s;  %s' % \
                 (info.__getattribute__('in')[k], info.out[k])
 
         # Replace all newlines in description
@@ -84,10 +79,7 @@ def help_file(version):
 
 
 def get_matl_folder(version, install=True):
-    """
-    Check if folder exists and download the source code if necessary
-    """
-
+    """Check if folder exists and download the source code if necessary."""
     matl_folder = os.path.join(current_app.config['MATL_FOLDER'], version)
 
     if not os.path.isdir(matl_folder):
@@ -100,11 +92,11 @@ def get_matl_folder(version, install=True):
 
 
 def parse_matl_results(output):
-    """
+    """Convert MATL output to a custom data structure.
+
     Takes all of the output and parses it out into sections to pass back
     to the client which indicates stderr/stdout/images, etc.
     """
-
     result = list()
 
     parts = re.split('(\[.*?\][^\n].*)', output)
@@ -147,12 +139,10 @@ def parse_matl_results(output):
 
 
 def matl(octave, flags, code='', inputs='', version='', folder=''):
-    """
-    Opens a session with Octave and manages input/output as well as errors
-    """
-
+    """Open a session with Octave and manages input/output as well as errors."""
     # Remember what directory octave is current in
-    escape = lambda x: x.replace("'", "''")
+    def escape(x):
+        return x.replace("'", "''")
 
     # Change directories to the temporary folder so that all temporary
     # files are placed in here and won't interfere with other requests
@@ -182,10 +172,7 @@ def matl(octave, flags, code='', inputs='', version='', folder=''):
 
 
 def refresh_releases():
-    """
-    Fetch new release information from Github and update local database
-    """
-
+    """Fetch new release information from Github and update local database."""
     repo = current_app.config['MATL_REPO']
     resp = requests.get('https://api.github.com/repos/%s/releases' % repo)
 

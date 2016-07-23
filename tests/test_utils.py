@@ -1,3 +1,5 @@
+""""Unit tests for utils module."""
+
 import os
 import shutil
 
@@ -6,10 +8,12 @@ from .mocks import MockZipFile
 
 
 class TestUnzip:
-    def test_unzip_and_flatten(self, mocker, tmpdir):
+    """Test unzip functionality."""
 
+    def test_unzip_and_flatten(self, mocker, tmpdir):
+        """Check that flattening of parent directories works as expected."""
         mzip = MockZipFile()
-        mzip.addFiles('mydir/abcde', 'mydir/fghij')
+        mzip.add_files('mydir/abcde', 'mydir/fghij')
 
         zipfile = mocker.patch('matl_online.utils.zipfile.ZipFile')
         zipfile.return_value = mzip
@@ -28,8 +32,9 @@ class TestUnzip:
         assert outnames[1] == 'fghij'
 
     def test_unzip_without_flatten(self, mocker, tmpdir):
+        """Check that unzipping (without flattening) works."""
         mzip = MockZipFile()
-        mzip.addFiles('mydir/abcde', 'mydir/fghij')
+        mzip.add_files('mydir/abcde', 'mydir/fghij')
 
         zipfile = mocker.patch('matl_online.utils.zipfile.ZipFile')
         zipfile.return_value = mzip
@@ -42,12 +47,13 @@ class TestUnzip:
         assert extract_args[0] == tmpdir.strpath
 
     def test_non_existent_dir(self, mocker, tmpdir):
+        """If destination doesn't exist, make sure it's created."""
         subdir = tmpdir.mkdir('sub')
         subpath = subdir.strpath
         shutil.rmtree(subpath)
 
         mzip = MockZipFile()
-        mzip.addFiles('mydic/abcde', 'mydir/fghij')
+        mzip.add_files('mydic/abcde', 'mydir/fghij')
 
         zipfile = mocker.patch('matl_online.utils.zipfile.ZipFile')
         zipfile.return_value = mzip

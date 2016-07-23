@@ -1,3 +1,5 @@
+"""Unit tests for basic celery task functionality."""
+
 import logging
 import os
 import pytest
@@ -7,6 +9,7 @@ from matl_online.tasks import OctaveTask, OutputHandler, matl_task
 
 
 def prepare_folder_testcase(mocker, moctave, tmpdir):
+    """Helper function for creating necessary mocks."""
     mocker.patch('matl_online.tasks.Task')
 
     mktmp = mocker.patch('matl_online.tasks.tempfile.mkdtemp')
@@ -17,8 +20,10 @@ def prepare_folder_testcase(mocker, moctave, tmpdir):
 
 
 class TestOctaveTask:
+    """Series of tests for the OctaveTask class."""
 
     def test_octave_property(self, mocker, moctave, logger):
+        """Make sure that an instance is created only when requested."""
         mocker.patch('matl_online.tasks.Task')
 
         logger.setLevel(logging.ERROR)
@@ -43,6 +48,7 @@ class TestOctaveTask:
         return task
 
     def test_octave_property_repeat(self, mocker, moctave, logger):
+        """Octave sessions are only created once per task."""
         task = self.test_octave_property(mocker, moctave, logger)
 
         # Get the property again and make sure we don't add any more
@@ -55,6 +61,7 @@ class TestOctaveTask:
         assert logger.handlers[0] == task._handler
 
     def test_folder_no_session(self, mocker, moctave, tmpdir):
+        """Test the dynamic folder property when there is no session."""
         prepare_folder_testcase(mocker, moctave, tmpdir)
 
         task = OctaveTask()
@@ -64,19 +71,21 @@ class TestOctaveTask:
         assert os.path.isdir(tmpdir.strpath)
 
     def test_folder_with_session(self, mocker, moctave, tmpdir):
+        """Test the folder property when we DO have a session."""
         prepare_folder_testcase(mocker, moctave, tmpdir)
 
         task = OctaveTask()
-        ID = '123456'
-        task.session_id = ID
+        session_id = '123456'
+        task.session_id = session_id
 
-        outfolder = os.path.join(tmpdir.strpath, ID)
+        outfolder = os.path.join(tmpdir.strpath, session_id)
 
         assert not os.path.isdir(outfolder)
         assert task.folder == outfolder
         assert os.path.isdir(outfolder)
 
     def test_on_term(self, mocker, moctave):
+        """Ensure cleanup is performed as expected when a task is terminated."""
         initialize = mocker.patch('matl_online.tasks._initialize_process')
 
         task = OctaveTask()
@@ -89,12 +98,14 @@ class TestOctaveTask:
 
         assert 'restart' in methods
         assert '_session.interrupt' in methods
-        initialize.assert_called_once()
+        assert initialize.call_count == 1
 
 
 class TestMATLTask:
+    """Tests for the MATLTask subclass of OctaveTask."""
 
     def test_normal(self, mocker, moctave, socketclient):
+        """Test that messages are received as expected in normal case."""
         # Clear out the socket client's messages so far
         socketclient.get_received()
 
@@ -109,14 +120,14 @@ class TestMATLTask:
         assert received[-1]['args'][0] == {'message': '', 'success': True}
 
     def test_keyboard_interupt(self, mocker, moctave, socketclient):
-
+        """Ensure proper handling of keyboard interrupt events."""
         socketclient.get_received()
 
         mocker.patch('matl_online.tasks.socket',
                      new_callable=lambda: socketclient.socketio)
 
-        E = mocker.patch('matl_online.tasks.matl_task._octave.eval')
-        E.side_effect = KeyboardInterrupt
+        ev = mocker.patch('matl_online.tasks.matl_task._octave.eval')
+        ev.side_effect = KeyboardInterrupt
 
         with pytest.raises(KeyboardInterrupt):
             matl_task.delay('-ro', '1D', session=socketclient.sid).wait()
@@ -133,14 +144,14 @@ class TestMATLTask:
         assert received[-1]['args'][0] == {'success': False}
 
     def test_time_limit(self, mocker, moctave, socketclient):
-
+        """Ensure tasks exceeding the time limit are dealth with properly."""
         socketclient.get_received()
 
         mocker.patch('matl_online.tasks.socket',
                      new_callable=lambda: socketclient.socketio)
 
-        E = mocker.patch('matl_online.tasks.matl_task._octave.eval')
-        E.side_effect = SoftTimeLimitExceeded
+        ev = mocker.patch('matl_online.tasks.matl_task._octave.eval')
+        ev.side_effect = SoftTimeLimitExceeded
 
         # TODO: We shouldn't have to explicitly clear this
         matl_task.octave.logger.handlers[0].clear()

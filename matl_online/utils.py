@@ -1,3 +1,5 @@
+"""Miscelaneous utility functions for the application."""
+
 import os
 import zipfile
 
@@ -7,16 +9,12 @@ ISO8601_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
 def parse_iso8601(date):
-    """
-    Convert a date in ISO 8601 format (used by github) to a datetime object
-    """
+    """Convert a date in ISO 8601 format (used by github) to a datetime object."""
     return datetime.strptime(date, ISO8601_FORMAT)
 
 
 def get_members(zip_file):
-    """
-    Removes leading directory from all contents of the zip file
-    """
+    """Remove leading directory from all contents of the zip file."""
     prefix = os.path.commonprefix(zip_file.namelist())
 
     offset = len(prefix)
@@ -29,10 +27,7 @@ def get_members(zip_file):
 
 
 def unzip(fileobj, destination, flatten=True):
-    """
-    Unzip an archive to a specific directory and flatten the shared folder
-    prefix of all contents.
-    """
+    """Unzip an archive to a specific directory and flatten the shared prefix."""
     archive = zipfile.ZipFile(fileobj)
 
     # Ensure that the destination exists

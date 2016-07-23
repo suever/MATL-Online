@@ -1,3 +1,5 @@
+""""Tests for checking user interaction with views."""
+
 import json
 
 from flask import url_for
@@ -7,7 +9,10 @@ from matl_online.public.models import Release
 
 
 class TestShare:
+    """Tests the /share route for uploading to imgur."""
+
     def test_share_with_csrf(self, app, testapp, mocker):
+        """Passing CSRF validation check."""
         csrf = mocker.patch('matl_online.public.views.validate_csrf')
         csrf.return_value = True
 
@@ -20,8 +25,8 @@ class TestShare:
         response = testapp.post(url)
 
         # Make sure that CSRF token was actually checked
-        csrf.assert_called_once()
-        post.assert_called_once()
+        assert csrf.call_count == 1
+        assert post.call_count == 1
 
         head_expect = {'Authorization':
                        'Client-ID ' + app.config['IMGUR_CLIENT_ID']}
@@ -39,11 +44,13 @@ class TestShare:
         assert payload.get('link') == data['data']['link']
 
     def test_share_without_csrf(self, testapp):
+        """Failing CSRF validation produces an error."""
         url = url_for('public.share', data='')
         resp = testapp.post_json(url, '', expect_errors=True)
         assert resp.status_code == 400
 
     def test_failed_upload(self, testapp, mocker):
+        """Test if there was an error while uploading to imgur."""
         csrf = mocker.patch('matl_online.public.views.validate_csrf')
         csrf.return_value = True
 
@@ -54,15 +61,18 @@ class TestShare:
 
         response = testapp.post(url, expect_errors=True)
 
-        csrf.assert_called_once()
-        post.assert_called_once()
+        assert csrf.call_count == 1
+        assert post.call_count == 1
 
         assert response.status_code == 400
         assert response.json.get('success') is False
 
 
 class TestHome:
+    """Test the main page of the site."""
+
     def test_defaults(self, testapp, mocker, db):
+        """Check the default arguments passed to template."""
         url = url_for('public.home')
         ReleaseFactory.create_batch(size=10)
 
@@ -87,6 +97,7 @@ class TestHome:
         assert versions == releases
 
     def test_non_existent_version(self, testapp, mocker, db):
+        """Pass an invalid version number via query string."""
         url = url_for('public.home', version='not a version')
         ReleaseFactory.create_batch(size=10)
 
@@ -101,8 +112,10 @@ class TestHome:
 
 
 class TestExplain:
-    def test_with_version(self, testapp, mocker, db):
+    """Test the /explain route."""
 
+    def test_with_version(self, testapp, mocker, db):
+        """Specify a version and get a successful response."""
         ReleaseFactory(tag='1.2.3')
         ReleaseFactory(tag='2.4.5')
 
@@ -120,6 +133,7 @@ class TestExplain:
         assert resp.json == data
 
     def test_no_version(self, testapp, mocker, db):
+        """Do not specify a version and use the latest version."""
         releases = ReleaseFactory.create_batch(size=3)
 
         task = mocker.patch('matl_online.public.views.matl_task.delay')
@@ -132,6 +146,7 @@ class TestExplain:
 
 
 def test_fetch_help(testapp, mocker, db, tmpdir):
+    """Check that we get the expected JSON when requesting help."""
     folder = mocker.patch('matl_online.matl.get_matl_folder')
     folder.return_value = tmpdir.strpath
 

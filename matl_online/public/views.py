@@ -1,3 +1,5 @@
+"""Public-facing routes of our application."""
+
 import json
 import hmac
 import os
@@ -34,6 +36,7 @@ last_modified = datetime.utcfromtimestamp(modtime).strftime('%Y/%m/%d')
 
 @blueprint.route('/')
 def home():
+    """Main page of the site."""
     code = request.values.get('code', '')
     inputs = request.values.get('inputs', '')
 
@@ -55,7 +58,7 @@ def home():
 @csrf.exempt
 @blueprint.route('/hook', methods=['POST'])
 def github_hook():
-
+    """Github web hook for receiving information about MATL releases."""
     # Now verify that the secret is correct
     secret = current_app.config['GITHUB_HOOK_SECRET']
 
@@ -72,7 +75,7 @@ def github_hook():
 
     mac = hmac.new(str(secret), msg=request.data, digestmod=sha1)
 
-    if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
+    if str(mac.hexdigest()) != str(signature):
         abort(403)
 
     # Implement ping
@@ -96,6 +99,7 @@ def github_hook():
 
 @blueprint.route('/share', methods=['POST'])
 def share():
+    """Route for posting image data to IMGUR to share via a link."""
     img = request.values.get('data')
 
     if not validate_csrf(request.headers.get('X-Csrftoken')):
@@ -128,13 +132,14 @@ def share():
 
 @socketio.on('connect')
 def connected():
-    # Go ahead and assign to their own room
+    """Send an event to the client with the ID of their session."""
     session_id = rooms()[0]
     emit('connection', {'session_id': session_id})
 
 
 @socketio.on('kill')
 def kill_task(data):
+    """Triggered when a kill message is sent to kill a task."""
     taskid = session.get('taskid', None)
     if taskid is not None:
         celery.control.revoke(taskid, terminate=True)
@@ -151,7 +156,7 @@ def kill_task(data):
 
 @socketio.on('submit')
 def submit_job(data):
-
+    """Executed when a user submit some code and inputs for interpretation."""
     # If we already have a task disable submitting
     uid = data.get('uid', str(uuid.uuid4()))
 
@@ -173,6 +178,7 @@ def submit_job(data):
 
 @blueprint.route('/explain', methods=['POST', 'GET'])
 def explain():
+    """Called when the user asks for an explanation of some code."""
     code = request.values.get('code', '')
     version = request.values.get('version', Release.latest().tag)
 
@@ -182,6 +188,5 @@ def explain():
 
 @blueprint.route('/help/<version>', methods=['GET'])
 def help(version):
-
-    # Get the help data
+    """Return a JSON representation of the help for the requested version."""
     return send_file(help_file(version))

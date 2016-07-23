@@ -1,14 +1,28 @@
 language: python
 python:
-    - "2.7_with_system_site_packages"
+    - 2.7
 
 before_install:
-    - sudo apt-get update
-    - sudo apt-get install python-numpy python-scipy
+    # Add necessary repositories for octave installation
+    - sudo add-apt-repository --yes ppa:octave/stable
+    - sudo apt-get update -qq
+
+    # Install miniconda so we can have numpy and scipy easily
+    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda update --yes conda
+    # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
+    - sudo rm -rf /dev/shm
+    - sudo ln -s /run/shm /dev/shm
 
 install:
+    # Install numpy and scipy
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
+    - sudo apt-get install -qq octave liboctave-dev libmpfr-dev
     - pip install -r requirements/dev.txt
 
 script:
     - py.test tests -v --cov=matl_online
-    - manage.py lint
+    - python manage.py lint
