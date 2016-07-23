@@ -9,8 +9,7 @@ class TestUnzip:
     def test_unzip_and_flatten(self, mocker, tmpdir):
 
         mzip = MockZipFile()
-        mzip.addFiles('mydir/abcde',
-                      'mydir/fghij')
+        mzip.addFiles('mydir/abcde', 'mydir/fghij')
 
         zipfile = mocker.patch('matl_online.utils.zipfile.ZipFile')
         zipfile.return_value = mzip

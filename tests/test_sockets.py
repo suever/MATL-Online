@@ -32,7 +32,7 @@ class TestSockets:
                           {'uid': socketclient.sid, 'code': ''})
 
         assert len(socketclient.get_received()) == 0
-        assert not task.called
+        task.assert_not_called()
 
     def test_real_submit(self, socketclient, mocker):
         # When we submit inputs and code the matl_task should be run
@@ -50,7 +50,7 @@ class TestSockets:
                            'code': 'D',
                            'inputs': '1'})
 
-        assert task.call_count == 1
+        task.assert_called_once()
         assert session(socketclient).get('taskid') == task_id
 
     def test_kill_task_no_task(self, socketclient, mocker):

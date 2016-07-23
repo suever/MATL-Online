@@ -95,7 +95,7 @@ class TestReleaseHook:
         assert resp.text == ''
 
         # Make sure that we never refresh the releases for these events
-        assert not refresh.called
+        refresh.assert_not_called()
 
     def get_signature(self, app, data):
         # Using the secret and payload create a signature header

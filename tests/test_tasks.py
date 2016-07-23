@@ -89,7 +89,7 @@ class TestOctaveTask:
 
         assert 'restart' in methods
         assert '_session.interrupt' in methods
-        assert initialize.called
+        initialize.assert_called_once()
 
 
 class TestMATLTask:

@@ -23,15 +23,11 @@ class TestShare:
         csrf.assert_called_once()
         post.assert_called_once()
 
-        ignore, args, kwargs = post.mock_calls[0]
+        head_expect = {'Authorization': 'Client-ID ' + app.config['IMGUR_CLIENT_ID']}
 
-        assert args[0] == 'https://api.imgur.com/3/image'
-        assert args[1].get('image') == 'data'
-        assert args[1].get('type') == 'base64'
-
-        # Make sure that an authorization header was passed to imgur
-        expected = 'Client-ID ' + app.config['IMGUR_CLIENT_ID']
-        assert kwargs.get('headers', {}).get('Authorization') == expected
+        post.assert_called_once_with('https://api.imgur.com/3/image',
+                                     {'image': 'data', 'type': 'base64'},
+                                     headers=head_expect)
 
         # Make sure that the response was correct
         assert response.status_code == 200
@@ -74,10 +70,9 @@ class TestHome:
 
         testapp.get(url)
 
-        assert render.call_args[0][0] == 'index.html'
+        args, params = render.call_args
 
-        params = render.call_args[1]
-
+        assert args[0] == 'index.html'
         assert params.get('inputs') == ''
         assert params.get('code') == ''
         assert params.get('version') == Release.latest()

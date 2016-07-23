@@ -322,4 +322,4 @@ class TestMATLInterface:
         call = [x for x in moctave.evals if x.startswith('matl_runner')]
 
         assert len(call) == 1
-        assert call[0] == "matl_runner('-ro', {'''abc'''}, '');"
+        assert call[0] == "matl_runner('-ro', {'''abc'''});"

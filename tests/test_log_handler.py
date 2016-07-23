@@ -36,14 +36,14 @@ class TestLogHandler:
         # Write something to the log
         logger.info('I am an empty message')
 
-        assert not send_func.called
+        send_func.assert_not_called()
         assert len(handler.contents) == 1
 
         # Now send a CLC event
         logger.info('[CLC]')
 
         # Make sure that the send function was called
-        assert send_func.called == 1
+        send_func.assert_called_once()
 
         # Make sure all messages were flushed
         assert len(handler.contents) == 0
@@ -61,14 +61,14 @@ class TestLogHandler:
         # Write something to the log
         logger.info(msg)
 
-        assert not send_func.called
+        send_func.assert_not_called()
         assert len(handler.contents) == 1
 
         # Now send a CLC event
         logger.info('[PAUSE]')
 
         # Make sure that the send function was called
-        assert send_func.called == 1
+        send_func.assert_called_once()
 
         # Make sure all messages were flushed
         assert len(handler.contents) == 1
@@ -86,7 +86,7 @@ class TestLogHandler:
         logger.info('warning: I am octave and I like warnings')
         logger.info('warning: I am octave and I still like warnings')
 
-        assert not send_func.called
+        send_func.assert_not_called()
         assert len(handler.contents) == 0
 
     def test_matl_error_handling(self, logger, mocker):
@@ -100,7 +100,7 @@ class TestLogHandler:
         logger.info(errmsg)
 
         # Check the contents
-        assert not send_func.called
+        send_func.assert_not_called()
         assert len(handler.contents) == 3
         assert handler.contents[0].msg == '[STDERR]MATL run-time error:'
         assert handler.contents[1].msg == '[STDERR]line 1'
@@ -122,7 +122,7 @@ class TestLogHandler:
         msg2 = 'message2'
         logger.info(msg2)
 
-        assert not send_func.called
+        send_func.assert_not_called()
         assert handler.getMessages() == '\n'.join([msg1, msg2])
         assert len(handler.contents) == 2
 
@@ -139,7 +139,7 @@ class TestLogHandler:
         logger.debug('debug')
 
         assert len(handler.contents) == 0
-        assert not send_func.called
+        send_func.assert_not_called()
 
     def test_send(self, logger, mocker):
         ID = '123'

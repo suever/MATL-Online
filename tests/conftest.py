@@ -19,12 +19,14 @@ def testapp(app):
 
 @pytest.yield_fixture(scope='function')
 def socketclient(app):
+    """A fake socketio client"""
     socketio.init_app(app)
     yield socketio.test_client(app)
 
 
 @pytest.yield_fixture(scope='function')
 def app():
+    """A flask app instance"""
     _app = create_app(TestConfig)
     ctx = _app.test_request_context()
     ctx.push()
@@ -36,6 +38,7 @@ def app():
 
 @pytest.yield_fixture(scope='function')
 def logger():
+    """Creates a logger which can be used to monitor logging calls"""
     # Create a new random log
     logger = logging.getLogger(str(uuid.uuid4()))
     logger.setLevel(logging.INFO)
@@ -43,6 +46,8 @@ def logger():
     yield logger
 
     for handler in logger.handlers:
+        # In the special case where an OutputHandler is registered, we want
+        # to clear out the message queue
         if isinstance(handler, OutputHandler):
             handler.clear()
 
@@ -51,6 +56,7 @@ def logger():
 
 @pytest.fixture
 def moctave(mocker, logger):
+    """Mock version of oct2py.octave to monitor calls to octave"""
     moctave = mocker.patch('oct2py.octave')
     moctave.evals = list()
 
@@ -64,6 +70,7 @@ def moctave(mocker, logger):
 
 @pytest.yield_fixture(scope='function')
 def db(app):
+    """Database instance"""
     _db.app = app
     with app.app_context():
         _db.create_all()
