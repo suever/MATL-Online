@@ -1,0 +1,14 @@
+language: python
+python:
+    - "2.7_with_system_site_packages"
+
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install python-numpy python-scipy
+
+install:
+    - pip install -r requirements/dev.txt
+
+script:
+    - py.test tests -v --cov=matl_online
+    - manage.py lint
