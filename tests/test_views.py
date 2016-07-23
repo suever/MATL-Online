@@ -23,7 +23,8 @@ class TestShare:
         csrf.assert_called_once()
         post.assert_called_once()
 
-        head_expect = {'Authorization': 'Client-ID ' + app.config['IMGUR_CLIENT_ID']}
+        head_expect = {'Authorization':
+                       'Client-ID ' + app.config['IMGUR_CLIENT_ID']}
 
         post.assert_called_once_with('https://api.imgur.com/3/image',
                                      {'image': 'data', 'type': 'base64'},
