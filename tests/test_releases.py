@@ -31,6 +31,12 @@ class TestRelease:
 
         assert release == Release.latest()
 
+    def test_empty_releases_latest(self):
+        """Make sure that if we don't have any releases, we don't have issues."""
+        assert Release.query.count() == 0
+        assert Release.latest() is None
+        assert Release.query.all() == []
+
     def test_release_ordering(self):
         """Make sure that we sort the releases properly."""
         release1 = ReleaseFactory(tag='9.0.0')
