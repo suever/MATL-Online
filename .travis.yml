@@ -27,3 +27,5 @@ install:
 script:
     - py.test tests -v --cov=matl_online
     - python manage.py lint
+after_success:
+    - coveralls
