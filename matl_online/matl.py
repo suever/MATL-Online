@@ -63,6 +63,12 @@ def help_file(version):
         # Replace all newlines in description
         info.descr[k] = info.descr[k].replace('\n', '')
 
+        if not isinstance(info.comm[k], (str, unicode)):
+            if len(info.comm[k]) == 0:
+                info.comm[k] = ''
+            else:
+                info.comm[k] = str(info.comm[k])
+
         item = {'source': info.source[k],
                 'brief': info.comm[k],
                 'description': info.descr[k],

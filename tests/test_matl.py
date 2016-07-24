@@ -145,7 +145,7 @@ class TestHelpParsing:
             data = json.load(fid)
 
         assert 'data' in data
-        assert len(data['data']) == 2
+        assert len(data['data']) == 3
 
         # Make sure it has all the necessary keys
         expected = ['source', 'description', 'brief', 'arguments']
@@ -170,6 +170,13 @@ class TestHelpParsing:
         assert item.get('arguments') == '1--2 (1 / 2);  1'
         assert item.get('source') == '<strong>a</strong>'
         assert item.get('brief') == 'any'
+
+        item = data['data'][2]
+
+        assert item.get('description') == '    '
+        assert item.get('arguments') == '0;  1'
+        assert item.get('source') == '<strong>Y?</strong>'
+        assert item.get('brief') == ''
 
     def test_help_json_exists(self, tmpdir, mocker):
         """Verify correctness of output JSON."""
