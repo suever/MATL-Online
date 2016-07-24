@@ -181,8 +181,6 @@ def refresh_releases():
         if item['prerelease']:
             continue
 
-        print item['tag_name']
-
         pubdate = parse_iso8601(item['published_at'])
 
         # Query the database for this release number
