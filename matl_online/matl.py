@@ -42,7 +42,10 @@ def help_file(version):
 
     matfile = os.path.join(folder, 'help.mat')
 
-    info = loadmat(matfile, squeeze_me=True, struct_as_record=False)
+    info = loadmat(matfile,
+                   squeeze_me=True,
+                   mat_dtype=True,
+                   struct_as_record=False)
     info = info['H']
 
     # Now create an array of dicts
@@ -63,11 +66,9 @@ def help_file(version):
         # Replace all newlines in description
         info.descr[k] = info.descr[k].replace('\n', '')
 
-        if not isinstance(info.comm[k], (str, unicode)):
-            if len(info.comm[k]) == 0:
-                info.comm[k] = ''
-            else:
-                info.comm[k] = str(info.comm[k])
+        # Scipy loads empty char arrays as numeric arrays
+        if not isinstance(info.comm[k], basestring):
+            info.comm[k] = ''
 
         item = {'source': info.source[k],
                 'brief': info.comm[k],
