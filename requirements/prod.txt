@@ -16,9 +16,9 @@ celery==3.1.23
 redis==2.10.5
 
 # Octave interaction
-scipy<1
+scipy==0.17.1
 -e git://github.com/suever/oct2py.git#egg=oct2py
-numpy<2
+numpy==1.11.1
 
 # Octave packages
 sympy
