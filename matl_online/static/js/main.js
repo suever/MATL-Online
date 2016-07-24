@@ -36,7 +36,7 @@ $('#explain').on('click', function(d) {
     var version = $('#version').data('version');
 
     // Do not submit the form unless there is code
-    if ( code == '' ) {
+    if ( code === '' ) {
         return;
     }
 
@@ -102,7 +102,7 @@ socket.on('status', function(data) {
     // Clear the output
     output.text('');
 
-    if ( data['session'] == uuid ) {
+    if ( data['session'] === uuid ) {
         data['data'].forEach(function(item) {
             switch ( item.type ) {
                 case 'image':
@@ -290,7 +290,7 @@ $('input[type=search]').on( 'keyup', function () {
     var searchStr = this.value;
 
     // If only one " then replace with ""
-    if ( (searchStr.match(/"/g) || []).length == 1 ){
+    if ( (searchStr.match(/"/g) || []).length === 1 ){
         searchStr = searchStr.replace(/"/g, '""');
     }
 
@@ -300,7 +300,7 @@ $('input[type=search]').on( 'keyup', function () {
 function countChar(val) {
     var count = val.value.length;
 
-    if ( count == 1 ) {
+    if ( count === 1 ) {
         $('#charcount').text('(' + count + ' character)');
     } else {
         $('#charcount').text('(' + count + ' characters)');
@@ -322,7 +322,7 @@ function toggleDocumentation(){
         $('.drawer').drawer('show');
 
         // Create the datatable if it doesn't exist already
-        if ( table == null ){
+        if ( table === null ){
             table = $('#documentation').DataTable({
                 paging: false,
                 ordering: false,
