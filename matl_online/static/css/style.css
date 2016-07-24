@@ -149,33 +149,33 @@ pre.code {
     -webkit-transition: all 1s;
     -o-transition:      all 1s;
     transition: all 1s;
-    width: 300px;    
+    width: 300px;
     position: absolute;
     top:5px;
     display: block;
 }
 
 #share {
-    -moz-transform:    rotateX( 0deg ) !important;
-    -ms-transform:     rotateX( 0deg ) !important;
-    -webkit-transform: rotateX( 0deg ) !important;
-    -o-transform:      rotateX( 0deg ) !important;
+    -moz-transform:    rotateX( 0deg );
+    -ms-transform:     rotateX( 0deg );
+    -webkit-transform: rotateX( 0deg );
+    -o-transform:      rotateX( 0deg );
     transform:         rotateX( 0deg );
 }
 
 #sharelink {
-    -moz-transform:    rotateX( 180deg ) !important;
-    -ms-transform:     rotateX( 180deg ) !important;
-    -webkit-transform: rotateX( 180deg ) !important;
-    -o-transform:      rotateX( 180deg ) !important;
+    -moz-transform:    rotateX( 180deg );
+    -ms-transform:     rotateX( 180deg );
+    -webkit-transform: rotateX( 180deg );
+    -o-transform:      rotateX( 180deg );
     transform:         rotateX( 180deg );
 }
 
-.flip-side-1 {    
-    -moz-transform:    rotateX( 0deg ) !important;
-    -ms-transform:     rotateX( 0deg ) !important;
-    -webkit-transform: rotateX( 0deg ) !important;
-    -o-transform:      rotateX( 0deg ) !important;
+.flip-side-1 {
+    -moz-transform:    rotateX( 0deg );
+    -ms-transform:     rotateX( 0deg );
+    -webkit-transform: rotateX( 0deg );
+    -o-transform:      rotateX( 0deg );
     transform:         rotateX( 0deg );
 }
 
@@ -185,11 +185,11 @@ thead {
 
 
 .flip-side-2 {
-    -moz-transform:    rotateX( 180deg ) !important;
-    -ms-transform:     rotateX( 180deg ) !important;
-    -webkit-transform: rotateX( 180deg ) !important;
-    -o-transform:      rotateX( 180deg ) !important;
-    transform:         rotateX( 180deg ) !important;
+    -moz-transform:    rotateX( 180deg );
+    -ms-transform:     rotateX( 180deg );
+    -webkit-transform: rotateX( 180deg );
+    -o-transform:      rotateX( 180deg );
+    transform:         rotateX( 180deg );
 }
 
 html, body {
@@ -200,7 +200,7 @@ html, body {
 
 .main {
     min-height: 100%;
-    height: auto !important;
+    height: auto;
     height: 100%;
     margin: 0 auto -20px;
 }
@@ -245,8 +245,8 @@ html, body {
 }
 
 .transition-width {
+    -webkit-transition: width 0.25s ease-out;
     transition: width 0.25s ease-out;
-    webkit-transition: width 0.25s ease-out;
 }
 
 .documentation {
@@ -279,9 +279,9 @@ html, body {
     height: 100%;
     background-color: white;
     border-left: 0;
-    box-shadow: none;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
+    box-shadow: none;
 }
 
 .inner-container {
