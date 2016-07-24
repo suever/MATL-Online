@@ -1,6 +1,6 @@
 """SQLAlchemy models."""
 
-from sqlalchemy import desc
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from matl_online.database import db, Model, Column
 
@@ -18,7 +18,17 @@ class Release(Model):
         """Create a custom string representation."""
         return '<Release %r>' % self.tag
 
+    @hybrid_property
+    def version(self):
+        """Convert release number to tuple for comparisons."""
+        return tuple(int(x) for x in self.tag.split('.'))
+
     @classmethod
     def latest(cls):
         """Method for getting the latest release."""
-        return cls.query.order_by(desc(cls.date)).first()
+        releases = cls.query.all()
+        if len(releases) == 0:
+            return None
+
+        releases.sort(key=lambda x: x.version)
+        return releases[-1]
