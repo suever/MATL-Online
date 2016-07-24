@@ -22,10 +22,13 @@ install:
     - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
     - sudo apt-get install -qq octave liboctave-dev libmpfr-dev
     - pip install -r requirements/dev.txt
+    # Install packages for reporting coverage information to external tools
     - pip install coveralls
+    - pip install codeclimate-test-reporter
 
 script:
     - py.test tests -v --cov=matl_online
     - python manage.py lint
 after_success:
     - coveralls
+    - codeclimate-test-reporter
