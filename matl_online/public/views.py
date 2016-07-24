@@ -41,7 +41,9 @@ def home():
     inputs = request.values.get('inputs', '')
 
     # Get the list of versions to show in the list
-    versions = Release.query.order_by(Release.date.desc()).all()
+    versions = Release.query.all()
+    versions.sort(key=lambda x: x.version, reverse=True)
+
     version = request.values.get('version')
     version = Release.query.filter(Release.tag == version).first()
 
