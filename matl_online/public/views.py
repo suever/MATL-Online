@@ -50,11 +50,14 @@ def home():
     if version is None:
         version = Release.latest()
 
+    analytics_id = current_app.config['GOOGLE_ANALYTICS_UNIVERSAL_ID']
+
     return render_template('index.html', code=code,
                            inputs=inputs,
                            version=version,
                            versions=versions,
-                           modified=last_modified)
+                           modified=last_modified,
+                           google_analytics_id=analytics_id)
 
 
 @csrf.exempt

@@ -43,6 +43,9 @@ class Config(object):
     FLOWER_COOKIE_SECRET = SECRET_KEY
     FLOWER_AUTH = os.environ.get('MATL_ONLINE_FLOWER_AUTH')
 
+    # Don't use google analytics unless we are on production
+    GOOGLE_ANALYTICS_UNIVERSAL_ID = None
+
 
 class ProdConfig(Config):
     """Production configuration."""
@@ -50,6 +53,8 @@ class ProdConfig(Config):
     ENV = 'prod'
     DEBUG = False
     ASSETS_DEBUG = False
+
+    GOOGLE_ANALYTICS_UNIVERSAL_ID = os.environ.get('GOOGLE_ANALYTICS_UNIVERSAL_ID')
 
 
 class DevConfig(Config):
