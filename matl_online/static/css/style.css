@@ -173,11 +173,11 @@ pre.code {
 }
 
 .flip-side-1 {
-    -moz-transform:    rotateX( 0deg );
-    -ms-transform:     rotateX( 0deg );
-    -webkit-transform: rotateX( 0deg );
-    -o-transform:      rotateX( 0deg );
-    transform:         rotateX( 0deg );
+    -moz-transform:    rotateX( 0deg ) !important;
+    -ms-transform:     rotateX( 0deg ) !important;
+    -webkit-transform: rotateX( 0deg ) !important;
+    -o-transform:      rotateX( 0deg ) !important;
+    transform:         rotateX( 0deg ) !important;
 }
 
 thead {
@@ -186,11 +186,11 @@ thead {
 
 
 .flip-side-2 {
-    -moz-transform:    rotateX( 180deg );
-    -ms-transform:     rotateX( 180deg );
-    -webkit-transform: rotateX( 180deg );
-    -o-transform:      rotateX( 180deg );
-    transform:         rotateX( 180deg );
+    -moz-transform:    rotateX( 180deg ) !important;
+    -ms-transform:     rotateX( 180deg ) !important;
+    -webkit-transform: rotateX( 180deg ) !important;
+    -o-transform:      rotateX( 180deg ) !important;
+    transform:         rotateX( 180deg ) !important;
 }
 
 html, body {
