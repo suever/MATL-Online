@@ -1,0 +1,15 @@
+engines:
+  csslint:
+    enabled: true
+    checks:
+      important:
+        enabled: false
+  duplication:
+    enabled: true
+    checks:
+      Similar code:
+        enabled: false
+  radon: 
+    enabled: true
+    config: 
+      threshold: "C"
