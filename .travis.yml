@@ -19,7 +19,7 @@ before_install:
 
 install:
     # Install numpy and scipy
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy=1.11.1 scipy=0.17.1
     - sudo apt-get install -qq octave liboctave-dev libmpfr-dev
     - pip install -r requirements/dev.txt
     # Install packages for reporting coverage information to external tools
