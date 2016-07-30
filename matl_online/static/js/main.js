@@ -25,10 +25,15 @@ function submitCode() {
     $('#run').text('Kill');
 }
 
+socket.on('connect', function(data){
+    console.log('Connected to server.');
+});
+
 // When the server acknowledges that we are connected it will issue
 // us an ID which we can use to get updates
 socket.on('connection', function(data) {
     uuid = data.session_id;
+    console.log('Session ID: ' + uuid);
 });
 
 $('#explain').on('click', function(d) {
@@ -80,11 +85,13 @@ function getlink() {
 socket.on('killed', function(data) {
     $('#run').text('Run');
     running = false;
+    console.log('Task killed.');
 });
 
 socket.on('complete', function(msg) {
     $('#run').text('Run');
     running = false;
+    console.log('Task complete.');
 });
 
 $('#run').on('click', function() {
@@ -98,6 +105,8 @@ $('#run').on('click', function() {
 socket.on('status', function(data) {
     var output = $('#output');
     var errors = $('#errors');
+
+    console.log('Output received.');
 
     // Clear the output
     output.text('');
