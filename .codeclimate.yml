@@ -9,7 +9,29 @@ engines:
     checks:
       Similar code:
         enabled: false
-  radon: 
+    config:
+      languages:
+      - ruby
+      - javascript
+      - python
+      - php
+  eslint:
     enabled: true
-    config: 
+  fixme:
+    enabled: true
+  radon:
+    enabled: true
+    config:
       threshold: "C"
+ratings:
+  paths:
+  - "**.css"
+  - "**.inc"
+  - "**.js"
+  - "**.jsx"
+  - "**.module"
+  - "**.php"
+  - "**.py"
+  - "**.rb"
+exclude_paths:
+- tests/
