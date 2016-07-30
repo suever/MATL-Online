@@ -228,8 +228,8 @@ def _initialize_process(**kwargs):
 
     # Run MATL for the first time to initialize everything
     octaverc = os.path.join(Config.MATL_WRAP_DIR, '.octaverc')
-    oct2py.octave.eval('source("' + octaverc + '")', log=False)
-    oct2py.octave.eval('addpath("' + Config.MATL_WRAP_DIR + '");', log=False)
+    oct2py.octave.eval('source("' + octaverc + '");')
+    oct2py.octave.eval('addpath("' + Config.MATL_WRAP_DIR + '");')
 
 # When a worker process is spawned, initialize octave
 worker_process_init.connect(_initialize_process)
