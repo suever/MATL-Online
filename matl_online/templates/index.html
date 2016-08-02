@@ -155,14 +155,14 @@
               <span class="annotation" id="charcount">
                 ({{ code|length }} character{% if code|length != 1 %}s{% endif %})
               </span>
-              <textarea id="code" onkeyup="countChar(this);" class="code form-control" name="code">{% if code %}{{ code }}{% endif %}</textarea>
+              <textarea id="code" onkeyup="countChar(this);" rows=4 class="code form-control" name="code">{% if code %}{{ code }}{% endif %}</textarea>
             </div>
 
             <div class="form-group">
               <label for="inputs">Input Arguments</label>
               <!--<input class="annotation" placeholder="Lines Per Run" name="lines_per"></input>-->
               <div style="position: relative;">
-                <textarea id="inputs" rows=8 class="code form-control" name="inputs">{% if inputs %}{{ inputs }}{% endif %}</textarea>
+                <textarea id="inputs" rows=6 class="code form-control" name="inputs">{% if inputs %}{{ inputs }}{% endif %}</textarea>
                 <i id="paste_input" data-toggle="tooltip" title="Paste Input" class="glyphicon glyphicon-plus pull-right"></i>
               </div>
                 <br>
