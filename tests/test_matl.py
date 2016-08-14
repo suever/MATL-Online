@@ -73,6 +73,26 @@ class TestResults:
         assert isinstance(result, list)
         assert len(result) == 0
 
+    def test_nn_image_parsing(self, tmpdir):
+        """Test for nearest-neighbor interpolated image"""
+        fileobj = tmpdir.join('image.png')
+        contents = 'hello'
+        fileobj.write(contents)
+
+        # Parse the string
+        result = matl.parse_matl_results('[IMAGE_NN]' + fileobj.strpath)
+
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]['type'] == 'image_nn'
+
+        # Since the file is empty it should just be the header portion
+        encoded = base64.b64encode(contents)
+        assert result[0]['value'] == 'data:image/png;base64,' + encoded
+
+        # Make sure the file was not removed
+        assert os.path.isfile(fileobj.strpath)
+
     def test_image_parsing(self, tmpdir):
         """Test valid image result."""
         fileobj = tmpdir.join('image.png')

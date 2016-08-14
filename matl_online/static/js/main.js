@@ -115,6 +115,7 @@ socket.on('status', function(data) {
         data['data'].forEach(function(item) {
             switch ( item.type ) {
                 case 'image':
+                case 'image_nn':
 
                     // Remove any previous images (simulates drawnow)
                     var thumb = $('.thumb');
@@ -122,7 +123,7 @@ socket.on('status', function(data) {
                     if ( thumb.length ){
                         $(thumb).find('.imshow').attr('src', item.value);
                     } else {
-                        val = '<span class="thumb"><img class="imshow nn-interp" src="' + item.value + '"><br/></span>';
+                        val = '<span class="thumb"><img class="imshow" src="' + item.value + '"><br/></span>';
                         output.append(val);
                         $('.thumb').on('click', function(e) {
                             var url = $(this).find('.imshow').attr('src');
@@ -132,6 +133,15 @@ socket.on('status', function(data) {
                             $('#dimensions').text(img.naturalHeight + ' x ' + img.naturalWidth);
                             $('#imagemodal').modal('show');
                         });
+
+
+                        if ( item.type === 'image_nn' ){
+                            $('.imshow').addClass('nn-interp');
+                            $('#imagepreview').addClass('nn-interp');
+                        } else {
+                            $('.imshow').removeClass('nn-interp');
+                            $('#imagepreview').removeClass('nn-interp');
+                        }
                     }
 
                     break;
@@ -362,6 +372,10 @@ function toggleDocumentation(){
         }
     }
 }
+
+$('.drawer').on('shown.bs.drawer', function(){
+    $('input[type=search]').focus();
+});
 
 $('#doctoggle').on('click', function(evnt){
     toggleDocumentation();

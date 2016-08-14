@@ -114,8 +114,14 @@ def parse_matl_results(output):
 
         item = dict()
 
-        if part.startswith('[IMAGE]'):
-            imname = part.replace('[IMAGE]', '')
+        if part.startswith('[IMAGE'):
+
+            if part.startswith('[IMAGE_NN]'):
+                imtype = 'image_nn'
+            else:
+                imtype = 'image'
+
+            imname = re.sub('\[IMAGE.*?\]', '', part)
 
             if not os.path.isfile(imname):
                 continue
@@ -125,7 +131,7 @@ def parse_matl_results(output):
                 encoded = base64.b64encode(image_file.read())
                 srcstr = 'data:image/png;base64,' + encoded
 
-            item['type'] = 'image'
+            item['type'] = imtype
             item['value'] = srcstr
         elif part.startswith('[STDERR]'):
             msg = part.replace('[STDERR]', '')
