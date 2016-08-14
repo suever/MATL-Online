@@ -74,7 +74,7 @@ class TestResults:
         assert len(result) == 0
 
     def test_nn_image_parsing(self, tmpdir):
-        """Test for nearest-neighbor interpolated image"""
+        """Test for nearest-neighbor interpolated image."""
         fileobj = tmpdir.join('image.png')
         contents = 'hello'
         fileobj.write(contents)
