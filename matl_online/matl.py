@@ -49,7 +49,8 @@ def add_doc_links(description):
         link = DocumentationLink.query.filter_by(name=name).first()
 
         if link:
-            return '<a class="matdoc" href="%s" target="_blank">%s</a>' % (link.link, name)
+            return '<a class="matdoc" href="%s" target="_blank">%s</a>' % \
+                (link.link, name)
 
         return name
 
@@ -57,14 +58,13 @@ def add_doc_links(description):
         # Don't worry about anything that's enclosed in single-quotes '' as
         # these are typically flags that are passed to a given function or
         # pre-defined literal strings
-        if value.startswith("<strong>'") or value.endswith("'</strong>"):
-            continue
+        if not (value.startswith("<strong>'") or value.endswith("'</strong>")):
 
-        # Replace all valid function names with links
-        tmp = re.sub('[A-Za-z0-9]+', lambda x: add_link(x.group()), value)
+            # Replace all valid function names with links
+            tmp = re.sub('[A-Za-z0-9]+', lambda x: add_link(x.group()), value)
 
-        # Replace the original string with the link version
-        description = description.replace(value, tmp)
+            # Replace the original string with the link version
+            description = description.replace(value, tmp)
 
     return description
 

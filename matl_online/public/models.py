@@ -4,6 +4,7 @@ import urlparse
 
 from bs4 import BeautifulSoup
 from flask import current_app
+from sqlalchemy import or_
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from matl_online.database import db, Model, Column
@@ -72,7 +73,8 @@ class DocumentationLink(Model):
                 doc.save()
 
         # Make sure to remove i and j entries
-        cls.query.filter_by(name='i').first().delete()
-        cls.query.filter_by(name='j').first().delete()
+        toremove = cls.query.filter(or_(cls.name == 'i', cls.name == 'j')).all()
+        for item in toremove:
+            item.delete()
 
         return cls.query.all()
