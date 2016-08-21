@@ -32,6 +32,13 @@ class Config(object):
     GITHUB_API = 'https://api.github.com'
     GITHUB_HOOK_SECRET = os.environ.get('MATL_ONLINE_GITHUB_HOOK_SECRET')
 
+    # MATLAB Online Documentation links
+    MATLAB_DOC_LINKS = [
+        'http://www.mathworks.com/help/matlab/functionlist.html',
+        'http://www.mathworks.com/help/images/functionlist.html',
+        'http://www.mathworks.com/help/stats/functionlist.html',
+        'http://www.mathworks.com/help/symbolic/functionlist.html']
+
     # Flower configuration
     FLOWER_OAUTH2_KEY = os.environ.get('MATL_ONLINE_GITHUB_CLIENT_ID')
     FLOWER_OAUTH2_SECRET = os.environ.get('MATL_ONLINE_GITHUB_CLIENT_SECRET')

@@ -6,11 +6,13 @@ import os
 import pytest
 import shutil
 
+from bs4 import BeautifulSoup
 from datetime import datetime
 
 from matl_online import matl
 from matl_online.utils import parse_iso8601, ISO8601_FORMAT
 from matl_online.public.models import Release
+from .factories import DocumentationLinkFactory as DocLink
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -50,6 +52,93 @@ class TestSourceCache:
 
         # Make sure that we only return the source folder
         assert folder == versiondir.strpath
+
+
+class TestDocLinks:
+    """Ensure that documentation hyperlinks are added appropriately."""
+
+    def test_basic_doclink(self, db):
+        """Use a straightforward single function name."""
+        link = DocLink(name='ans')
+        template = 'This is a doc string for <strong>%s</strong>'
+
+        output = matl.add_doc_links(template % link.name)
+
+        soup = BeautifulSoup(output, 'html.parser')
+
+        assert soup.strong.a['href'] == link.link
+        assert soup.strong.a.text == link.name
+
+    def test_multiple_doclink(self, db):
+        """Include two functions in the same docstring."""
+        links = (DocLink(name='func1'), DocLink(name='func2'))
+        template = 'This is a doc for <strong>%s</strong>'
+
+        docstring = (template % links[0].name) + (template % links[1].name)
+
+        output = matl.add_doc_links(docstring)
+
+        soup = BeautifulSoup(output, 'html.parser')
+
+        strongs = soup.findAll('strong')
+
+        assert len(strongs) == len(links)
+
+        for k, strong in enumerate(strongs):
+            assert strong.a['href'] == links[k].link
+            assert strong.a.text == links[k].name
+
+    def test_single_quoted(self, db):
+        """Single quoted function names should be ignored."""
+        double = DocLink(name='double')
+        links = (DocLink(name='func1'), DocLink(name='func2'))
+
+        docstring = ("doc string for <strong>'%s'</strong>, " +
+                     '<strong>%s</strong> and <strong>%s</strong>') % \
+            (double.name, links[0].name, links[1].name)
+
+        output = matl.add_doc_links(docstring)
+
+        soup = BeautifulSoup(output, 'html.parser')
+        strongs = soup.findAll('strong')
+
+        # Make sure the first one wasn't converted to a link
+        assert strongs[0].a is None
+
+        # Remove it and make sure everything else is golden
+        strongs = strongs[1:]
+
+        assert len(strongs) == len(links)
+
+        for k, strong in enumerate(strongs):
+            assert strong.a['href'] == links[k].link
+            assert strong.a.text == links[k].name
+
+    def test_complex_function(self, db):
+        """Test when there is a multi-function example."""
+        mat2cell = DocLink(name='mat2cell')
+        ones = DocLink(name='ones')
+        size = DocLink(name='size')
+        ndims = DocLink(name='ndims')
+
+        expected = [mat2cell, ones, size, size, size, ndims]
+
+        ex = 'mat2cell(x, ones(size(x,1),1), size(x,2),...,size(x,ndims(x)))'
+        docstring = 'Doc for: <strong>%s</strong>' % ex
+
+        output = matl.add_doc_links(docstring)
+
+        soup = BeautifulSoup(output, 'html.parser')
+
+        assert len(soup.findAll('strong')) == 1
+
+        links = soup.strong.findAll('a')
+
+        assert len(links) == len(expected)
+
+        for k, link in enumerate(links):
+            assert link.text == expected[k].name
+            assert link['href'] == expected[k].link
 
 
 class TestResults:
@@ -147,7 +236,7 @@ class TestResults:
 class TestHelpParsing:
     """Series of tests for checking help to JSON conversion."""
 
-    def test_generate_help_json(self, tmpdir, mocker):
+    def test_generate_help_json(self, tmpdir, mocker, db):
         """Check all reading / parsing of help .mat file."""
         folder = mocker.patch('matl_online.matl.get_matl_folder')
         folder.return_value = tmpdir.strpath

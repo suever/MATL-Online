@@ -2,11 +2,11 @@
 
 from datetime import datetime
 
-from factory import Sequence, LazyFunction
+from factory import Sequence, LazyFunction, LazyAttribute
 from factory.alchemy import SQLAlchemyModelFactory
 
 from matl_online.database import db
-from matl_online.public.models import Release
+from matl_online.public.models import DocumentationLink, Release
 
 
 class BaseFactory(SQLAlchemyModelFactory):
@@ -25,3 +25,13 @@ class ReleaseFactory(BaseFactory):
 
     class Meta:
         model = Release
+
+
+class DocumentationLinkFactory(BaseFactory):
+    """Factory for creating DocumentationLink objects on demand."""
+
+    # The default link will simply append .html to the end of the name
+    link = LazyAttribute(lambda o: o.name + '.html')
+
+    class Meta:
+        model = DocumentationLink
