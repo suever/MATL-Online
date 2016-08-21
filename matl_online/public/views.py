@@ -60,8 +60,7 @@ def home():
     if not version or re.match('^[A-Za-z0-9\.]*$', version) is None:
         version = _latest_version_tag()
 
-    if len(version) > 8:
-        version = version[:8]
+    version = version[:min(len(version), 8)]
 
     analytics_id = current_app.config['GOOGLE_ANALYTICS_UNIVERSAL_ID']
 
@@ -186,6 +185,8 @@ def submit_job(data):
     if not version or re.match('^[A-Za-z0-9\.]*$', version) is None:
         version = _latest_version_tag()
 
+    version = version[:min(len(version), 8)]
+
     # No op if no inputs are provided
     if code == '':
         return
@@ -210,4 +211,5 @@ def explain():
 @blueprint.route('/help/<version>', methods=['GET'])
 def help(version):
     """Return a JSON representation of the help for the requested version."""
+    version = version[:min(len(version), 8)]
     return send_file(help_file(version))
