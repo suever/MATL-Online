@@ -20,18 +20,13 @@ STRONG_RE = re.compile('\<strong\>.*?\<\/strong\>')
 
 def install_matl(version, folder):
     """Download a specific version of MATL source code."""
-    url = '%s/repos/%s/releases/tags/%s'
-    url = url % (current_app.config['GITHUB_API'],
-                 current_app.config['MATL_REPO'], version)
+    repo = current_app.config['MATL_REPO']
+    url = '/'.join(['https://github.com', repo, 'zipball', version])
+    response = requests.get(url, stream=True)
 
-    resp = requests.get(url)
-
-    if resp.status_code == 404:
+    if response.status_code == 404:
         raise KeyError('Tag "%s" is invalid' % version)
 
-    zipball = resp.json()['zipball_url']
-
-    response = requests.get(zipball, stream=True)
     unzip(StringIO.StringIO(response.content), folder)
 
 

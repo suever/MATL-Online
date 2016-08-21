@@ -25,7 +25,7 @@ class TestSockets:
         assert 'session_id' in payload[0]
         assert payload[0]['session_id'] == socketclient.sid
 
-    def test_submit_empty(self, socketclient, mocker):
+    def test_submit_empty(self, socketclient, mocker, db):
         """If no code is provided, no tasks should ever run."""
         # Clear previous events
         socketclient.get_received()
@@ -38,7 +38,7 @@ class TestSockets:
         assert len(socketclient.get_received()) == 0
         task.assert_not_called()
 
-    def test_real_submit(self, socketclient, mocker):
+    def test_real_submit(self, socketclient, mocker, db):
         """A matl_task should run with valid inputs."""
         socketclient.get_received()
         # The task ID should be stored in the session
@@ -79,7 +79,7 @@ class TestSockets:
         # Make sure that no task id was aassigned
         assert session(socketclient).get('taskid') is None
 
-    def test_kill_task(self, socketclient, mocker):
+    def test_kill_task(self, socketclient, mocker, db):
         """Kill events result in a task being revoked and terminated."""
         socketclient.get_received()
 
@@ -87,7 +87,7 @@ class TestSockets:
         revoke = mocker.patch('matl_online.public.views.celery.control.revoke')
 
         # Start a job to set the session variable
-        self.test_real_submit(socketclient, mocker)
+        self.test_real_submit(socketclient, mocker, db)
 
         # Get the task id
         taskid = session(socketclient).get('taskid')

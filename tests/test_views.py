@@ -86,7 +86,7 @@ class TestHome:
         assert args[0] == 'index.html'
         assert params.get('inputs') == ''
         assert params.get('code') == ''
-        assert params.get('version') == Release.latest()
+        assert params.get('version') == Release.latest().tag
 
         versions = params.get('versions')
         versions.sort()
@@ -107,8 +107,7 @@ class TestHome:
         testapp.get(url)
 
         version = render.call_args[1].get('version')
-        assert version == Release.latest()
-        assert version.tag != 'not a version'
+        assert version == Release.latest().tag
 
 
 class TestExplain:

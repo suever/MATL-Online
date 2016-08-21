@@ -3,6 +3,7 @@
 import json
 import hmac
 import os
+import re
 import requests
 import uuid
 
@@ -34,6 +35,16 @@ modtime = os.stat(os.path.join(Config.PROJECT_ROOT, '.git')).st_mtime
 last_modified = datetime.utcfromtimestamp(modtime).strftime('%Y/%m/%d')
 
 
+def _latest_version_tag():
+    latest = Release.latest()
+    if latest is None:
+        version = ''
+    else:
+        version = latest.tag
+
+    return version
+
+
 @blueprint.route('/')
 def home():
     """Main page of the site."""
@@ -45,10 +56,12 @@ def home():
     versions.sort(key=lambda x: x.version, reverse=True)
 
     version = request.values.get('version')
-    version = Release.query.filter(Release.tag == version).first()
 
-    if version is None:
-        version = Release.latest()
+    if not version or re.match('^[A-Za-z0-9\.]*$', version) is None:
+        version = _latest_version_tag()
+
+    if len(version) > 8:
+        version = version[:8]
 
     analytics_id = current_app.config['GOOGLE_ANALYTICS_UNIVERSAL_ID']
 
@@ -168,7 +181,10 @@ def submit_job(data):
     # Process all input arguments
     inputs = data.get('inputs', '')
     code = data.get('code', '')
-    version = data.get('version', '18.3.0')
+    version = data.get('version')
+
+    if not version or re.match('^[A-Za-z0-9\.]*$', version) is None:
+        version = _latest_version_tag()
 
     # No op if no inputs are provided
     if code == '':
