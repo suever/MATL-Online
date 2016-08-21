@@ -49,7 +49,7 @@ function result = input(prompt, varargin)
     %   session.
     %
     % - Filling the Queue
-    %   
+    %
     %   Inputs arguments are placed into the queue by specifying 'init' as
     %   the first input parameter, and the other inputs are all other
     %   inputs.
@@ -95,10 +95,17 @@ function varargout = imwrite(varargin)
 
     mlock;
 
+    % If the second input is a colormap
+    if numel(varargin) >= 2 && ~ischar(varargin{2})
+        filename_ind = 3;
+    else
+        filename_ind = 2;
+    end
+
     % Filename is going to be input #2. We want to replace this with the
     % filename that we actually want
-    varargin{2} = generateUniqueFilename(pwd, 'image', '.png');
-    builtin('disp', ['[IMAGE_NN]', varargin{2}])
+    varargin{filename_ind} = generateUniqueFilename(pwd, 'image', '.png');
+    builtin('disp', ['[IMAGE_NN]', varargin{filename_ind}])
     [varargout{1:nargout}] = builtin('imwrite', varargin{:});
 endfunction
 
@@ -141,7 +148,7 @@ function name = generateUniqueFilename(folder, prefix, extension)
     while exist(generateName(k), 'file')
         k = k + 1;
     end
-    
+
     name = generateName(k);
 endfunction
 
