@@ -1,5 +1,9 @@
 """SQLAlchemy models."""
+import requests
+import urlparse
 
+from bs4 import BeautifulSoup
+from flask import current_app
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from matl_online.database import db, Model, Column
@@ -32,3 +36,43 @@ class Release(Model):
 
         releases.sort(key=lambda x: x.version)
         return releases[-1]
+
+
+class DocumentationLink(Model):
+    """Model for storing hyperlinks to MATLAB's documentation."""
+
+    __tablenamme__ = 'doclinks'
+
+    id = Column(db.Integer, primary_key=True)
+    name = Column(db.String, unique=True, nullable=False)
+    link = Column(db.String, nullable=False)
+
+    @classmethod
+    def refresh(cls):
+        """Method to fetch updated documentation from the Mathworks."""
+        for url in current_app.config['MATLAB_DOC_LINKS']:
+            resp = requests.get(url)
+            soup = BeautifulSoup(resp.text, 'html.parser')
+
+            terms = soup.findAll('td', {'class': 'term'})
+            links = [term.find('a') for term in terms]
+
+            for link in links:
+
+                function = link.text.rstrip()
+
+                doc = cls.query.filter_by(name=function).first()
+                doc_url = urlparse.urljoin(url, link['href'])
+
+                # Create an entry if one doesn't already exist
+                if doc is None:
+                    doc = cls(name=function)
+
+                doc.link = doc_url
+                doc.save()
+
+        # Make sure to remove i and j entries
+        cls.query.filter_by(name='i').first().delete()
+        cls.query.filter_by(name='j').first().delete()
+
+        return cls.query.all()

@@ -11,8 +11,11 @@ import StringIO
 from flask import current_app
 from scipy.io import loadmat
 
-from matl_online.public.models import Release
+from matl_online.public.models import Release, DocumentationLink
 from matl_online.utils import unzip, parse_iso8601
+
+# Regular expression for pulling out content between <strong></strong> tags
+STRONG_RE = re.compile('\<strong\>.*?\<\/strong\>')
 
 
 def install_matl(version, folder):
@@ -30,6 +33,40 @@ def install_matl(version, folder):
 
     response = requests.get(zipball, stream=True)
     unzip(StringIO.StringIO(response.content), folder)
+
+
+def add_doc_links(description):
+    """Add hyperlinks to MATLAB's online documentation for built-ins."""
+    # We want to find all bold parts
+    values = re.findall(STRONG_RE, description)
+
+    # These could be functions themselves, other MATL statements, or
+    # complex function call examples:
+    # mat2cell(x, ones(size(x,1),1), size(x,2),...,size(x,ndims(x)))
+
+    def add_link(name):
+        """Helper function for retrieving the link for a function."""
+        link = DocumentationLink.query.filter_by(name=name).first()
+
+        if link:
+            return '<a class="matdoc" href="%s" target="_blank">%s</a>' % (link.link, name)
+
+        return name
+
+    for value in values:
+        # Don't worry about anything that's enclosed in single-quotes '' as
+        # these are typically flags that are passed to a given function or
+        # pre-defined literal strings
+        if value.startswith("<strong>'") or value.endswith("'</strong>"):
+            continue
+
+        # Replace all valid function names with links
+        tmp = re.sub('[A-Za-z0-9]+', lambda x: add_link(x.group()), value)
+
+        # Replace the original string with the link version
+        description = description.replace(value, tmp)
+
+    return description
 
 
 def help_file(version):
@@ -62,6 +99,9 @@ def help_file(version):
         else:
             arguments = '%s;  %s' % \
                 (info.__getattribute__('in')[k], info.out[k])
+
+        # Put hyperlinks to the MATLAB documentation in the description
+        info.descr[k] = add_doc_links(info.descr[k])
 
         # Replace all newlines in description
         info.descr[k] = info.descr[k].replace('\n', '')

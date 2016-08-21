@@ -147,7 +147,7 @@ class TestResults:
 class TestHelpParsing:
     """Series of tests for checking help to JSON conversion."""
 
-    def test_generate_help_json(self, tmpdir, mocker):
+    def test_generate_help_json(self, tmpdir, mocker, db):
         """Check all reading / parsing of help .mat file."""
         folder = mocker.patch('matl_online.matl.get_matl_folder')
         folder.return_value = tmpdir.strpath
