@@ -1,7 +1,8 @@
 # General
 flask==0.11.1
 requests==2.10.0
-eventlet==0.19.0
+beautifulsoup4==4.5.0
+eventlet==0.17.4
 
 # CSS/JS Assets
 flask_assets==0.11
