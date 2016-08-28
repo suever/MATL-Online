@@ -51,7 +51,9 @@ class DocumentationLink(Model):
     @classmethod
     def refresh(cls):
         """Method to fetch updated documentation from the Mathworks."""
-        for url in current_app.config['MATLAB_DOC_LINKS']:
+        # Flip the order of the links so that the first URL listed is the
+        # highest priority and will take precedence
+        for url in current_app.config['MATLAB_DOC_LINKS'][::-1]:
             resp = requests.get(url)
             soup = BeautifulSoup(resp.text, 'html.parser')
 
