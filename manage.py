@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Management script."""
 import eventlet
+eventlet.monkey_patch()
+
 import os
 
 from glob import glob
@@ -15,7 +17,6 @@ from matl_online.database import db
 from matl_online import matl
 from matl_online.settings import DevConfig, ProdConfig
 
-eventlet.monkey_patch()
 
 if os.environ.get('MATL_ONLINE_ENV') == 'prod':
     CONFIG = ProdConfig
