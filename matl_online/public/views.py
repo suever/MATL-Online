@@ -45,6 +45,12 @@ def _latest_version_tag():
     return version
 
 
+def _parse_version(version):
+    if not version or re.match('^[A-Za-z0-9\.]*$', version) is None:
+        version = _latest_version_tag()
+        return version[:min(len(version), 8)]
+
+
 @blueprint.route('/')
 def home():
     """Main page of the site."""
@@ -55,12 +61,7 @@ def home():
     versions = Release.query.all()
     versions.sort(key=lambda x: x.version, reverse=True)
 
-    version = request.values.get('version')
-
-    if not version or re.match('^[A-Za-z0-9\.]*$', version) is None:
-        version = _latest_version_tag()
-
-    version = version[:min(len(version), 8)]
+    version = _parse_version(request.values.get('version'))
 
     analytics_id = current_app.config['GOOGLE_ANALYTICS_UNIVERSAL_ID']
 
@@ -180,12 +181,8 @@ def submit_job(data):
     # Process all input arguments
     inputs = data.get('inputs', '')
     code = data.get('code', '')
-    version = data.get('version')
 
-    if not version or re.match('^[A-Za-z0-9\.]*$', version) is None:
-        version = _latest_version_tag()
-
-    version = version[:min(len(version), 8)]
+    version = _parse_version(data.get('version'))
 
     # No op if no inputs are provided
     if code == '':
