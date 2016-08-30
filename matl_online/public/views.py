@@ -48,7 +48,7 @@ def _latest_version_tag():
 def _parse_version(version):
     if not version or re.match('^[A-Za-z0-9\.]*$', version) is None:
         version = _latest_version_tag()
-        return version[:min(len(version), 8)]
+    return version[:min(len(version), 8)]
 
 
 @blueprint.route('/')
