@@ -18,11 +18,13 @@ function submitCode() {
         debug: $('#debug').val(),
         version: $('#version').data('version'),
         uid: uuid
+    }, function(resp){
+        console.log('Successfully submitted job.');
+
+        // Change the status and update the button functionality
+        running = true;
+        $('#run').text('Kill');
     });
-
-    running = true;
-
-    $('#run').text('Kill');
 }
 
 socket.on('connect', function(data){
