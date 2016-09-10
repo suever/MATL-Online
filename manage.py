@@ -93,12 +93,9 @@ class Lint(Command):
 
 
 @manager.command
-def run():
+def run(port=5000, host='127.0.0.1'):
     """Command for creating an eventlet instance."""
-    socketio.run(app,
-                 host='127.0.0.1',
-                 port=5000,
-                 use_reloader=True)
+    socketio.run(app, host=host, port=int(port), use_reloader=True)
 
 
 manager.add_command('server', Server())
