@@ -27,6 +27,8 @@ function submitCode() {
 
 socket.on('connect', function(data){
     console.log('Connected to server.');
+    $('#run').removeClass('disabled');
+    $('#run').text('Run');
 });
 
 // When the server acknowledges that we are connected it will issue
