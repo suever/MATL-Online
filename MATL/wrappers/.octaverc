@@ -15,8 +15,8 @@ function varargout = drawnow(varargin)
     % Get the current figure without creating a new one
     currentFigure = get(0, 'CurrentFigure');
 
-    % If there are no figures, carry on
-    if isempty(currentFigure)
+    % If there are no figures or axes, carry on
+    if isempty(currentFigure) || isempty(get(currentFigure, 'CurrentAxes'))
         builtin('drawnow');
         return;
     end
