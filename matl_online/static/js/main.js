@@ -7,9 +7,9 @@ $('#codeform').on('submit', function(d) { d.preventDefault(); });
 
 function timeoutFcn() {
     // Send a google analytics event if it's defined
-    try {
+    if ( typeof ga !== "undefined" ) {
         ga('send', 'event', 'errors', 'error', 'Submit failed');
-    } catch(err) {}
+    }
 
     // Force the socket to reconnect
     socket.disconnect();
