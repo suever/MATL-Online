@@ -5,12 +5,25 @@ var running = false;
 
 $('#codeform').on('submit', function(d) { d.preventDefault(); });
 
+function timeoutFcn() {
+    // Send a google analytics event if it's defined
+    try {
+        ga('send', 'event', 'errors', 'error', 'Submit failed');
+    } catch(err) {}
+
+    // Force the socket to reconnect
+    socket.disconnect();
+    socket.connect();
+}
+
 function submitCode() {
     var form = $('#codeform');
 
     $('#errorconsoletab').css('font-weight', 'normal');
     $('#errors').html('');
-    $('#output').html('')
+    $('#output').html('');
+
+    var timeoutId = setTimeout(timeoutFcn, 2000);
 
     socket.emit('submit', {
         code: $('#code').val(),
@@ -19,7 +32,8 @@ function submitCode() {
         version: $('#version').data('version'),
         uid: uuid
     }, function(resp){
-        console.log('Successfully submitted job.');
+        // Make sure that we don't fire the timeout callback
+        clearTimeout(timeoutId);
 
         // Change the status and update the button functionality
         running = true;
