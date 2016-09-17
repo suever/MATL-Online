@@ -5,11 +5,15 @@ var running = false;
 
 $('#codeform').on('submit', function(d) { d.preventDefault(); });
 
+function sendAnalyticsEvent(category, type, message) {
+    if ( typeof ga !== "undefined" ) {
+        ga('send', 'event', category, type, message);
+    }
+}
+
 function timeoutFcn() {
     // Send a google analytics event if it's defined
-    if ( typeof ga !== "undefined" ) {
-        ga('send', 'event', 'errors', 'error', 'Submit failed');
-    }
+    sendAnalyticsEvent('errors', 'error', 'Submit failed');
 
     // Force the socket to reconnect
     socket.disconnect();
@@ -38,6 +42,8 @@ function submitCode() {
         // Change the status and update the button functionality
         running = true;
         $('#run').text('Kill');
+
+        sendAnalyticsEvent('general', 'workflow', 'Job Submitted');
     });
 }
 
