@@ -367,7 +367,10 @@ function toggleDocumentation(){
                 columns: [
                     {
                         data: 'source',
-                        orderable: true
+                        orderable: true,
+                        render: function(src) {
+                            return '<strong>' + src + '</strong>';
+                        }
                     },
                     {
                         data: null,

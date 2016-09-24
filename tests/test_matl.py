@@ -270,21 +270,21 @@ class TestHelpParsing:
         # make sure all newlines were removed from description
         assert item.get('description').find('\n') == -1
         assert item.get('arguments') == ''
-        assert item.get('source') == '<strong>&</strong>'
+        assert item.get('source') == '&amp;'
         assert item.get('brief') == 'alternative input/output specification'
 
         item = data['data'][1]
 
         assert item.get('description').find('\n') == -1
         assert item.get('arguments') == '1--2 (1 / 2);  1'
-        assert item.get('source') == '<strong>a</strong>'
+        assert item.get('source') == 'a'
         assert item.get('brief') == 'any'
 
         item = data['data'][2]
 
         assert item.get('description') == '    '
         assert item.get('arguments') == '0;  1'
-        assert item.get('source') == '<strong>Y?</strong>'
+        assert item.get('source') == 'Y?'
         assert item.get('brief') == ''
 
     def test_help_json_exists(self, tmpdir, mocker):
