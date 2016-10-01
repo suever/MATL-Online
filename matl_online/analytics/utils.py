@@ -18,7 +18,7 @@ ANSWER_FILTER = '!b0OfNb3Hk1Ze71'
 class MATLAnswer(StackExchangeAnswer):
     """Class for representing a MATL Answer on PPCG."""
 
-    # Set a default ID to prevent errors
+    # This is a default ID to prevent issues when one is not-assigned
     id = 0
 
 
