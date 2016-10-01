@@ -3,12 +3,45 @@
 import os
 import shutil
 
-from matl_online.utils import unzip
+from matl_online.utils import unzip, grouper
 from .mocks import MockZipFile
 
 
 class TestUnzip:
     """Test unzip functionality."""
+
+    def test_grouper_equal_lengths(self):
+        """Check that equal size groups are created."""
+        items = range(10)
+
+        nPerGroup = 5
+        nGroups = 2
+        groups = list(grouper(nPerGroup, items))
+
+        assert len(groups) == nGroups
+        for index, group in enumerate(groups):
+            assert len(group) == nPerGroup
+            assert min(group) == index * nPerGroup
+            assert max(group) == (index + 1) * nPerGroup - 1
+
+    def test_grouper_unequal_lengths(self):
+        """Check that the last group gets truncated."""
+        items = range(11)
+
+        nPerGroup = 5
+        nGroups = 3
+
+        groups = list(grouper(nPerGroup, items))
+
+        assert len(groups) == nGroups
+        for index, group in enumerate(groups):
+            if index == (len(groups) - 1):
+                assert len(group) == 1
+                assert group[0] == 10
+            else:
+                assert len(group) == nPerGroup
+                assert min(group) == index * nPerGroup
+                assert max(group) == (index + 1) * nPerGroup - 1
 
     def test_unzip_and_flatten(self, mocker, tmpdir):
         """Check that flattening of parent directories works as expected."""
