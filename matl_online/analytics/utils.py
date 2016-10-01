@@ -1,3 +1,5 @@
+"""Module for retrieving and parsing MATL Answers."""
+
 import re
 
 from bs4 import BeautifulSoup
@@ -14,24 +16,14 @@ ANSWER_FILTER = '!b0OfNb3Hk1Ze71'
 
 
 class MATLAnswer(StackExchangeAnswer):
+    """Class for representing a MATL Answer on PPCG."""
 
     # Set a default ID to prevent errors
     id = 0
 
-    def Answer(self):
-        # Construct an Answer database object
-        return Answer.from_json(self.json)
-
-    def fetch_callback(self, *args, **kwargs):
-        import pdb
-        pdb.set_trace()
-
 
 def fetch_answers():
-    """
-    Use the StackExchange API to get all MATL Answers and update our local
-    database of answers.
-    """
+    """Fetch MATL Answers using the StackExchange API."""
     site = Site(ProgrammingPuzzlesampCodeGolf,
                 current_app.config['STACK_EXCHANGE_KEY'])
 

@@ -24,21 +24,22 @@ def to_epoch(date):
     return (date - dt(1970, 1, 1)).total_seconds()
 
 
+def group_by_date(date, span):
+    """Helper function for grouping by a given time span."""
+    read_fmt, write_fmt = groupers[span]
+    return to_epoch(dt.strptime(date.strftime(read_fmt), write_fmt))
+
+
 @blueprint.route('/answer/histogram')
 def histogram():
     """View for returning answers grouped by the given interval."""
-    width = request.args.get('span', 'week').lower()
+    span = request.args.get('span', 'week').lower()
 
     answers = Answer.query.order_by(Answer.created).all()
 
-    rfmt, wfmt = groupers[width]
-
     result = list()
 
-    # Function to run to determine grouping of answers
-    grouper = lambda x: to_epoch(dt.strptime(x.created.strftime(rfmt), wfmt))
-
-    for key, group in groupby(answers, grouper):
+    for key, group in groupby(answers, lambda x: group_by_date(x.created, span)):
         date = key
 
         # Get all group members
@@ -60,7 +61,6 @@ def histogram():
 @blueprint.route('/answers')
 def answers():
     """A list of all MATL answers that we have stored."""
-
     output = list()
 
     for answer in Answer.query.all():
@@ -78,7 +78,6 @@ def answers():
 @blueprint.route('/users')
 def userlist():
     """List of all users that have answered a question using MATL."""
-
     users = list()
 
     for user in StackExchangeUser.query.all():
