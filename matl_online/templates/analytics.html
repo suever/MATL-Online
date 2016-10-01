@@ -1,0 +1,228 @@
+{% extends "layout.html" %}
+
+{% block css %}
+<style>
+
+  .plot-region {
+    margin: 20px;
+    min-height:492px;
+  }
+
+  .leader-item {
+    min-height: 40px;
+  }
+
+  .leader-item img {
+    margin-right: 10px;
+    margin-left: -5px;
+    border: 1px solid #CCC;
+    height: 25px;
+    width: 25px;
+  }
+
+  .dropdown-label {
+    padding-right: 5px;
+  }
+
+  .item-score {
+    font-size: 15px;
+    font-weight: bold;
+    float:right;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 15px;
+  }
+
+  .list-group {
+    margin-bottom: 0px;
+  }
+
+
+  .list-group-item.active {
+    background-color: #CCC;
+  }
+
+  .leader-panel {
+    overflow: auto;
+    padding: 0px;
+    height: 250px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="col-md-8">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <i class="fa fa-bar-chart fa-fw"></i> MATL Answers
+      <div class="pull-right" id="answers-hist"></div>
+    </div>
+    <div class="panel-body">
+      <div class="plot-region" id="answer_plot"></div>
+    </div>
+  </div>
+</div>
+
+<div class="col-md-4">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <i class="fa fa-user fa-fw"></i> Top Users
+      <div class="pull-right" id="user-dropdown"></div>
+    </div>
+    <div class="panel-body leader-panel" id="user-panel"></div>
+  </div>
+</div>
+
+<div class="col-md-4">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <i class="fa fa-trophy fa-fw"></i> Popular Answers
+      <div class="pull-right" id="answer-dropdown">
+      </div>
+    </div>
+    <div class="panel-body leader-panel" id="answer-panel"></div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block javascript %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.resize.min.js"></script>
+<script src="{{ url_for('static', filename='lib/jquery.flot.axislabels.js') }}"></script>
+<script src="{{ url_for('static', filename='js/leader.js') }}"></script>
+<script src="{{ url_for('static', filename='js/toggle.js') }}"></script>
+
+<script>
+  $(document).ready(function(evnt){
+
+    var user_leaderboard, answer_leaderboard, answer_plot;
+    var answer_data; 
+
+    // Setup the dropdowns for each of the panels
+    var user_sort = $('#user-dropdown').toggleButton({
+      items: [ 
+        {label: 'Answers', value: 'answers'},
+        {label: 'Cumulative Score', value: 'score'},
+        {label: 'Average Score', value: 'average'},
+      ]
+    })
+
+    .on('toggleButton.select', function(evnt, data){
+      user_leaderboard.sort(data.value);
+    });
+
+    var answer_sort = $('#answer-dropdown').toggleButton({
+      items: [
+        { label: 'Score', value: 'score' }
+      ]
+    });
+
+    var answer_sort = $('#answers-hist').toggleButton({
+      items: [
+        {label: 'Answers', value: 'answers'},
+        {label: 'Score', value: 'score'},
+        {label: 'Accepted Answers', value: 'accepted'}
+      ]
+    })
+
+    .on('toggleButton.select', function(evnt, data){
+      // Get the new data to plot and refresh the fplot object
+      var newdata = [];
+      var maxval = 0;
+
+      // Grab the relevant value
+      $.each(answer_data, function(index, datum){
+        var value = datum[data.value];
+        newdata.push([datum.date * 1000, value]);
+        maxval = Math.max(maxval, value);
+      });
+
+      // Replace the data
+      answer_plot.setData([newdata]);
+
+      // Pad the y limits by 10%
+      answer_plot.getAxes().yaxis.options.max = maxval * 1.1;
+
+      // Redraw everything
+      answer_plot.setupGrid();
+      answer_plot.draw();
+    });
+
+    // Dynamically load in the user statistics 
+    $.ajax({
+      url: "{{ url_for('analytics.userlist') }}",
+      dataType: "json",
+      success: function(data){
+        // Compute the average score per question for each user
+        $.each(data, function(index, datum){
+          datum.average = (datum.score / datum.answers).toFixed(1);
+        });
+
+        // Create the leaderboard from this data
+        user_leaderboard = $('#user-panel').leader({
+          label: function(item) { 
+            return '<img class="img-circle" src="' + item.avatar + '"/>' + item.username;
+          },
+          items: data,
+          key: 'answers',
+          url: 'profile'
+        });
+      }
+    });
+
+    // Create the histogram of answers
+    $.ajax({
+      url: "{{ url_for('analytics.histogram', span='week') }}",
+      dataType: 'json',
+      success: function(data){
+
+        answer_data = data;
+
+        var newdata = [];
+
+        $.each(data, function(index, datum){
+          newdata.push([datum.date * 1000, datum.answers]);
+        });
+
+        answer_plot = $.plot($('#answer_plot'), [newdata], {
+            series: {
+                bars: {
+                    show: true
+                }
+            },
+            bars: {
+                align: "center",
+                barWidth: 7 * 24 * 60 * 60 * 1000   // 7 days
+            },
+          axisLabels: { 'show': false },
+          xaxes: [{ axisLabel: 'Submission Date' }],
+          yaxes: [{ axisLabel: 'MATL Answers'}],
+          xaxis: { mode: "time" },
+          colors: ['#4682b4']
+        });
+      }
+    });
+
+    // Dynamically load in the answer statistics
+    $.ajax({
+      url: "{{ url_for('analytics.answers') }}",
+      dataType: "json",
+      success: function(data) {
+
+        answer_leaderboard = $('#answer-panel').leader({
+          label: function(item) {return item.title; },
+          items: data,
+          key: 'score',
+          url: 'url'
+        });
+      }
+    });
+
+  });
+</script>
+
+{% endblock %}

@@ -8,6 +8,9 @@ gunicorn==19.9.0
 # Python 2/3 Compatibility
 six==1.12.0
 
+# Stack Exchange
+Py-StackExchange==2.2.6
+
 # CSS/JS Assets
 flask_assets==0.12
 yuicompressor==2.4.8

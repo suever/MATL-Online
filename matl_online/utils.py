@@ -1,6 +1,10 @@
 """Miscelaneous utility functions for the application."""
 
+<<<<<<< HEAD
 import base64
+=======
+import itertools
+>>>>>>> 0aa7dfb... Adds initial version of analytics page
 import os
 import zipfile
 
@@ -13,6 +17,12 @@ def base64_encode_file(filename):
     """Load a file and return the base64-encoded version of the contents."""
     with open(filename, 'rb') as fid:
         return b'base64,' + base64.b64encode(fid.read())
+
+
+def grouper(n, items):
+    """Groups the input into chunks of N items."""
+    args = [iter(items)] * n
+    return ([e for e in t if e is not None] for t in itertools.izip_longest(*args))
 
 
 def parse_iso8601(date):

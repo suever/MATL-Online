@@ -1,7 +1,7 @@
 """The app module, containing the app factory function."""
 from flask import Flask
 
-from matl_online import public
+from matl_online import public, analytics
 from matl_online.assets import assets
 from matl_online.extensions import db, migrate, socketio, celery, csrf
 from matl_online.settings import ProdConfig
@@ -33,4 +33,5 @@ def register_extensions(app):
 def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(public.views.blueprint)
+    app.register_blueprint(analytics.views.blueprint)
     return None

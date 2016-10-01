@@ -14,7 +14,9 @@ class Config(object):
     # Custom timeout for celery process initialization
     CELERY_PROCESS_INIT_TIMEOUT = 10
 
+    # API Keys for external applications
     IMGUR_CLIENT_ID = os.environ.get('MATL_ONLINE_IMGUR_CLIENT_ID')
+    STACK_EXCHANGE_KEY = os.environ.get('MATL_ONLINE_STACKEXCHANGE_KEY')
 
     SECRET_KEY = str(uuid.uuid4())
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
