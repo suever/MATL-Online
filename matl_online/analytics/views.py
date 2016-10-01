@@ -96,6 +96,13 @@ def userlist():
     return json.dumps(users), 200
 
 
+@blueprint.context_processor
+def inject_modified_date():
+    """Context processor to add modification date to all pages."""
+    from matl_online.public.views import last_modified
+    return {'modified': last_modified}
+
+
 @blueprint.route('/')
 def home():
     """Main analytics page."""

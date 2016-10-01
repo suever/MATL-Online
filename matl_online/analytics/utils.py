@@ -11,12 +11,12 @@ from matl_online.utils import grouper
 from matl_online.analytics.models import Answer, StackExchangeUser
 
 
-# Answer filter to use for the SE API so that we get back specific fields
+# An Answer filter to use for the SE API so that we get back specific fields
 ANSWER_FILTER = '!b0OfNb3Hk1Ze71'
 
 
 class MATLAnswer(StackExchangeAnswer):
-    """Class for representing a MATL Answer on PPCG."""
+    """A Class for representing a MATL Answer on PPCG."""
 
     # This is a default ID to prevent issues when one is not-assigned
     id = 0
