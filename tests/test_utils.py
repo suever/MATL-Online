@@ -14,34 +14,32 @@ class TestUnzip:
         """Check that equal size groups are created."""
         items = range(10)
 
-        nPerGroup = 5
-        nGroups = 2
-        groups = list(grouper(nPerGroup, items))
+        per_group = 5
+        ngroups = 2
+        groups = list(grouper(per_group, items))
 
-        assert len(groups) == nGroups
+        assert len(groups) == ngroups
         for index, group in enumerate(groups):
-            assert len(group) == nPerGroup
-            assert min(group) == index * nPerGroup
-            assert max(group) == (index + 1) * nPerGroup - 1
+            assert len(group) == per_group
+            assert min(group) == index * per_group
+            assert max(group) == (index + 1) * per_group - 1
 
     def test_grouper_unequal_lengths(self):
         """Check that the last group gets truncated."""
         items = range(11)
 
-        nPerGroup = 5
-        nGroups = 3
+        per_group = 5
+        groups = list(grouper(per_group, items))
 
-        groups = list(grouper(nPerGroup, items))
-
-        assert len(groups) == nGroups
+        assert len(groups) == 3
         for index, group in enumerate(groups):
             if index == (len(groups) - 1):
                 assert len(group) == 1
-                assert group[0] == 10
+                assert group[0] == max(items)
             else:
-                assert len(group) == nPerGroup
-                assert min(group) == index * nPerGroup
-                assert max(group) == (index + 1) * nPerGroup - 1
+                assert len(group) == per_group
+                assert min(group) == index * per_group
+                assert max(group) == (index + 1) * per_group - 1
 
     def test_unzip_and_flatten(self, mocker, tmpdir):
         """Check that flattening of parent directories works as expected."""
