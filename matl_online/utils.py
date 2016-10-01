@@ -20,7 +20,7 @@ def base64_encode_file(filename):
 
 
 def grouper(n, items):
-    """Groups the input into chunks of N items."""
+    """Group the input into chunks of N items."""
     args = [iter(items)] * n
     return ([e for e in t if e is not None] for t in itertools.izip_longest(*args))
 
