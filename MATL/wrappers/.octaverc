@@ -152,6 +152,9 @@ function name = generateUniqueFilename(folder, prefix, extension)
     name = generateName(k);
 endfunction
 
+% Ensure that we do not save any crash dump files
+crash_dumps_octave_core(false);
+
 % Load necessary packages
 pkg load image
 pkg load statistics
