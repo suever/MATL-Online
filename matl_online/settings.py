@@ -11,6 +11,9 @@ class Config(object):
     CELERYD_TASK_SOFT_TIME_LIMIT = 30
     CELERYD_TASK_TIME_LIMIT = 60
 
+    # Custom timeout for celery process initialization
+    CELERY_PROCESS_INIT_TIMEOUT = 10
+
     IMGUR_CLIENT_ID = os.environ.get('MATL_ONLINE_IMGUR_CLIENT_ID')
 
     SECRET_KEY = str(uuid.uuid4())
@@ -26,6 +29,9 @@ class Config(object):
     # Directories
     MATL_FOLDER = os.path.join(PROJECT_ROOT, 'MATL')
     MATL_WRAP_DIR = os.path.join(MATL_FOLDER, 'wrappers')
+
+    # Octave settings
+    OCTAVE_EXECUTABLE = 'octave-cli --norc --no-history'
 
     # Github / Repo settings
     MATL_REPO = 'lmendo/MATL'

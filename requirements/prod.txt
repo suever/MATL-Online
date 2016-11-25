@@ -18,7 +18,7 @@ redis==2.10.5
 
 # Octave interaction
 scipy==0.17.1
--e git://github.com/suever/oct2py.git@79e2507e127b71d9a9cdcee1174e3198e37209f5#egg=oct2py
+-e git://github.com/suever/oct2py.git@16db760302111a32d40cc47c5a155cc12897ae3f#egg=oct2py
 numpy==1.11.1
 
 # Octave packages

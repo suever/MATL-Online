@@ -104,7 +104,7 @@ class OctaveTask(Task):
             # non-worker processes don't start up an octave instance. This
             # simply gets the octave session which should already be
             # initiailized by _initialize_process
-            from oct2py import octave
+            from matl_online.octave import octave
             self._octave = octave
 
             # Remove all other handlers (stdout, etc.)
@@ -222,14 +222,14 @@ def _initialize_process(**kwargs):
     opportunity to actually launch octave and execute a quick MATL program
     """
     # Import oct2py within here because it creates a new instance of octave
-    import oct2py
+    from matl_online.octave import octave
 
-    oct2py.octave.logger.handlers = []
+    octave.logger.handlers = []
 
     # Run MATL for the first time to initialize everything
     octaverc = os.path.join(Config.MATL_WRAP_DIR, '.octaverc')
-    oct2py.octave.eval('source("' + octaverc + '");')
-    oct2py.octave.eval('addpath("' + Config.MATL_WRAP_DIR + '");')
+    octave.eval('source("' + octaverc + '");')
+    octave.eval('addpath("' + Config.MATL_WRAP_DIR + '");')
 
 # When a worker process is spawned, initialize octave
 worker_process_init.connect(_initialize_process)
