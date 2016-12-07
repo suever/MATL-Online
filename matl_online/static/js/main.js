@@ -411,9 +411,6 @@ function toggleDocumentation(){
                     // and case-sensitive)
                     table.columns(0).search(this.value, false, false, false).draw();
                 } else {
-                    // Clear any searches on the first column
-                    table.columns(0).search('').draw();
-
                     // Apply the search to the table as a whole
                     table.search(str).draw();
                 }
