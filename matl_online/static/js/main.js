@@ -412,6 +412,7 @@ function toggleDocumentation(){
                     table.columns(0).search(this.value, false, false, false).draw();
                 } else {
                     // Apply the search to the table as a whole
+                    table.columns(0).search('');
                     table.search(str).draw();
                 }
             });
