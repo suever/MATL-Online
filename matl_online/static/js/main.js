@@ -385,8 +385,13 @@ function toggleDocumentation(){
                     }]
             });
 
+            // The events that we'd like to override from datatables
+            var events = 'keyup.DT search.DT input.DT paste.DT cut.DT';
+
             // Custom search function to handle single " characters
-            $('input[type=search]').on( 'keyup', function () {
+            $('#documentation_filter input')
+            .off(events)
+            .on(events, function(){
 
                 var str = this.value;
                 var hasQuote = false;
