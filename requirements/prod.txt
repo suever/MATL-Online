@@ -5,7 +5,7 @@ beautifulsoup4==4.5.0
 eventlet==0.17.4
 
 # CSS/JS Assets
-flask_assets==0.11
+flask_assets==0.12
 cssmin
 jsmin
 
