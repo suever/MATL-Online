@@ -338,6 +338,34 @@ function countChar(val) {
     }
 }
 
+function searchTable(table, string) {
+
+    var origLen = string.length;
+    var hasQuote = false;
+
+    // If only one " then replace with ""
+    if ( (string.match(/"/g) || []).length === 1 ){
+        string = string.replace(/"/g, '""');
+        hasQuote = true;
+    }
+
+    // Determine if it starts with X, Y, or Z
+    var hasXYZ = string.match('^[XYZ]');
+
+    // If we have a single character OR the search string
+    // starts with X, Y, or Z and is two characters (or 3 if
+    // one is a quote)
+    if ( origLen === 1 || ( hasXYZ && origLen === 2 ) ) {
+        // Search just the first column (no regex, non-smart,
+        // and case-sensitive)
+        table.columns(0).search(string, false, false, false).draw();
+    } else {
+        // Apply the search to the table as a whole
+        table.columns(0).search('');
+        table.search(string).draw();
+    }
+}
+
 function toggleDocumentation(){
 
     var navitem = $('#doctoggle').parent();
@@ -388,38 +416,17 @@ function toggleDocumentation(){
             // The events that we'd like to override from datatables
             var events = 'keyup.DT search.DT input.DT paste.DT cut.DT';
 
+            var searchDelay = null;
+
             // Custom search function to handle single " characters
             $('#documentation_filter input')
             .off(events)
-            .on(events, function(){
-
-                var str = this.value;
-                var hasQuote = false;
-
-                // If only one " then replace with ""
-                if ( (str.match(/"/g) || []).length === 1 ){
-                    str = str.replace(/"/g, '""');
-                    hasQuote = true;
-                }
-
-                // Get the original length of the input
-                var origLen = this.value.length;
-
-                // Determine if it starts with X, Y, or Z
-                var hasXYZ = str.match('^[XYZ]');
-
-                // If we have a single character OR the search string
-                // starts with X, Y, or Z and is two characters (or 3 if
-                // one is a quote)
-                if ( origLen === 1 || ( hasXYZ && origLen === 2 ) ) {
-                    // Search just the first column (no regex, non-smart,
-                    // and case-sensitive)
-                    table.columns(0).search(this.value, false, false, false).draw();
-                } else {
-                    // Apply the search to the table as a whole
-                    table.columns(0).search('');
-                    table.search(str).draw();
-                }
+            .on(events, function(evnt){
+                // Only allow the search to be performed every 250ms
+                clearTimeout(searchDelay)
+                searchDelay = setTimeout(function(){
+                    searchTable(table, evnt.target.value);
+                }, 250);
             });
         }
     }
