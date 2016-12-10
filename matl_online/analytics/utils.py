@@ -77,7 +77,7 @@ def fetch_answers():
                            filter=ANSWER_FILTER)
 
         for answer in ans:
-            soup = BeautifulSoup(answer.body)
+            soup = BeautifulSoup(answer.body, "html.parser")
 
             code = None
 
