@@ -14,3 +14,6 @@ htmlcov
 
 # Octave files
 octave-workspace
+
+# Celery beat schedules
+celerybeat-schedule

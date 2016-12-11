@@ -14,6 +14,7 @@ from matl_online.extensions import celery
 from matl_online.matl import matl, parse_matl_results
 from matl_online.settings import config
 from matl_online.octave import OctaveSession
+from matl_online.analytics.utils import fetch_answers
 
 from logging import StreamHandler
 import logging
@@ -219,6 +220,20 @@ def _initialize_process(**kwargs):
 
     octave = OctaveSession(octaverc=config.OCTAVERC,
                            paths=[config.MATL_WRAP_DIR])
+
+
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    """Function for scheduling periodic tasks."""
+    sender.add_periodic_task(config.ANSWER_CHECK_INTERVAL,
+                             refresh_answers.s(''),
+                             name='Refresh Answers')
+
+
+@celery.task
+def refresh_answers(self, *args, **kwargs):
+    """Periodic task for fetching new MATL answers."""
+    fetch_answers()
 
 
 # When a worker process is spawned, initialize octave

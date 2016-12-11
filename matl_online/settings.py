@@ -11,6 +11,9 @@ class Config(object):
     CELERYD_TASK_SOFT_TIME_LIMIT = 30
     CELERYD_TASK_TIME_LIMIT = 60
 
+    # Interval (in seconds) between checks for new MATL answers (and votes)
+    ANSWER_CHECK_INTERVAL = 60 * 60 * 30
+
     # Custom timeout for celery process initialization
     CELERY_PROCESS_INIT_TIMEOUT = 10
 
