@@ -388,7 +388,7 @@ function toggleDocumentation(){
                 info: false,
                 ajax: 'help/' + $('#version').data('version'),
                 stripe: true,
-                scrollY: '100vh',
+                scrollY: 'calc(100% - 80px)',
                 scrollX: false,
                 scrollCollapse: true,
                 order: [[ 0, "asc"]],
