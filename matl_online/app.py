@@ -10,7 +10,6 @@ from matl_online.settings import ProdConfig
 
 def create_app(config_object=ProdConfig):
     """Application factory for creating flask apps."""
-
     app = Flask(__name__)
     app.config.from_object(config_object)
     register_extensions(app)
@@ -36,18 +35,3 @@ def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(public.views.blueprint)
     return None
-
-
-def make_celery(app):
-    celery = Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'])
-    celery.conf.update(app.config)
-    TaskBase = celery.Task
-
-    class ContextTask(TaskBase):
-        abstract = True
-
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return TaskBase.__call__(self, *args, **kwargs)
-
-    celery.Task = ContextTask
