@@ -1,4 +1,5 @@
 """The app module, containing the app factory function."""
+from celery import Celery
 from flask import Flask
 
 from matl_online import public
@@ -9,6 +10,7 @@ from matl_online.settings import ProdConfig
 
 def create_app(config_object=ProdConfig):
     """Application factory for creating flask apps."""
+
     app = Flask(__name__)
     app.config.from_object(config_object)
     register_extensions(app)
@@ -21,7 +23,11 @@ def register_extensions(app):
     assets.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
-    socketio.init_app(app, message_queue='redis://')
+
+    # Make sure that the client manager isn't remembered
+    socketio.server_options.pop('client_manager', None)
+    socketio.init_app(app, message_queue=app.config.get('SOCKETIO_MESSAGE_QUEUE'))
+
     celery.conf.update(app.config)
     csrf.init_app(app)
 
@@ -30,3 +36,18 @@ def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(public.views.blueprint)
     return None
+
+
+def make_celery(app):
+    celery = Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'])
+    celery.conf.update(app.config)
+    TaskBase = celery.Task
+
+    class ContextTask(TaskBase):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+
+    celery.Task = ContextTask

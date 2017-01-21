@@ -1,15 +1,19 @@
 """A series of fixtures that are shared among all tests."""
 
 import logging
+import os
 import pytest
 import uuid
 
+from flask_socketio import SocketIOTestClient
 from webtest import TestApp
 
 from matl_online.app import create_app
 from matl_online.database import db as _db
 from matl_online.extensions import socketio
 from matl_online.settings import TestConfig
+
+os.environ['MATL_ONLINE_TESTING'] = '1'
 from matl_online.tasks import OutputHandler
 
 
@@ -22,8 +26,7 @@ def testapp(app):
 @pytest.yield_fixture(scope='function')
 def socketclient(app):
     """A fake socketio client."""
-    socketio.init_app(app)
-    yield socketio.test_client(app)
+    yield SocketIOTestClient(app, socketio)
 
 
 @pytest.yield_fixture(scope='function')

@@ -59,6 +59,8 @@ class Config(object):
     # Don't use google analytics unless we are on production
     GOOGLE_ANALYTICS_UNIVERSAL_ID = None
 
+    SOCKETIO_MESSAGE_QUEUE = None
+
 
 class ProdConfig(Config):
     """Production configuration."""
@@ -69,6 +71,8 @@ class ProdConfig(Config):
 
     GOOGLE_ANALYTICS_UNIVERSAL_ID = os.environ.get('GOOGLE_ANALYTICS_UNIVERSAL_ID')
 
+    SOCKETIO_MESSAGE_QUEUE = 'redis://'
+
 
 class DevConfig(Config):
     """Development configuration."""
@@ -76,6 +80,8 @@ class DevConfig(Config):
     ENV = 'dev'
     DEBUG = True
     ASSETS_DEBUG = True
+
+    SOCKETIO_MESSAGE_QUEUE = 'redis://'
 
 
 class TestConfig(Config):
