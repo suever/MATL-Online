@@ -1,5 +1,4 @@
 """The app module, containing the app factory function."""
-from celery import Celery
 from flask import Flask
 
 from matl_online import public
