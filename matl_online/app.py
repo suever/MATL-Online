@@ -21,11 +21,7 @@ def register_extensions(app):
     assets.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
-
-    # Make sure that the client manager isn't remembered
-    socketio.server_options.pop('client_manager', None)
-    socketio.init_app(app, message_queue=app.config.get('SOCKETIO_MESSAGE_QUEUE'))
-
+    socketio.init_app(app, message_queue='redis://')
     celery.conf.update(app.config)
     csrf.init_app(app)
 

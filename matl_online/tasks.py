@@ -18,7 +18,6 @@ from logging import StreamHandler
 import logging
 
 octave = None
-
 socket = SocketIO(message_queue='redis://')
 
 

@@ -4,7 +4,6 @@ import logging
 import pytest
 import uuid
 
-from flask_socketio import SocketIOTestClient
 from webtest import TestApp
 
 from matl_online.app import create_app
@@ -23,7 +22,8 @@ def testapp(app):
 @pytest.yield_fixture(scope='function')
 def socketclient(app):
     """A fake socketio client."""
-    yield SocketIOTestClient(app, socketio)
+    socketio.init_app(app)
+    yield socketio.test_client(app)
 
 
 @pytest.yield_fixture(scope='function')
