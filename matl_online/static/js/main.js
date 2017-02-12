@@ -276,6 +276,10 @@ $('#paste_apply').on('click', function(evnt){
     }
 
     $('#inputs').val($('#inputs').val() + input);
+
+    // Make sure that we resize the inputs field
+    autosize.update($('#inputs'));
+
     $('#pastemodal').modal('toggle');
     $('#paste_input_field').val('');
 });
