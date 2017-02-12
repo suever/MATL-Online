@@ -34,6 +34,9 @@ function timeoutFcn() {
     // Force the socket to reconnect
     socket.disconnect();
     socket.connect();
+
+    // Attempt to resubmit the job
+    submitCode();
 }
 
 function submitCode() {
