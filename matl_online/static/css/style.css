@@ -206,6 +206,17 @@ html, body {
     margin: 0 auto -20px;
 }
 
+#save {
+    width: 125px;
+    text-align: center;
+}
+
+#run {
+    width: 125px;
+    text-align: center;
+    margin-right: 10px;
+}
+
 .footer {
     position: absolute;
     bottom: 1px;
@@ -222,7 +233,7 @@ html, body {
     position: relative;
     top: 5px;
     right: 5px;
-    color: #DDD;
+    color: #BBB;
     height:0px;
 }
 

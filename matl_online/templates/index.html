@@ -162,15 +162,13 @@
 
             <div class="form-group">
               <label for="inputs">Input Arguments</label>
-              <!--<input class="annotation" placeholder="Lines Per Run" name="lines_per"></input>-->
               <div style="position: relative;">
                 <i id="paste_input" data-toggle="tooltip" title="Paste Input" class="fa fa-clipboard pull-right"></i>
                 <textarea id="inputs" rows=1 class="code form-control" name="inputs">{% if inputs %}{{ inputs }}{% endif %}</textarea>
               </div>
                 <br>
-              <button id="run" class="btn btn-secondary disabled" style="width:100px;">Connecting</button>
-              &nbsp;&nbsp;
-              <button id="save" class="btn btn-secondary" style="width: 100px;">Save</button>
+              <button id="run" class="btn btn-secondary disabled">Connecting</button>
+              <button id="save" class="btn btn-secondary">Save</button>
             </div>
 
             <input class="form-control" type="hidden" id="debug" name="debug" value="0">
@@ -227,6 +225,7 @@
     <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script src="{{ url_for('static', filename='js/autosize.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.hotkeys.js') }}"></script>
     {% assets "js_all" %}
     <script type="text/javascript" src="{{ ASSET_URL }}"></script>
     {% endassets %}

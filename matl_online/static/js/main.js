@@ -3,6 +3,9 @@ var socket = io.connect(window.location.protocol + '//' + document.domain + ':' 
 var uuid;
 var running = false;
 
+var runtext = 'Run (ctrl + enter)';
+var killtext = 'Kill (esc)';
+
 $('#codeform').on('submit', function(d) {
     d.preventDefault();
 });
@@ -19,6 +22,18 @@ $('#code').bind('input propertychange', function(){
 // Listen to the paste input field so that we can check the type
 $('#paste_input_field').bind('input propertychange', function(){
     checkInputType(this);
+});
+
+jQuery.hotkeys.options.filterContentEditable = false;
+jQuery.hotkeys.options.filterInputAcceptingElements = false;
+
+// Bind ctrl+return to submit the code for the user
+$(document).bind('keydown', 'ctrl+return', function(){
+    submitCode();
+});
+
+$(document).bind('keydown', 'esc', function(){
+    killjob();
 });
 
 function sendAnalyticsEvent(category, type, message) {
@@ -40,6 +55,12 @@ function timeoutFcn() {
 }
 
 function submitCode() {
+
+    // If code is already running or there is no code, then skip
+    if ( running === true || $('#code').val() === '') {
+        return;
+    }
+
     var form = $('#codeform');
 
     $('#errorconsoletab').css('font-weight', 'normal');
@@ -60,7 +81,7 @@ function submitCode() {
 
         // Change the status and update the button functionality
         running = true;
-        $('#run').text('Kill');
+        $('#run').text(killtext);
 
         sendAnalyticsEvent('general', 'workflow', 'Job Submitted');
     });
@@ -69,7 +90,7 @@ function submitCode() {
 socket.on('connect', function(data){
     console.log('Connected to server.');
     $('#run').removeClass('disabled');
-    $('#run').text('Run');
+    $('#run').text(runtext);
 });
 
 // When the server acknowledges that we are connected it will issue
@@ -126,20 +147,24 @@ function getlink() {
 }
 
 socket.on('killed', function(data) {
-    $('#run').text('Run');
+    $('#run').text(runtext);
     running = false;
     console.log('Task killed.');
 });
 
 socket.on('complete', function(msg) {
-    $('#run').text('Run');
+    $('#run').text(runtext);
     running = false;
     console.log('Task complete.');
 });
 
+function killjob(){
+    socket.emit('kill', {uid: uuid});
+}
+
 $('#run').on('click', function() {
     if ( running ) {
-        socket.emit('kill', {uid: uuid});
+        killjob();
     } else {
         submitCode();
     }
