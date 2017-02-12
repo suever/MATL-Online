@@ -60,7 +60,7 @@
             <h4 class="modal-title">Paste Input Argument</h4>
           </div>
           <div class="modal-body explain">
-            <textarea id="paste_input_field" onkeyup='checkInputType(this);' class="code" placeholder="Paste Input Here"></textarea>
+            <textarea id="paste_input_field" class="code" placeholder="Paste Input Here"></textarea>
             <div class="modal-footer">
               <div style="float:left;">
                 <label class="radio-inline"><input id="array_input" type="radio" name="format" value="array" checked/>Python Array</label>
@@ -157,15 +157,15 @@
               <span class="annotation" id="charcount">
                 ({{ code|length }} character{% if code|length != 1 %}s{% endif %})
               </span>
-              <textarea id="code" onkeyup="countChar(this);" rows=4 class="code form-control" name="code">{% if code %}{{ code }}{% endif %}</textarea>
+              <textarea id="code" rows=1 class="code form-control" name="code">{% if code %}{{ code }}{% endif %}</textarea>
             </div>
 
             <div class="form-group">
               <label for="inputs">Input Arguments</label>
               <!--<input class="annotation" placeholder="Lines Per Run" name="lines_per"></input>-->
               <div style="position: relative;">
+                <textarea id="inputs" rows=1 class="code form-control" name="inputs">{% if inputs %}{{ inputs }}{% endif %}</textarea>
                 <i id="paste_input" data-toggle="tooltip" title="Paste Input" class="glyphicon glyphicon-plus pull-right"></i>
-                <textarea id="inputs" rows=6 class="code form-control" name="inputs">{% if inputs %}{{ inputs }}{% endif %}</textarea>
               </div>
                 <br>
               <button id="run" class="btn btn-secondary disabled" style="width:100px;">Connecting</button>
@@ -226,6 +226,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script src="{{ url_for('static', filename='js/autosize.min.js') }}"></script>
     {% assets "js_all" %}
     <script type="text/javascript" src="{{ ASSET_URL }}"></script>
     {% endassets %}

@@ -3,7 +3,23 @@ var socket = io.connect(window.location.protocol + '//' + document.domain + ':' 
 var uuid;
 var running = false;
 
-$('#codeform').on('submit', function(d) { d.preventDefault(); });
+$('#codeform').on('submit', function(d) {
+    d.preventDefault();
+});
+
+// Setup the text areas to automatically resize based on content
+autosize($('#code'));
+autosize($('#inputs'));
+
+// Setup the code and input blocks to resize automatically as needed
+$('#code').bind('input propertychange', function(){
+    countChar(this);
+});
+
+// Listen to the paste input field so that we can check the type
+$('#paste_input_field').bind('input propertychange', function(){
+    checkInputType(this);
+});
 
 function sendAnalyticsEvent(category, type, message) {
     if ( typeof ga !== "undefined" ) {
