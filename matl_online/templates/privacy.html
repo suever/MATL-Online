@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+  <div class="col-md-8 col-md-offset-2">
+    <h2>Privacy Policy</h2>
+    <p>Google Analytics is used on <a href="https://matl.suever.net">matl.suever.com</a> in order to get information about visitors to the site as well as their successful and/or unsuccessful interactions with the site.</p>
+
+    <p>This information includes:
+    <ul>
+      <li>What website referred you to this site.</li>
+      <li>How long you remained on the site.</li>
+      <li>What device and operating system you used to access the site.</li>
+      <li>Information about errors you may have encountered while using the site.</li>
+    </ul></p>
+
+    <p>I am able to use this information to get an idea of how the site is being used as well as ensure that the site is designed to provide the optimal experience to the majority of users. I also use it to monitor and investigate potential issues with the site.</p>
+
+    <p>If you would like, you can opt out of tracking using the checkbox below. This will store a cookie on your machine indicating that you no longer want <a href="https://matl.suever.net">matl.suever.net</a> to log any data to Google Analytics. You can always return to this page to opt back into Google Analytics if you wish.</p>
+
+    <div style="text-align:center;">
+      <form id="optout">
+        <label class="custom-control custom-checkbox">
+          <input id="optout_check" type="checkbox">
+          <span class="custom-control-indicator"></span>
+          <span class="custom-control-description">
+            I would like to OPT-OUT of Google Analytics
+          </span>
+        </label>
+      </form>
+    </div>
+
+
+    <p>If you would like to opt out of Google Analytics on <strong>all sites</strong>, you can use install one of <a href="http://tools.google.com/dlpage/gaoptout?hl=en" target="_blank">many browser plugins</a></p>.
+  </div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+  $(document).ready(function(){
+
+    var checkbox = $('#optout_check');
+    $(checkbox).prop('checked', {{ request.cookies.get('gaoptout') }});
+
+    $(checkbox).change(function(){
+      $.get({
+        url: "{{ url_for('public.privacy_opt') }}",
+        data: { value: this.checked }
+      });
+    });
+  });
+</script>
+{% endblock %}
