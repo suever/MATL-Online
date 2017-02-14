@@ -82,13 +82,12 @@ def home():
 @blueprint.route('/privacy/optout')
 def privacy_opt():
     """API for opting out of Google Analytics."""
-
     key = 'gaoptout'
 
     new = request.values.get('value', 'true')
 
     payload = {
-        'previous': request.cookies.get(key) == 'true',
+        'previous': request.cookies.get(key),
         'current': new
     }
 
@@ -100,7 +99,6 @@ def privacy_opt():
 @blueprint.route('/privacy')
 def privacy():
     """Disclaimer about google analytics and opt out option."""
-
     return render_template('privacy.html')
 
 

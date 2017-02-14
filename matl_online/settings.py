@@ -99,3 +99,6 @@ class TestConfig(Config):
     CELERY_ALWAYS_EAGER = True
 
     PRESERVE_CONTEXT_ON_EXCEPTION = False
+
+    # Create a bogus GA Universal ID for testing
+    GOOGLE_ANALYTICS_UNIVERSAL_ID = 'nonsense'
