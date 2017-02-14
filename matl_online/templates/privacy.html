@@ -2,7 +2,7 @@
 
 {% block content %}
 
-  <div class="col-md-8 col-md-offset-2">
+  <div class="col-md-8 col-md-offset-2 col-sm-12">
     <h2>Privacy Policy</h2>
     <p>Google Analytics is used on <a href="https://matl.suever.net">matl.suever.com</a> in order to get information about visitors to the site as well as their successful and/or unsuccessful interactions with the site.</p>
 
@@ -40,7 +40,10 @@
   $(document).ready(function(){
 
     var checkbox = $('#optout_check');
+
+    {% if request.cookies.get('gaoptout') %}
     $(checkbox).prop('checked', {{ request.cookies.get('gaoptout') }});
+    {% endif %}
 
     $(checkbox).change(function(){
       $.get({
