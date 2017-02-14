@@ -12,11 +12,11 @@ from datetime import datetime
 from flask import (Blueprint,
                    abort,
                    current_app,
-                   render_template,
                    request,
                    jsonify,
                    send_file,
                    session)
+from flask import render_template as _render_template
 
 from flask_socketio import emit, rooms
 from flask_wtf.csrf import validate_csrf
@@ -33,6 +33,16 @@ blueprint = Blueprint('public', __name__, static_folder='../static')
 
 modtime = os.stat(os.path.join(Config.PROJECT_ROOT, '.git')).st_mtime
 last_modified = datetime.utcfromtimestamp(modtime).strftime('%Y/%m/%d')
+
+
+def render_template(*args, **kwargs):
+    """Custom render_template function to add common properties."""
+    kwargs['modified'] = kwargs.get('modified', last_modified)
+
+    analytics_id = current_app.config['GOOGLE_ANALYTICS_UNIVERSAL_ID']
+    kwargs['google_analytics_id'] = analytics_id
+
+    return _render_template(*args, **kwargs)
 
 
 def _latest_version_tag():
@@ -63,14 +73,33 @@ def home():
 
     version = _parse_version(request.values.get('version'))
 
-    analytics_id = current_app.config['GOOGLE_ANALYTICS_UNIVERSAL_ID']
-
     return render_template('index.html', code=code,
                            inputs=inputs,
                            version=version,
-                           versions=versions,
-                           modified=last_modified,
-                           google_analytics_id=analytics_id)
+                           versions=versions)
+
+
+@blueprint.route('/privacy/optout')
+def privacy_opt():
+    """API for opting out of Google Analytics."""
+    key = 'gaoptout'
+
+    new = request.values.get('value', 'true')
+
+    payload = {
+        'previous': request.cookies.get(key),
+        'current': new
+    }
+
+    resp = jsonify(payload)
+    resp.set_cookie(key, new)
+    return resp
+
+
+@blueprint.route('/privacy')
+def privacy():
+    """Disclaimer about google analytics and opt out option."""
+    return render_template('privacy.html')
 
 
 @csrf.exempt

@@ -200,9 +200,6 @@ html, body {
 }
 
 .main {
-    min-height: 100%;
-    height: auto;
-    height: 100%;
     margin: 0 auto -20px;
 }
 

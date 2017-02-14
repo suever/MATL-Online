@@ -110,6 +110,50 @@ class TestHome:
         assert version == Release.latest().tag
 
 
+class TestPrivacy:
+    """Test privacy policy and associated routes."""
+
+    def test_privacy_page(self, testapp):
+        """Test the main view for errors."""
+        url = url_for('public.privacy')
+        resp = testapp.get(url)
+        assert resp.status_code == 200
+
+    def test_api(self, testapp):
+        """Test the API for toggling the opt-in/opt-out status."""
+        url = url_for('public.privacy_opt')
+
+        opts = [('true', 'true'), ('true', 'false'),
+                ('false', 'false'), ('false', 'true')]
+
+        for previous, current in opts:
+            testapp.set_cookie('gaoptout', previous)
+            resp = testapp.get(url, params={'value': current})
+
+            assert resp.status_code == 200
+            assert resp.json['previous'] == previous
+            assert resp.json['current'] == current
+            assert testapp.cookies['gaoptout'] == current
+
+    def test_optout(self, testapp):
+        """Make sure that the cookie is respected."""
+        url = url_for('public.privacy')
+
+        # Opt-In
+        testapp.set_cookie('gaoptout', 'false')
+        resp = testapp.get(url)
+
+        assert resp.status_code == 200
+        assert resp.text.find('GoogleAnalyticsObject') != -1
+
+        # Opt-Out
+        testapp.set_cookie('gaoptout', 'true')
+        resp = testapp.get(url)
+
+        assert resp.status_code == 200
+        assert resp.text.find('GoogleAnalyticsObject') == -1
+
+
 class TestExplain:
     """Test the /explain route."""
 
