@@ -78,8 +78,6 @@ class OutputHandler(StreamHandler):
                 self.contents.append(newrecord)
 
             return
-        elif record.msg.startswith('---'):
-            return
 
         self.contents.append(record)
 
