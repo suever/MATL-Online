@@ -112,26 +112,6 @@ class TestLogHandler:
         assert handler.contents[1].msg == '[STDERR]line 1'
         assert handler.contents[2].msg == '[STDERR]line 2'
 
-    def test_dash_filter(self, logger, mocker):
-        """Make sure that lines with --- are ignored."""
-        task = type('task', (object,), {'session_id': '123'})
-        handler = OutputHandler(task)
-        logger.addHandler(handler)
-
-        send_func = mocker.patch('matl_online.tasks.OutputHandler.send')
-
-        msg1 = 'message1'
-        logger.info(msg1)
-
-        logger.info('--- Ignore everything I say here')
-
-        msg2 = 'message2'
-        logger.info(msg2)
-
-        send_func.assert_not_called()
-        assert handler.messages() == '\n'.join([msg1, msg2])
-        assert len(handler.contents) == 2
-
     def test_filter(self, logger, mocker):
         """Ensure that we ONLY get info events."""
         task = type('task', (object,), {'session_id': '123'})
