@@ -10,9 +10,9 @@ cssmin
 jsmin
 
 # Sockets
-flask_socketio==2.8.2
-python-engineio==1.1.0
-python-socketio==1.6.2
+flask_socketio==2.9.1
+python-engineio==1.7.0
+python-socketio==1.7.7
 
 # Celery
 celery==3.1.23
