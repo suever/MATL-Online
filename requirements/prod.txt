@@ -1,8 +1,8 @@
 # General
-flask==0.11.1
-requests==2.10.0
-beautifulsoup4==4.5.0
-eventlet==0.17.4
+flask==0.12.2
+requests==2.18.4
+beautifulsoup4==4.6.0
+eventlet==0.21.0
 
 # CSS/JS Assets
 flask_assets==0.12
@@ -10,13 +10,13 @@ cssmin
 jsmin
 
 # Sockets
-flask_socketio==2.9.1
+flask_socketio==2.9.2
 python-engineio==1.7.0
-python-socketio==1.7.7
+python-socketio==1.8.0
 
 # Celery
 celery==3.1.23
-redis==2.10.5
+redis==2.10.6
 
 # Octave interaction
 scipy==0.17.1
@@ -27,15 +27,15 @@ numpy==1.11.1
 sympy
 
 # Database
-SQLAlchemy==1.0.13
-Flask-SQLAlchemy==2.1
+SQLAlchemy==1.1.14
+Flask-SQLAlchemy==2.3.0
 
 # App management
-Flask-Migrate==1.8.0
-Flask-Script==2.0.5
+Flask-Migrate==2.1.1
+Flask-Script==2.0.6
 
 # Forms
-flask_wtf==0.12
+flask_wtf==0.14.2
 
 # Flower
-flower==0.9.1
+flower==0.9.2
