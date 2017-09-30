@@ -101,7 +101,7 @@ class TestReleaseHook:
         refresh.assert_not_called()
 
     def get_signature(self, app, data):
-        """Using the secret and payload create a signature header."""
+        """Create a signature header from the secret and payload."""
         secret = app.config['GITHUB_HOOK_SECRET']
         sign = hmac.new(str(secret), msg=data, digestmod=sha1).hexdigest()
         return {'X-Hub-Signature': 'sha1=' + sign}

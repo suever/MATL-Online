@@ -1,4 +1,4 @@
-""""Unit tests for utils module."""
+"""Unit tests for utils module."""
 
 import os
 import shutil

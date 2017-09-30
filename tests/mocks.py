@@ -10,7 +10,7 @@ class MockZipFile:
         self.extract_arguments = ()
 
     def add_files(self, *args):
-        """Method to add files to this archive."""
+        """Add files to this archive."""
         self.files.extend(args)
 
     def namelist(self):

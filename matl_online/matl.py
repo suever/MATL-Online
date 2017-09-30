@@ -41,7 +41,7 @@ def add_doc_links(description):
     # mat2cell(x, ones(size(x,1),1), size(x,2),...,size(x,ndims(x)))
 
     def add_link(name):
-        """Helper function for retrieving the link for a function."""
+        """Retrieve function documentation hyperlinks."""
         link = DocumentationLink.query.filter_by(name=name).first()
 
         if link:

@@ -22,13 +22,13 @@ def testapp(app):
 
 @pytest.yield_fixture(scope='function')
 def socketclient(app):
-    """A fake socketio client."""
+    """Fake socketio client."""
     yield SocketIOTestClient(app, socketio)
 
 
 @pytest.yield_fixture(scope='function')
 def app():
-    """A flask app instance."""
+    """Flask app instance."""
     _app = create_app(TestConfig)
     ctx = _app.test_request_context()
     ctx.push()
@@ -40,7 +40,7 @@ def app():
 
 @pytest.yield_fixture(scope='function')
 def logger():
-    """A logger which can be used to monitor logging calls."""
+    """Logger which can be used to monitor logging calls."""
     # Create a new random log
     logger = logging.getLogger(str(uuid.uuid4()))
     logger.setLevel(logging.INFO)
@@ -58,7 +58,7 @@ def logger():
 
 @pytest.fixture
 def moctave(mocker, logger):
-    """A Mock version of oct2py.octave to monitor calls to octave."""
+    """Mock version of oct2py.octave to monitor calls to octave."""
     moctave = mocker.patch('matl_online.octave.octave')
     moctave.evals = list()
 

@@ -13,6 +13,8 @@ class BaseFactory(SQLAlchemyModelFactory):
     """Base factory for SQLAlchemy Model generation."""
 
     class Meta:
+        """Meta information for the factory."""
+
         abstract = True
         sqlalchemy_session = db.session
 
@@ -24,6 +26,8 @@ class ReleaseFactory(BaseFactory):
     date = LazyFunction(datetime.now)
 
     class Meta:
+        """Meta information for the factory."""
+
         model = Release
 
 
@@ -34,4 +38,6 @@ class DocumentationLinkFactory(BaseFactory):
     link = LazyAttribute(lambda o: o.name + '.html')
 
     class Meta:
+        """Meta information for the factory."""
+
         model = DocumentationLink

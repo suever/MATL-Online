@@ -1,4 +1,4 @@
-""""Tests for checking user interaction with views."""
+"""Tests for checking user interaction with views."""
 
 import json
 
