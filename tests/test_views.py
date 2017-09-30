@@ -43,6 +43,12 @@ class TestShare:
         assert payload.get('success') is True
         assert payload.get('link') == data['data']['link']
 
+    def test_share_with_invalid_csrf(self, testapp):
+        """Failing CSRF validation produces an error."""
+        url = url_for('public.share', data='INVALID')
+        resp = testapp.post_json(url, '', expect_errors=True)
+        assert resp.status_code == 400
+
     def test_share_without_csrf(self, testapp):
         """Failing CSRF validation produces an error."""
         url = url_for('public.share', data='')

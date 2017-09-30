@@ -22,6 +22,7 @@ from flask_socketio import emit, rooms
 from flask_wtf.csrf import validate_csrf
 
 from hashlib import sha1
+from wtforms import ValidationError
 
 from matl_online.extensions import socketio, celery, csrf
 from matl_online.matl import help_file, refresh_releases
@@ -149,8 +150,10 @@ def share():
     """Route for posting image data to IMGUR to share via a link."""
     img = request.values.get('data')
 
-    if not validate_csrf(request.headers.get('X-Csrftoken')):
-        abort(400, 'CSRF token missing or incorrect.')
+    try:
+        validate_csrf(request.headers.get('X-Csrftoken'))
+    except ValidationError as e:
+        abort(400, e.message)
 
     result = {'success': True,
               'link': 'https://imgur.com/opoxoisdf.png'}
