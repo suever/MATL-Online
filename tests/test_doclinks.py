@@ -72,7 +72,7 @@ class TestDocumentationLink:
             assert name in names and link in links
 
     def test_remove_ij(self, mocker, testapp):
-        """i and j should be removed by default if they are present."""
+        """Variables i and j should be removed by default if they are present."""
         req = mocker.patch('matl_online.matl.requests.get')
         testapp.app.config['MATLAB_DOC_LINKS'] = ['http://mathworks.com']
 

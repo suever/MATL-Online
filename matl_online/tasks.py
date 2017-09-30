@@ -178,7 +178,7 @@ class OctaveTask(Task):
         return self._handler.send()
 
     def after_return(self, *args, **kwargs):
-        """Callback to be executed after task completes."""
+        """Fire after task completion."""
         self._handler.clear()
 
         if os.path.isdir(self.folder):
@@ -229,6 +229,7 @@ def _initialize_process(**kwargs):
     octaverc = os.path.join(Config.MATL_WRAP_DIR, '.octaverc')
     octave.eval('source("' + octaverc + '");')
     octave.eval('addpath("' + Config.MATL_WRAP_DIR + '");')
+
 
 # When a worker process is spawned, initialize octave
 worker_process_init.connect(_initialize_process)

@@ -4,7 +4,7 @@ from matl_online.extensions import socketio
 
 
 def session(client):
-    """Helper function for retrieving a client's session."""
+    """Retrieve a client's session."""
     return socketio.server.environ[client.sid].get('saved_session', {})
 
 

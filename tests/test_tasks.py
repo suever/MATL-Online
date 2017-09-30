@@ -9,7 +9,7 @@ from matl_online.tasks import OctaveTask, OutputHandler, matl_task
 
 
 def prepare_folder_testcase(mocker, moctave, tmpdir):
-    """Helper function for creating necessary mocks."""
+    """Create the necessary mocks."""
     mocker.patch('matl_online.tasks.Task')
 
     mktmp = mocker.patch('matl_online.tasks.tempfile.mkdtemp')

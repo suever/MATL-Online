@@ -30,7 +30,7 @@ class Release(Model):
 
     @classmethod
     def latest(cls):
-        """Method for getting the latest release."""
+        """Get the latest release from Github."""
         releases = cls.query.all()
         if len(releases) == 0:
             return None
@@ -50,7 +50,7 @@ class DocumentationLink(Model):
 
     @classmethod
     def refresh(cls):
-        """Method to fetch updated documentation from the Mathworks."""
+        """Fetch updated documentation from the Mathworks."""
         # Flip the order of the links so that the first URL listed is the
         # highest priority and will take precedence
         for url in current_app.config['MATLAB_DOC_LINKS'][::-1]:

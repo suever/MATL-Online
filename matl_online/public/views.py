@@ -22,6 +22,7 @@ from flask_socketio import emit, rooms
 from flask_wtf.csrf import validate_csrf
 
 from hashlib import sha1
+from wtforms import ValidationError
 
 from matl_online.extensions import socketio, celery, csrf
 from matl_online.matl import help_file, refresh_releases
@@ -36,7 +37,7 @@ last_modified = datetime.utcfromtimestamp(modtime).strftime('%Y/%m/%d')
 
 
 def render_template(*args, **kwargs):
-    """Custom render_template function to add common properties."""
+    """Add common properties via a custom render_template function."""
     kwargs['modified'] = kwargs.get('modified', last_modified)
 
     analytics_id = current_app.config['GOOGLE_ANALYTICS_UNIVERSAL_ID']
@@ -63,7 +64,7 @@ def _parse_version(version):
 
 @blueprint.route('/')
 def home():
-    """Main page of the site."""
+    """Serve the main page of the site."""
     code = request.values.get('code', '')
     inputs = request.values.get('inputs', '')
 
@@ -81,7 +82,7 @@ def home():
 
 @blueprint.route('/privacy/optout')
 def privacy_opt():
-    """API for opting out of Google Analytics."""
+    """Endpoint for opting out of Google Analytics."""
     key = 'gaoptout'
 
     new = request.values.get('value', 'true')
@@ -149,8 +150,10 @@ def share():
     """Route for posting image data to IMGUR to share via a link."""
     img = request.values.get('data')
 
-    if not validate_csrf(request.headers.get('X-Csrftoken')):
-        abort(400, 'CSRF token missing or incorrect.')
+    try:
+        validate_csrf(request.headers.get('X-Csrftoken'))
+    except ValidationError as e:
+        abort(400, e.message)
 
     result = {'success': True,
               'link': 'https://imgur.com/opoxoisdf.png'}
@@ -203,7 +206,7 @@ def kill_task(data):
 
 @socketio.on('submit')
 def submit_job(data):
-    """Executed when a user submit some code and inputs for interpretation."""
+    """Submit some code and inputs for interpretation."""
     # If we already have a task disable submitting
     uid = data.get('uid', str(uuid.uuid4()))
 
@@ -226,7 +229,7 @@ def submit_job(data):
 
 @blueprint.route('/explain', methods=['POST', 'GET'])
 def explain():
-    """Called when the user asks for an explanation of some code."""
+    """Provide the user with an explanation of some code."""
     code = request.values.get('code', '')
     version = request.values.get('version', Release.latest().tag)
 
