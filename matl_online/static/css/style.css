@@ -44,6 +44,12 @@ pre.code {
     white-space: pre;
 }
 
+.btn-secondary {
+    background-color: #CCCCCC;
+    color: #333333;
+    border-color: #BBBBBB;
+}
+
 .btn-inverse.active {
     background-color: #080808;
 }
