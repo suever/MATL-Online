@@ -142,11 +142,14 @@ def parse_matl_results(output):
     """
     result = list()
 
-    parts = re.split('(\[.*?\][^\n].*)', output)
+    parts = re.split('(\[.*?\][^\n].*\n?)', output)
 
     for part in parts:
         if part == '':
             continue
+
+        # Strip a single trailing newline
+        part = part.rstrip('\n')
 
         item = dict()
 

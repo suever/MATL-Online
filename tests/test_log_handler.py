@@ -145,9 +145,8 @@ class TestLogHandler:
 
         event, payload = emit.call_args[0]
 
-        # TODO: Look into if we really want a trailing newline here
         expected_data = {'session': identifier,
-                         'data': [{'type': 'stdout', 'value': 'test1\n'},
+                         'data': [{'type': 'stdout', 'value': 'test1'},
                                   {'type': 'stderr', 'value': 'error'}]}
 
         assert payload == expected_data
