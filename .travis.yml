@@ -12,14 +12,14 @@ before_install:
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
     - hash -r
-    - conda update --yes conda
+    - conda update --quiet --yes conda
     # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
     - sudo rm -rf /dev/shm
     - sudo ln -s /run/shm /dev/shm
 
 install:
     # Install numpy and scipy
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy=1.11.1 scipy=0.17.1
+    - conda install --quiet --yes python=$TRAVIS_PYTHON_VERSION numpy=1.11.1 scipy=0.17.1
     - sudo apt-get install -qq octave liboctave-dev libmpfr-dev
     - pip install -r requirements/dev.txt
     # Install packages for reporting coverage information to external tools
