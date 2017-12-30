@@ -27,7 +27,7 @@ numpy==1.11.1
 sympy
 
 # Database
-SQLAlchemy==1.1.14
+SQLAlchemy==1.2.0
 Flask-SQLAlchemy==2.3.0
 
 # App management
