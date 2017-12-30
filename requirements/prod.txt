@@ -19,7 +19,7 @@ celery==3.1.23
 redis==2.10.6
 
 # Octave interaction
-scipy==0.17.1
+scipy==1.0.0
 -e git://github.com/suever/oct2py.git@16db760302111a32d40cc47c5a155cc12897ae3f#egg=oct2py
 numpy==1.11.1
 
