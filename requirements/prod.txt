@@ -6,8 +6,8 @@ eventlet==0.20.0
 
 # CSS/JS Assets
 flask_assets==0.12
+jsmin==2.2.2
 cssmin==0.2.0
-jsmin
 
 # Sockets
 flask_socketio==2.9.3
