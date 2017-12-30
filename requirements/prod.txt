@@ -6,8 +6,8 @@ eventlet==0.20.0
 
 # CSS/JS Assets
 flask_assets==0.12
-cssmin
-jsmin
+jsmin==2.2.2
+cssmin==0.2.0
 
 # Sockets
 flask_socketio==2.9.3
@@ -24,10 +24,10 @@ scipy==0.17.1
 numpy==1.13.3
 
 # Octave packages
-sympy
+sympy==1.1.1
 
 # Database
-SQLAlchemy==1.1.14
+SQLAlchemy==1.2.0
 Flask-SQLAlchemy==2.3.0
 
 # App management
