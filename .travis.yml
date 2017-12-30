@@ -9,9 +9,9 @@ before_install:
 
     # Install miniconda so we can have numpy and scipy easily
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-    - bash miniconda.sh -b -p $HOME/miniconda
+    - chmod +x miniconda.sh
+    - ./miniconda.sh -b
     - export PATH="$HOME/miniconda/bin:$PATH"
-    - hash -r
     - conda update --yes conda
     # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
     - sudo rm -rf /dev/shm
