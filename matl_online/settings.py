@@ -31,7 +31,8 @@ class Config(object):
     MATL_WRAP_DIR = os.path.join(MATL_FOLDER, 'wrappers')
 
     # Octave settings
-    OCTAVE_EXECUTABLE = 'octave-cli --norc --no-history'
+    OCTAVE_CLI_OPTIONS = '--norc --no-history'
+    OCTAVE_EXECUTABLE = 'octave-cli'
 
     # Github / Repo settings
     MATL_REPO = 'lmendo/MATL'
