@@ -10,9 +10,10 @@ from celery.signals import worker_process_init
 
 from flask_socketio import SocketIO
 
-from matl_online.settings import Config
 from matl_online.extensions import celery
 from matl_online.matl import matl, parse_matl_results
+from matl_online.settings import Config
+from matl_online.octave import OctaveSession
 
 from logging import StreamHandler
 import logging
@@ -60,6 +61,8 @@ class OutputHandler(StreamHandler):
 
     def process_message(self, message):
 
+        print(message)
+
         if message == '[PAUSE]':
             # For now we send the entire message again. Consider a better
             # approach (i.e. adding a field to the result that says to
@@ -93,17 +96,14 @@ class OctaveTask(Task):
 
     def __init__(self, *args, **kwargs):
         """Initialize task."""
+        global octave
         super(OctaveTask, self).__init__(*args, **kwargs)
 
     @property
     def octave(self):
         """Dependent property which automatically spawns octave if needed."""
         if self._octave is None:
-            # We hide this import within this property getter so that
-            # non-worker processes don't start up an octave instance. This
-            # simply gets the octave session which should already be
-            # initiailized by _initialize_process
-            from matl_online.octave import octave
+            global octave
             self._octave = octave
 
         return self._octave
@@ -207,13 +207,10 @@ def _initialize_process(**kwargs):
     Function to be called when a worker process is spawned. We use this to
     opportunity to actually launch octave and execute a quick MATL program
     """
-    # Import oct2py within here because it creates a new instance of octave
-    from matl_online.octave import octave
+    global octave
 
-    # Run MATL for the first time to initialize everything
-    octaverc = os.path.join(Config.MATL_WRAP_DIR, '.octaverc')
-    octave.eval('source("' + octaverc + '");')
-    octave.eval('addpath("' + Config.MATL_WRAP_DIR + '");')
+    octave = OctaveSession(octaverc=Config.OCTAVERC,
+                           paths=[Config.MATL_WRAP_DIR])
 
 
 # When a worker process is spawned, initialize octave

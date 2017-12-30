@@ -33,6 +33,7 @@ class Config(object):
     # Octave settings
     OCTAVE_CLI_OPTIONS = '--norc --no-history'
     OCTAVE_EXECUTABLE = 'octave-cli'
+    OCTAVERC = os.path.join(MATL_WRAP_DIR, '.octaverc')
 
     # Github / Repo settings
     MATL_REPO = 'lmendo/MATL'
