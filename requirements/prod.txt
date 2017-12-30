@@ -28,7 +28,7 @@ sympy
 
 # Database
 SQLAlchemy==1.1.14
-Flask-SQLAlchemy==2.3.0
+Flask-SQLAlchemy==2.3.2
 
 # App management
 Flask-Migrate==2.1.1
