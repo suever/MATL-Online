@@ -37,7 +37,7 @@ class OutputHandler(StreamHandler):
 
     def messages(self):
         """Concatenate all messages into a long stream."""
-        return '\n'.join([x.getMessage() for x in self.contents])
+        return '\n'.join([x for x in self.contents])
 
     def send(self):
         """Send a message out to the specified rooms."""
@@ -55,31 +55,31 @@ class OutputHandler(StreamHandler):
         #   2. [CLC]    Send an empty message and clear contents
         #   3. [IMAGE]  FUTURE ENCODING TO BASE64
 
-        if not record.levelno == logging.INFO:
-            return
+        if record.levelno == logging.INFO:
+            process_message(record.msg)
 
-        if record.msg == '[PAUSE]':
+    def process_message(self, message):
+
+        if message == '[PAUSE]':
             # For now we send the entire message again. Consider a better
             # approach (i.e. adding a field to the result that says to
             # flush prior to display)
             self.send()
             return
-        elif record.msg == '[CLC]':
+        elif message == '[CLC]':
             self.send()
             self.clear()
             return
-        elif record.msg.startswith('warning:'):
+        elif message.startswith('warning:'):
             return
-        elif record.msg.startswith('MATL run-time error:'):
-            import copy
-            for item in record.msg.split('\n'):
-                newrecord = copy.copy(record)
-                newrecord.msg = '[STDERR]' + item
-                self.contents.append(newrecord)
+        elif message.startswith('MATL run-time error:'):
+            for item in message.split('\n'):
+                self.contents.append('[STDERR]' + item)
 
             return
 
-        self.contents.append(record)
+        self.contents.append(message)
+
 
 
 class OctaveTask(Task):
@@ -106,23 +106,15 @@ class OctaveTask(Task):
             from matl_online.octave import octave
             self._octave = octave
 
-            # Remove all other handlers (stdout, etc.)
-            self._octave.logger.handlers = []
-
-        # Add the handler if we need to
-        if len(self._octave.logger.handlers) == 0:
-            if self._handler is None:
-                self._handler = OutputHandler(self)
-
-            # Turn on debugging so we get notified of EVERY output as it
-            # happens rather than waiting for a command to finish which is
-            # what happens if we set the log level to INFO instead
-            self._octave.logger.setLevel(logging.INFO)
-
-            # Add our custom handler to capture all output
-            self._octave.logger.addHandler(self._handler)
-
         return self._octave
+
+    @property
+    def handler(self):
+        """Dependent property that creates an OutputHandler instance."""
+        if self._handler is None:
+            self._handler = OutputHandler(self)
+
+        return self._handler
 
     @property
     def folder(self):
@@ -175,11 +167,11 @@ class OctaveTask(Task):
 
     def send_results(self):
         """Local forwarder for all send events."""
-        return self._handler.send()
+        return self.handler.send()
 
     def after_return(self, *args, **kwargs):
         """Fire after task completion."""
-        self._handler.clear()
+        self.handler.clear()
 
         if os.path.isdir(self.folder):
             shutil.rmtree(self.folder)
@@ -196,7 +188,8 @@ def matl_task(self, *args, **kwargs):
     self.session_id = kwargs.pop('session', '')
 
     try:
-        matl(matl_task.octave, *args, folder=self.folder, **kwargs)
+        matl(matl_task.octave, *args, folder=self.folder,
+             stream_handler=matl_task.handler, **kwargs)
         result = self.send_results()
 
     # In the case of an interrupt (either through a time limit or a
@@ -222,8 +215,6 @@ def _initialize_process(**kwargs):
     """
     # Import oct2py within here because it creates a new instance of octave
     from matl_online.octave import octave
-
-    octave.logger.handlers = []
 
     # Run MATL for the first time to initialize everything
     octaverc = os.path.join(Config.MATL_WRAP_DIR, '.octaverc')

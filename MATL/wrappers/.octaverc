@@ -23,4 +23,7 @@ page_screen_output(false);
 page_output_immediately(true);
 
 % Make Octave work if we compiled it with --disable-docs
-texi_macros_file ("/dev/null")
+texi_macros_file ("/dev/null");
+
+% Just need SOMETHING here which gets assigned to ans
+ans = NaN;
