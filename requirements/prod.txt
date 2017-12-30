@@ -24,7 +24,7 @@ scipy==1.0.0
 numpy==1.13.3
 
 # Octave packages
-sympy
+sympy==1.1.1
 
 # Database
 SQLAlchemy==1.1.14
