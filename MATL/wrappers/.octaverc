@@ -163,6 +163,7 @@ pkg load statistics
 pkg load symbolic
 
 % Initialize the symbolic toolbox
+sympref('quiet', '1')
 catalan;
 
 % Hide all figures by default
