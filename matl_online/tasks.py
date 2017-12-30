@@ -186,6 +186,7 @@ class OctaveTask(Task):
 def matl_task(self, *args, **kwargs):
     """Celery task for processing a MATL command and returning the result."""
     self.session_id = kwargs.pop('session', '')
+    self.handler.clear()
 
     try:
         matl(matl_task.octave, *args, folder=self.folder,
