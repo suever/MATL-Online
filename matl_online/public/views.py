@@ -192,7 +192,7 @@ def kill_task(data):
     """Triggered when a kill message is sent to kill a task."""
     taskid = session.get('taskid', None)
     if taskid is not None:
-        celery.control.revoke(taskid, terminate=True)
+        celery.control.revoke(taskid, terminate=True, signal='SIGTERM')
 
     # Send a success notification regardless just in case something went
     # wrong and the task was ALREADY killed
