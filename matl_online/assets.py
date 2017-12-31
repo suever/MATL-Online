@@ -5,14 +5,14 @@ from flask_assets import Bundle, Environment
 css = Bundle(
     'css/style.css',
     'lib/bootstrap-drawer.min.css',
-    filters='cssmin',
+    filters='yui_css',
     output='public/css/common.css'
 )
 
 js = Bundle(
     'js/main.js',
     'lib/drawer.min.js',
-    filters='jsmin',
+    filters='yui_js',
     output='public/js/common.js'
 )
 
