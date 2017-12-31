@@ -95,10 +95,10 @@ class TestHome:
         assert params.get('version') == Release.latest().tag
 
         versions = params.get('versions')
-        versions.sort()
+        versions = sorted(versions, key=lambda v: v.tag)
 
         releases = Release.query.all()
-        releases.sort()
+        releases = sorted(releases, key=lambda v: v.tag)
 
         assert versions == releases
 

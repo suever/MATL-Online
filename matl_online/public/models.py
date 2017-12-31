@@ -1,9 +1,9 @@
 """SQLAlchemy models."""
 import requests
-import urlparse
 
 from bs4 import BeautifulSoup
 from flask import current_app
+from six.moves.urllib.parse import urljoin
 from sqlalchemy import or_
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -65,7 +65,7 @@ class DocumentationLink(Model):
                 function = link.text.rstrip()
 
                 doc = cls.query.filter_by(name=function).first()
-                doc_url = urlparse.urljoin(url, link['href'])
+                doc_url = urljoin(url, link['href'])
 
                 # Create an entry if one doesn't already exist
                 if doc is None:

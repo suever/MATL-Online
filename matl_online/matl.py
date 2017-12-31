@@ -7,9 +7,10 @@ import os
 import re
 import requests
 import shutil
-import StringIO
+import six
 
 from flask import current_app
+from six import StringIO
 from scipy.io import loadmat
 
 from matl_online.public.models import Release, DocumentationLink
@@ -28,7 +29,7 @@ def install_matl(version, folder):
     if response.status_code == 404:
         raise KeyError('Tag "%s" is invalid' % version)
 
-    unzip(StringIO.StringIO(response.content), folder)
+    unzip(StringIO(response.content), folder)
 
 
 def add_doc_links(description):
@@ -103,7 +104,7 @@ def help_file(version):
         info.descr[k] = info.descr[k].replace('\n', '')
 
         # Scipy loads empty char arrays as numeric arrays
-        if not isinstance(info.comm[k], basestring):
+        if not isinstance(info.comm[k], six.string_types[0]):
             info.comm[k] = ''
 
         item = {'source': cgi.escape(info.sourcePlain[k]),
@@ -168,7 +169,7 @@ def parse_matl_results(output):
             # Base64-encode the image.
             with open(imname, 'rb') as image_file:
                 encoded = base64.b64encode(image_file.read())
-                srcstr = 'data:image/png;base64,' + encoded
+                srcstr = b'data:image/png;base64,' + encoded
 
             item['type'] = imtype
             item['value'] = srcstr

@@ -165,7 +165,7 @@ class TestResults:
     def test_nn_image_parsing(self, tmpdir):
         """Test for nearest-neighbor interpolated image."""
         fileobj = tmpdir.join('image.png')
-        contents = 'hello'
+        contents = b'hello'
         fileobj.write(contents)
 
         # Parse the string
@@ -177,7 +177,7 @@ class TestResults:
 
         # Since the file is empty it should just be the header portion
         encoded = base64.b64encode(contents)
-        assert result[0]['value'] == 'data:image/png;base64,' + encoded
+        assert result[0]['value'] == b'data:image/png;base64,' + encoded
 
         # Make sure the file was not removed
         assert os.path.isfile(fileobj.strpath)
@@ -185,7 +185,7 @@ class TestResults:
     def test_image_parsing(self, tmpdir):
         """Test valid image result."""
         fileobj = tmpdir.join('image.png')
-        contents = 'hello'
+        contents = b'hello'
         fileobj.write(contents)
 
         # Parse the string
@@ -197,7 +197,7 @@ class TestResults:
 
         # Since the file is empty it should just be the header portion
         encoded = base64.b64encode(contents)
-        assert result[0]['value'] == 'data:image/png;base64,' + encoded
+        assert result[0]['value'] == b'data:image/png;base64,' + encoded
 
         # Make sure the file was not removed
         assert os.path.isfile(fileobj.strpath)
@@ -260,7 +260,7 @@ class TestHelpParsing:
         expected = ['source', 'description', 'brief', 'arguments']
         expected.sort()
 
-        actual = data['data'][0].keys()
+        actual = list(data['data'][0].keys())
         actual.sort()
 
         assert actual == expected
