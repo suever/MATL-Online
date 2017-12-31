@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Management script."""
-import eventlet
 
+import eventlet
 import os
 
 from glob import glob
@@ -14,19 +14,11 @@ from flask_script.commands import Clean, ShowUrls
 from matl_online.app import create_app, socketio
 from matl_online.database import db
 from matl_online import matl
-from matl_online.settings import DevConfig, ProdConfig
+from matl_online.settings import config
 
 eventlet.monkey_patch()
 
-if os.environ.get('MATL_ONLINE_ENV') == 'prod':
-    CONFIG = ProdConfig
-else:
-    CONFIG = DevConfig
-
-HERE = os.path.abspath(os.path.dirname(__file__))
-TEST_PATH = os.path.join(HERE, 'tests')
-
-app = create_app(CONFIG)
+app = create_app(config)
 
 manager = Manager(app)
 migrate = Migrate(app, db)
@@ -41,7 +33,8 @@ def _make_context():
 def test():
     """Run the tests."""
     import pytest
-    exit_code = pytest.main([TEST_PATH, '--verbose'])
+    test_path = os.path.join(config.PROJECT_ROOT, 'tests')
+    exit_code = pytest.main([test_path, '--verbose'])
     return exit_code
 
 

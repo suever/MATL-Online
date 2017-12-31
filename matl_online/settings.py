@@ -104,3 +104,14 @@ class TestConfig(Config):
 
     # Create a bogus GA Universal ID for testing
     GOOGLE_ANALYTICS_UNIVERSAL_ID = 'nonsense'
+
+
+def get_config():
+    """Retrieve the current active configuration based on env variables."""
+    if os.environ.get('MATL_ONLINE_ENV') == 'prod':
+        return ProdConfig
+    else:
+        return DevConfig
+
+
+config = get_config()
