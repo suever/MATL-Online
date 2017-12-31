@@ -10,9 +10,10 @@ from celery.signals import worker_process_init
 
 from flask_socketio import SocketIO
 
-from matl_online.settings import Config
 from matl_online.extensions import celery
 from matl_online.matl import matl, parse_matl_results
+from matl_online.settings import Config
+from matl_online.octave import OctaveSession
 
 from logging import StreamHandler
 import logging
@@ -37,7 +38,7 @@ class OutputHandler(StreamHandler):
 
     def messages(self):
         """Concatenate all messages into a long stream."""
-        return '\n'.join([x.getMessage() for x in self.contents])
+        return '\n'.join([x for x in self.contents])
 
     def send(self):
         """Send a message out to the specified rooms."""
@@ -55,31 +56,32 @@ class OutputHandler(StreamHandler):
         #   2. [CLC]    Send an empty message and clear contents
         #   3. [IMAGE]  FUTURE ENCODING TO BASE64
 
-        if not record.levelno == logging.INFO:
-            return
+        if record.levelno == logging.INFO:
+            self.process_message(record.msg)
 
-        if record.msg == '[PAUSE]':
+    def process_message(self, message):
+        """Append a message to be send back to the user."""
+        print(message)
+
+        if message == '[PAUSE]':
             # For now we send the entire message again. Consider a better
             # approach (i.e. adding a field to the result that says to
             # flush prior to display)
             self.send()
             return
-        elif record.msg == '[CLC]':
+        elif message == '[CLC]':
             self.send()
             self.clear()
             return
-        elif record.msg.startswith('warning:'):
+        elif message.startswith('warning:'):
             return
-        elif record.msg.startswith('MATL run-time error:'):
-            import copy
-            for item in record.msg.split('\n'):
-                newrecord = copy.copy(record)
-                newrecord.msg = '[STDERR]' + item
-                self.contents.append(newrecord)
+        elif message.startswith('MATL run-time error:'):
+            for item in message.split('\n'):
+                self.contents.append('[STDERR]' + item)
 
             return
 
-        self.contents.append(record)
+        self.contents.append(message)
 
 
 class OctaveTask(Task):
@@ -93,36 +95,25 @@ class OctaveTask(Task):
 
     def __init__(self, *args, **kwargs):
         """Initialize task."""
+        global octave
         super(OctaveTask, self).__init__(*args, **kwargs)
 
     @property
     def octave(self):
         """Dependent property which automatically spawns octave if needed."""
         if self._octave is None:
-            # We hide this import within this property getter so that
-            # non-worker processes don't start up an octave instance. This
-            # simply gets the octave session which should already be
-            # initiailized by _initialize_process
-            from matl_online.octave import octave
+            global octave
             self._octave = octave
 
-            # Remove all other handlers (stdout, etc.)
-            self._octave.logger.handlers = []
-
-        # Add the handler if we need to
-        if len(self._octave.logger.handlers) == 0:
-            if self._handler is None:
-                self._handler = OutputHandler(self)
-
-            # Turn on debugging so we get notified of EVERY output as it
-            # happens rather than waiting for a command to finish which is
-            # what happens if we set the log level to INFO instead
-            self._octave.logger.setLevel(logging.INFO)
-
-            # Add our custom handler to capture all output
-            self._octave.logger.addHandler(self._handler)
-
         return self._octave
+
+    @property
+    def handler(self):
+        """Dependent property that creates an OutputHandler instance."""
+        if self._handler is None:
+            self._handler = OutputHandler(self)
+
+        return self._handler
 
     @property
     def folder(self):
@@ -146,15 +137,7 @@ class OctaveTask(Task):
         socket.emit(*args, room=self.session_id, **kwargs)
 
     def on_term(self):
-        """Clean up after termination event.
-
-        This is a time-limit exceed so the worker will NOT be restarted,
-        we just need to halt the current process and get it to a point
-        where we can process new tasks
-        """
-        # Go ahead and kill the subprocess
-        self.octave._session.interrupt()
-
+        """Clean up after termination event."""
         # Restart octave so we're ready to go with future calls
         self.octave.restart()
         _initialize_process()
@@ -170,16 +153,16 @@ class OctaveTask(Task):
         This is a hard kill by celery so this worker will be destroyed. No
         need to restart octave
         """
-        self.octave._session.interrupt()
+        self.octave._engine.repl.terminate()
         self.on_failure()
 
     def send_results(self):
         """Local forwarder for all send events."""
-        return self._handler.send()
+        return self.handler.send()
 
     def after_return(self, *args, **kwargs):
         """Fire after task completion."""
-        self._handler.clear()
+        self.handler.clear()
 
         if os.path.isdir(self.folder):
             shutil.rmtree(self.folder)
@@ -194,20 +177,22 @@ class OctaveTask(Task):
 def matl_task(self, *args, **kwargs):
     """Celery task for processing a MATL command and returning the result."""
     self.session_id = kwargs.pop('session', '')
+    self.handler.clear()
 
     try:
-        matl(matl_task.octave, *args, folder=self.folder, **kwargs)
+        matl(self.octave, *args, folder=self.folder,
+             stream_handler=self.handler.process_message, **kwargs)
         result = self.send_results()
 
     # In the case of an interrupt (either through a time limit or a
     # revoke() event, we will still clean things up
     except (KeyboardInterrupt, SystemExit):
-        self.octave.logger.info('[STDERR]Job cancelled')
+        self.handler.process_message('[STDERR]Job cancelled')
         self.on_kill()
         raise
     except SoftTimeLimitExceeded:
         # Propagate the term event up the chain to actually kill the worker
-        self.octave.logger.info('[STDERR]Operation timed out')
+        self.handler.process_message('[STDERR]Operation timed out')
         self.on_term()
         raise
 
@@ -220,15 +205,10 @@ def _initialize_process(**kwargs):
     Function to be called when a worker process is spawned. We use this to
     opportunity to actually launch octave and execute a quick MATL program
     """
-    # Import oct2py within here because it creates a new instance of octave
-    from matl_online.octave import octave
+    global octave
 
-    octave.logger.handlers = []
-
-    # Run MATL for the first time to initialize everything
-    octaverc = os.path.join(Config.MATL_WRAP_DIR, '.octaverc')
-    octave.eval('source("' + octaverc + '");')
-    octave.eval('addpath("' + Config.MATL_WRAP_DIR + '");')
+    octave = OctaveSession(octaverc=Config.OCTAVERC,
+                           paths=[Config.MATL_WRAP_DIR])
 
 
 # When a worker process is spawned, initialize octave

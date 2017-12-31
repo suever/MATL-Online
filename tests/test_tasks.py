@@ -5,7 +5,7 @@ import os
 import pytest
 
 from celery.exceptions import SoftTimeLimitExceeded
-from matl_online.tasks import OctaveTask, OutputHandler, matl_task
+from matl_online.tasks import OctaveTask, matl_task
 
 
 def prepare_folder_testcase(mocker, moctave, tmpdir):
@@ -39,26 +39,15 @@ class TestOctaveTask:
         assert task._octave == newoctave
         assert newoctave == moctave
 
-        # Check the logging level is appropriate
-        assert logger.level == logging.INFO
-        assert len(logger.handlers) == 1
-        assert isinstance(logger.handlers[0], OutputHandler)
-        assert logger.handlers[0] == task._handler
-
         return task
 
     def test_octave_property_repeat(self, mocker, moctave, logger):
         """Octave sessions are only created once per task."""
         task = self.test_octave_property(mocker, moctave, logger)
 
-        # Get the property again and make sure we don't add any more
-        # handlers
-        task.octave
-
-        assert logger.level == logging.INFO
-        assert len(logger.handlers) == 1
-        assert isinstance(logger.handlers[0], OutputHandler)
-        assert logger.handlers[0] == task._handler
+        # Get the property again and make sure we don't create a new
+        # instance
+        assert task.octave == moctave
 
     def test_folder_no_session(self, mocker, moctave, tmpdir):
         """Test the dynamic folder property when there is no session."""
@@ -97,7 +86,6 @@ class TestOctaveTask:
         methods = [m[0] for m in moctave.method_calls]
 
         assert 'restart' in methods
-        assert '_session.interrupt' in methods
         assert initialize.call_count == 1
 
 
@@ -152,9 +140,6 @@ class TestMATLTask:
 
         ev = mocker.patch('matl_online.tasks.matl_task._octave.eval')
         ev.side_effect = SoftTimeLimitExceeded
-
-        # TODO: We shouldn't have to explicitly clear this
-        matl_task.octave.logger.handlers[0].clear()
 
         with pytest.raises(SoftTimeLimitExceeded):
             matl_task.delay('-ro', '1D', session=socketclient.sid).wait()

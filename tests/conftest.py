@@ -58,8 +58,8 @@ def logger():
 
 @pytest.fixture
 def moctave(mocker, logger):
-    """Mock version of oct2py.octave to monitor calls to octave."""
-    moctave = mocker.patch('matl_online.octave.octave')
+    """Mock version of OctaveEngine to monitor calls to octave."""
+    moctave = mocker.patch('matl_online.tasks.octave')
     moctave.evals = list()
 
     def moctave_eval(*args, **kwargs):

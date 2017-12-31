@@ -95,7 +95,7 @@ class TestSockets:
         socketclient.emit('kill', {})
 
         # Make sure that a message was sent to kill the tasks
-        revoke.assert_called_once_with(taskid, terminate=True)
+        revoke.assert_called_once_with(taskid, terminate=True, signal='SIGTERM')
 
         received = socketclient.get_received()
 

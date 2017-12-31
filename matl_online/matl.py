@@ -190,7 +190,7 @@ def parse_matl_results(output):
     return result
 
 
-def matl(octave, flags, code='', inputs='', version='', folder=''):
+def matl(octave, flags, code='', inputs='', version='', folder='', stream_handler=None):
     """Open a session with Octave and manages input/output as well as errors."""
     # Remember what directory octave is current in
     def escape(x):
@@ -210,13 +210,13 @@ def matl(octave, flags, code='', inputs='', version='', folder=''):
 
     if len(inputs):
         inputs = ["'%s'" % escape(item) for item in inputs.split('\n')]
-        cmd = "matl_runner('%s', %s, %s);" % (flags, code, ','.join(inputs))
+        cmd = "matl_runner('%s', %s, %s);\n" % (flags, code, ','.join(inputs))
     else:
         inputs = None
-        cmd = "matl_runner('%s', %s);" % (flags, code)
+        cmd = "matl_runner('%s', %s);\n" % (flags, code)
 
     # Actually run the MATL code
-    octave.eval(cmd)
+    octave.eval(cmd, stream_handler=stream_handler)
 
     # Change back to the original directory
     cmd = "cd('%s')" % escape(current_app.config['PROJECT_ROOT'])
