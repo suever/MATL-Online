@@ -5,6 +5,9 @@ beautifulsoup4==4.6.0
 eventlet==0.20.0
 gunicorn==19.7.1
 
+# Python 2/3 Compatibility
+six==1.11.0
+
 # CSS/JS Assets
 flask_assets==0.12
 yuicompressor==2.4.8

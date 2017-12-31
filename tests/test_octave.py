@@ -2,7 +2,7 @@
 
 import os
 
-from mock import call
+from six.moves import mock
 
 from matl_online.octave import OctaveSession
 
@@ -39,15 +39,15 @@ class TestOctaveSession:
         """Ensure that the specified paths are added to the path."""
         paths = ['path1', 'path2', 'path3']
 
-        mock = mocker.patch('matl_online.octave.OctaveSession.eval')
+        eval_mock = mocker.patch('matl_online.octave.OctaveSession.eval')
 
         session = OctaveSession(paths=paths)
 
         assert session.octaverc is None
         assert session.paths == paths
 
-        expected_calls = [call('addpath("''%s''")' % path) for path in paths]
-        mock.assert_has_calls(expected_calls)
+        expected_calls = [mock.call('addpath("''%s''")' % path) for path in paths]
+        eval_mock.assert_has_calls(expected_calls)
 
     def test_eval_without_handler(self, mocker):
         """Ensure that code is sent to octave for evaluation."""

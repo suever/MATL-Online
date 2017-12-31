@@ -5,6 +5,7 @@ import hmac
 import os
 import re
 import requests
+import six
 import uuid
 
 from datetime import datetime
@@ -122,7 +123,9 @@ def github_hook():
 
     signature = pieces[1]
 
-    mac = hmac.new(str(secret), msg=request.data, digestmod=sha1)
+    mac = hmac.new(six.b(secret or ''),
+                   msg=six.b(request.get_data(as_text=True)),
+                   digestmod=sha1)
 
     if str(mac.hexdigest()) != str(signature):
         abort(403)
@@ -154,7 +157,7 @@ def share():
     try:
         validate_csrf(request.headers.get('X-Csrftoken'))
     except ValidationError as e:
-        abort(400, e.message)
+        abort(400, str(e))
 
     result = {'success': True,
               'link': 'https://imgur.com/opoxoisdf.png'}
