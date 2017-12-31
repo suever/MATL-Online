@@ -216,7 +216,7 @@ def matl(octave, flags, code='', inputs='', version='', folder='', stream_handle
         cmd = "matl_runner('%s', %s);\n" % (flags, code)
 
     # Actually run the MATL code
-    octave.eval(cmd, stream_handler=stream_handler.process_message)
+    octave.eval(cmd, stream_handler=stream_handler)
 
     # Change back to the original directory
     cmd = "cd('%s')" % escape(current_app.config['PROJECT_ROOT'])

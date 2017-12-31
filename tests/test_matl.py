@@ -454,7 +454,7 @@ class TestMATLInterface:
         call = [x for x in moctave.evals if x.startswith('matl_runner')]
 
         assert len(call) == 1
-        assert call[0] == "matl_runner('-ro', {'D'}, '12');"
+        assert call[0].rstrip() == "matl_runner('-ro', {'D'}, '12');"
 
     def test_multiple_inputs(self, mocker, app, moctave):
         """Multiple input parameters should be send to matl_runner."""
@@ -467,7 +467,7 @@ class TestMATLInterface:
         call = [x for x in moctave.evals if x.startswith('matl_runner')]
 
         assert len(call) == 1
-        assert call[0] == "matl_runner('-ro', {'D'}, '12','13');"
+        assert call[0].rstrip() == "matl_runner('-ro', {'D'}, '12','13');"
 
     def test_string_escape(self, mocker, app, moctave):
         """All single quotes need to be escaped properly."""
@@ -480,4 +480,4 @@ class TestMATLInterface:
         call = [x for x in moctave.evals if x.startswith('matl_runner')]
 
         assert len(call) == 1
-        assert call[0] == "matl_runner('-ro', {'''abc'''});"
+        assert call[0].rstrip() == "matl_runner('-ro', {'''abc'''});"

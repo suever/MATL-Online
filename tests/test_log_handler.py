@@ -108,9 +108,9 @@ class TestLogHandler:
         # Check the contents
         send_func.assert_not_called()
         assert len(handler.contents) == 3
-        assert handler.contents[0].msg == '[STDERR]MATL run-time error:'
-        assert handler.contents[1].msg == '[STDERR]line 1'
-        assert handler.contents[2].msg == '[STDERR]line 2'
+        assert handler.contents[0] == '[STDERR]MATL run-time error:'
+        assert handler.contents[1] == '[STDERR]line 1'
+        assert handler.contents[2] == '[STDERR]line 2'
 
     def test_filter(self, logger, mocker):
         """Ensure that we ONLY get info events."""

@@ -57,7 +57,7 @@ class OutputHandler(StreamHandler):
         #   3. [IMAGE]  FUTURE ENCODING TO BASE64
 
         if record.levelno == logging.INFO:
-            process_message(record.msg)
+            self.process_message(record.msg)
 
     def process_message(self, message):
 
@@ -183,7 +183,7 @@ def matl_task(self, *args, **kwargs):
 
     try:
         matl(self.octave, *args, folder=self.folder,
-             stream_handler=self.handler, **kwargs)
+             stream_handler=self.handler.process_message, **kwargs)
         result = self.send_results()
 
     # In the case of an interrupt (either through a time limit or a
