@@ -39,6 +39,7 @@ last_modified = datetime.utcfromtimestamp(modtime).strftime('%Y/%m/%d')
 def render_template(*args, **kwargs):
     """Add common properties via a custom render_template function."""
     kwargs['modified'] = kwargs.get('modified', last_modified)
+    kwargs['current_year'] = kwargs.get('current_year', datetime.now().year)
 
     analytics_id = current_app.config['GOOGLE_ANALYTICS_UNIVERSAL_ID']
     kwargs['google_analytics_id'] = analytics_id
