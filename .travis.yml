@@ -10,19 +10,7 @@ before_install:
     - sudo add-apt-repository --yes ppa:octave/stable
     - sudo apt-get update -qq
 
-    # Install miniconda so we can have numpy and scipy easily
-    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-    - bash miniconda.sh -b -p $HOME/miniconda
-    - export PATH="$HOME/miniconda/bin:$PATH"
-    - hash -r
-    - conda update --quiet --yes conda
-    # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
-    - sudo rm -rf /dev/shm
-    - sudo ln -s /run/shm /dev/shm
-
 install:
-    # Install numpy and scipy
-    - conda install --quiet --yes python=$TRAVIS_PYTHON_VERSION numpy=1.13.1 scipy=1.0.0
     - sudo apt-get install -qq octave liboctave-dev libmpfr-dev
     - pip install -r requirements/dev.txt
     # Install packages for reporting coverage information to external tools
