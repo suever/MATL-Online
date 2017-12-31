@@ -14,14 +14,14 @@ python-engineio==2.0.1
 python-socketio==1.8.4
 
 # Celery
-celery==3.1.23
+celery==3.1.23 # pyup: ignore
 redis==2.10.6
 
 # Octave interaction
 scipy==1.0.0
 numpy==1.13.3
 octave-kernel==0.28.2
-ipython==5.4.1
+ipython==5.4.1 # pyup: ignore
 
 # Octave packages
 sympy==1.1.1
@@ -36,6 +36,3 @@ Flask-Script==2.0.6
 
 # Forms
 flask_wtf==0.14.2
-
-# Flower
-flower==0.9.2
