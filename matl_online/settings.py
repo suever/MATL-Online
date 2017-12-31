@@ -106,7 +106,12 @@ class TestConfig(Config):
     GOOGLE_ANALYTICS_UNIVERSAL_ID = 'nonsense'
 
 
-if os.environ.get('MATL_ONLINE_ENV') == 'prod':
-    config = ProdConfig
-else:
-    config = DevConfig
+def get_config():
+    """Retrieve the current active configuration based on env variables."""
+    if os.environ.get('MATL_ONLINE_ENV') == 'prod':
+        return ProdConfig
+    else:
+        return DevConfig
+
+
+config = get_config()
