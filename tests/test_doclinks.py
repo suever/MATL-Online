@@ -27,8 +27,7 @@ class TestDocumentationLink:
 
         assert link.name == funcname
         assert link.link == funclink
-
-        req.assert_called_once()
+        assert req.call_count == 1
 
     def test_refresh_multiple(self, mocker, testapp):
         """Parse out multiple functions at the same time."""

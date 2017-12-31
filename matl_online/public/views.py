@@ -135,7 +135,7 @@ def github_hook():
     if event == 'ping':
         return jsonify({'msg': 'pong'})
 
-    payload = json.loads(request.data)
+    payload = request.json
 
     # Ignore any non-release events
     if 'release' not in payload:
