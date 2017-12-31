@@ -12,7 +12,8 @@ before_install:
 
 install:
     - sudo apt-get install -qq octave liboctave-dev libmpfr-dev
-    - pip install -r requirements/dev.txt
+    - pip install --upgrade pip setuptools wheel
+    - pip install --only-binary=numpy,scipy -r requirements/dev.txt
     # Install packages for reporting coverage information to external tools
     - pip install coveralls
     - pip install codeclimate-test-reporter
