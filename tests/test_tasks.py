@@ -5,7 +5,7 @@ import os
 import pytest
 
 from celery.exceptions import SoftTimeLimitExceeded
-from matl_online.tasks import OctaveTask, OutputHandler, matl_task
+from matl_online.tasks import OctaveTask, matl_task
 
 
 def prepare_folder_testcase(mocker, moctave, tmpdir):

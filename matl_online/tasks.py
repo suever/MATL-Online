@@ -60,7 +60,7 @@ class OutputHandler(StreamHandler):
             self.process_message(record.msg)
 
     def process_message(self, message):
-
+        """Append a message to be send back to the user."""
         print(message)
 
         if message == '[PAUSE]':
@@ -82,7 +82,6 @@ class OutputHandler(StreamHandler):
             return
 
         self.contents.append(message)
-
 
 
 class OctaveTask(Task):
@@ -139,7 +138,6 @@ class OctaveTask(Task):
 
     def on_term(self):
         """Clean up after termination event."""
-
         # Restart octave so we're ready to go with future calls
         self.octave.restart()
         _initialize_process()
