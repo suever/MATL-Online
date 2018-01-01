@@ -12,7 +12,7 @@ from flask_socketio import SocketIO
 
 from matl_online.extensions import celery
 from matl_online.matl import matl, parse_matl_results
-from matl_online.settings import Config
+from matl_online.settings import config
 from matl_online.octave import OctaveSession
 
 from logging import StreamHandler
@@ -144,8 +144,7 @@ class OctaveTask(Task):
 
     def on_success(self, *args, **kwargs):
         """Send a completion messages upon successful completion."""
-        self.emit('complete', {'success': True,
-                               'message': ''})
+        self.emit('complete', {'success': True, 'message': ''})
 
     def on_kill(self):
         """Clean up after a task is killed.
@@ -179,6 +178,8 @@ def matl_task(self, *args, **kwargs):
     self.session_id = kwargs.pop('session', '')
     self.handler.clear()
 
+    is_test = config.ENV == 'test'
+
     try:
         matl(self.octave, *args, folder=self.folder,
              stream_handler=self.handler.process_message, **kwargs)
@@ -194,7 +195,16 @@ def matl_task(self, *args, **kwargs):
         # Propagate the term event up the chain to actually kill the worker
         self.handler.process_message('[STDERR]Operation timed out')
         self.on_term()
+
+        if is_test:
+            self.on_failure()
+            self.after_return()
+
         raise
+
+    if is_test:
+        self.on_success()
+        self.after_return()
 
     return result
 
@@ -207,8 +217,8 @@ def _initialize_process(**kwargs):
     """
     global octave
 
-    octave = OctaveSession(octaverc=Config.OCTAVERC,
-                           paths=[Config.MATL_WRAP_DIR])
+    octave = OctaveSession(octaverc=config.OCTAVERC,
+                           paths=[config.MATL_WRAP_DIR])
 
 
 # When a worker process is spawned, initialize octave

@@ -102,7 +102,7 @@ class TestMATLTask:
         mocker.patch('matl_online.tasks.socket',
                      new_callable=lambda: socketclient.socketio)
 
-        matl_task.delay('-ro', '1D', session=socketclient.sid).wait()
+        matl_task('-ro', '1D', session=socketclient.sid)
 
         received = socketclient.get_received()
         assert received[-1]['args'][0] == {'message': '', 'success': True}
@@ -114,11 +114,11 @@ class TestMATLTask:
         mocker.patch('matl_online.tasks.socket',
                      new_callable=lambda: socketclient.socketio)
 
-        ev = mocker.patch('matl_online.tasks.matl_task._octave.eval')
+        ev = mocker.patch('matl_online.tasks.matl_task.octave.eval')
         ev.side_effect = KeyboardInterrupt
 
         with pytest.raises(KeyboardInterrupt):
-            matl_task.delay('-ro', '1D', session=socketclient.sid).wait()
+            matl_task('-ro', '1D', session=socketclient.sid)
 
         received = socketclient.get_received()
 
@@ -138,11 +138,11 @@ class TestMATLTask:
         mocker.patch('matl_online.tasks.socket',
                      new_callable=lambda: socketclient.socketio)
 
-        ev = mocker.patch('matl_online.tasks.matl_task._octave.eval')
+        ev = mocker.patch('matl_online.tasks.matl_task.octave.eval')
         ev.side_effect = SoftTimeLimitExceeded
 
         with pytest.raises(SoftTimeLimitExceeded):
-            matl_task.delay('-ro', '1D', session=socketclient.sid).wait()
+            matl_task('-ro', '1D', session=socketclient.sid)
 
         received = socketclient.get_received()
 

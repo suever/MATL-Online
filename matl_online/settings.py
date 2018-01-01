@@ -97,6 +97,7 @@ class DevConfig(Config):
 class TestConfig(Config):
     """Test configuration."""
 
+    ENV = 'test'
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
@@ -118,10 +119,13 @@ class TestConfig(Config):
 
 def get_config():
     """Retrieve the current active configuration based on env variables."""
-    if os.environ.get('MATL_ONLINE_ENV') == 'prod':
-        return ProdConfig
-    else:
-        return DevConfig
+    env = os.environ.get('MATL_ONLINE_ENV', 'dev')
+
+    return {
+        'prod': ProdConfig,
+        'dev': DevConfig,
+        'test': TestConfig
+    }[env.lower()]
 
 
 config = get_config()
