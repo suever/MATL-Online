@@ -46,6 +46,9 @@ function sendAnalyticsEvent(category, type, message) {
 }
 
 function timeoutFcn() {
+
+    Rollbar.warning("SocketIO Connection Failed", { uuid: uuid });
+
     // Send a google analytics event if it's defined
     sendAnalyticsEvent('errors', 'error', 'Submit failed');
 
