@@ -12,7 +12,7 @@ from flask_socketio import SocketIO
 
 from matl_online.extensions import celery
 from matl_online.matl import matl, parse_matl_results
-from matl_online.settings import Config
+from matl_online.settings import config
 from matl_online.octave import OctaveSession
 
 from logging import StreamHandler
@@ -207,8 +207,8 @@ def _initialize_process(**kwargs):
     """
     global octave
 
-    octave = OctaveSession(octaverc=Config.OCTAVERC,
-                           paths=[Config.MATL_WRAP_DIR])
+    octave = OctaveSession(octaverc=config.OCTAVERC,
+                           paths=[config.MATL_WRAP_DIR])
 
 
 # When a worker process is spawned, initialize octave

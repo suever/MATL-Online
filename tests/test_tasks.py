@@ -5,6 +5,7 @@ import os
 import pytest
 
 from celery.exceptions import SoftTimeLimitExceeded
+from matl_online.settings import config
 from matl_online.tasks import OctaveTask, matl_task
 
 
