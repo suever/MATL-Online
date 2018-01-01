@@ -144,8 +144,7 @@ class OctaveTask(Task):
 
     def on_success(self, *args, **kwargs):
         """Send a completion messages upon successful completion."""
-        self.emit('complete', {'success': True,
-                               'message': ''})
+        self.emit('complete', {'success': True, 'message': ''})
 
     def on_kill(self):
         """Clean up after a task is killed.
@@ -179,6 +178,8 @@ def matl_task(self, *args, **kwargs):
     self.session_id = kwargs.pop('session', '')
     self.handler.clear()
 
+    is_test = config.ENV == 'test'
+
     try:
         matl(self.octave, *args, folder=self.folder,
              stream_handler=self.handler.process_message, **kwargs)
@@ -194,7 +195,16 @@ def matl_task(self, *args, **kwargs):
         # Propagate the term event up the chain to actually kill the worker
         self.handler.process_message('[STDERR]Operation timed out')
         self.on_term()
+
+        if is_test:
+            self.on_failure()
+            self.after_return()
+
         raise
+
+    if is_test:
+        self.on_success()
+        self.after_return()
 
     return result
 
