@@ -63,6 +63,10 @@ class Config(object):
 
     SOCKETIO_MESSAGE_QUEUE = None
 
+    # Rollbar
+    ROLLBAR_SERVER_SIDE_TOKEN = os.environ.get('MATL_ONLINE_ROLLBAR_SERVER_SIDE_TOKEN')
+    ROLLBAR_CLIENT_SIDE_TOKEN = os.environ.get('MATL_ONLINE_ROLLBAR_CLIENT_SIDE_TOKEN')
+
 
 class ProdConfig(Config):
     """Production configuration."""
@@ -75,6 +79,8 @@ class ProdConfig(Config):
 
     SOCKETIO_MESSAGE_QUEUE = 'redis://'
 
+    ROLLBAR_ENV = 'production'
+
 
 class DevConfig(Config):
     """Development configuration."""
@@ -84,6 +90,8 @@ class DevConfig(Config):
     ASSETS_DEBUG = True
 
     SOCKETIO_MESSAGE_QUEUE = 'redis://'
+
+    ROLLBAR_ENV = 'development'
 
 
 class TestConfig(Config):
@@ -104,6 +112,8 @@ class TestConfig(Config):
 
     # Create a bogus GA Universal ID for testing
     GOOGLE_ANALYTICS_UNIVERSAL_ID = 'nonsense'
+
+    ROLLBAR_ENV = 'testing'
 
 
 def get_config():
