@@ -202,6 +202,33 @@ class TestResults:
         # Make sure the file was not removed
         assert os.path.isfile(fileobj.strpath)
 
+    def test_invalid_audio_parsing(self):
+        """Test with a bad filename and ensure no result."""
+        filename = '/ignore/this/audio.wav'
+        result = matl.parse_matl_results('[AUDIO]' + filename)
+
+        assert isinstance(result, list)
+        assert len(result) == 0
+
+    def test_audio_parsing(self, tmpdir):
+        """Test valid audio result."""
+        fileobj = tmpdir.join('audio.wav')
+        contents = b'AUDIO'
+        fileobj.write(contents)
+
+        # Parse the string
+        result = matl.parse_matl_results('[AUDIO]' + fileobj.strpath)
+
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]['type'] == 'audio'
+
+        encoded = base64.b64encode(contents)
+        assert result[0]['value'] == b'data:audio/wav;base64,' + encoded
+
+        # Make sure that the file was not removed
+        assert os.path.isfile(fileobj.strpath)
+
     def test_stdout2_parsing(self):
         """Test potential to have a second type of STDOUT."""
         expected = 'ouptut2'

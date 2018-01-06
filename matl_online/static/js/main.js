@@ -197,8 +197,11 @@ socket.on('status', function(data) {
                     if ( thumb.length ){
                         $(thumb).find('.imshow').attr('src', item.value);
                     } else {
-                        val = '<span class="thumb"><img class="imshow" src="' + item.value + '"><br/></span>';
-                        output.append(val);
+                        var container = $('<div/>', { 'class': 'thumb' });
+                        var img = $('<img/>', { 'class': 'imshow', src: item.value });
+                        container.append(img);
+                        output.append(container);
+
                         $('.thumb').on('click', function(e) {
                             var url = $(this).find('.imshow').attr('src');
                             $('#imagepreview').attr('src', url);
@@ -219,6 +222,18 @@ socket.on('status', function(data) {
                     }
 
                     break;
+                case 'audio':
+                    var span = $('<div/>', { 'class': 'audio' });
+                    var fallback = 'Your browser does not support the <code>audio</code> element.';
+                    var audio_tag = $('<audio/>', {
+                        src: item.value,
+                        controls: "true",
+                        text: fallback
+                    });
+
+                    span.append(audio_tag);
+                    output.append(span)
+                    break
                 case 'stderr':
                     errors.append(document.createTextNode(item.value + '\n'));
                     $('#errorconsoletab').css('font-weight', 'bold');
