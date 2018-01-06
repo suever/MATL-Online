@@ -1,6 +1,5 @@
 """Module for interacting with MATL and it's source code."""
 
-import base64
 import cgi
 import json
 import os
