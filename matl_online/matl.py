@@ -14,7 +14,7 @@ from six import StringIO
 from scipy.io import loadmat
 
 from matl_online.public.models import Release, DocumentationLink
-from matl_online.utils import unzip, parse_iso8601
+from matl_online.utils import unzip, parse_iso8601, base64_encode_file
 
 # Regular expression for pulling out content between <strong></strong> tags
 STRONG_RE = re.compile('\<strong\>.*?\<\/strong\>')
@@ -167,11 +167,19 @@ def parse_matl_results(output):
                 continue
 
             # Base64-encode the image.
-            with open(imname, 'rb') as image_file:
-                encoded = base64.b64encode(image_file.read())
-                srcstr = b'data:image/png;base64,' + encoded
+            srcstr = b'data:image/png;' + base64_encode_file(imname)
 
             item['type'] = imtype
+            item['value'] = srcstr
+        elif part.startswith('[AUDIO]'):
+            filename = part.replace('[AUDIO]', '')
+
+            if not os.path.isfile(filename):
+                continue
+
+            srcstr = b'data:audio/wav;' + base64_encode_file(filename)
+
+            item['type'] = 'audio'
             item['value'] = srcstr
         elif part.startswith('[STDERR]'):
             msg = part.replace('[STDERR]', '')
