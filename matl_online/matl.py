@@ -143,6 +143,15 @@ def process_image(image_path, interpolation=False):
         })
 
 
+def process_audio(audio_file):
+    """Process an audio file returned from MATL."""
+    if os.path.isfile(audio_file):
+        return {
+            'type': 'audio',
+            'value': b'data:audio/wav;' + base64_encode_file(audio_file)
+        }
+
+
 def parse_matl_results(output):
     """Convert MATL output to a custom data structure.
 
@@ -166,26 +175,13 @@ def parse_matl_results(output):
             item = process_image(re.sub('\[IMAGE.*?\]', '', part),
                                  part.startswith('[IMAGE]'))
         elif part.startswith('[AUDIO]'):
-            filename = part.replace('[AUDIO]', '')
-
-            if not os.path.isfile(filename):
-                continue
-
-            srcstr = b'data:audio/wav;' + base64_encode_file(filename)
-
-            item['type'] = 'audio'
-            item['value'] = srcstr
+            item = process_audio(part.replace('[AUDIO]', ''))
         elif part.startswith('[STDERR]'):
-            msg = part.replace('[STDERR]', '')
-            item['type'] = 'stderr'
-            item['value'] = msg
+            item = {'type': 'stderr', 'value': part.replace('[STDERR]', '')}
         elif part.startswith('[STDOUT]'):
-            item['type'] = 'stdout2'
-            msg = part.replace('[STDOUT]', '')
-            item['value'] = msg
+            item = {'type': 'stdout2', 'value': part.replace('[STDOUT]', '')}
         else:
-            item['type'] = 'stdout'
-            item['value'] = part
+            item = {'type': 'stdout', 'value': part}
 
         if item:
             result.append(item)
