@@ -134,6 +134,15 @@ def get_matl_folder(version, install=True):
     return matl_folder
 
 
+def process_image(image_path, interpolation=False):
+    """Process an image result returned from MATL."""
+    if os.path.isfile(image_path):
+        return ({
+            'type': 'image' if interpolation else 'image_nn',
+            'value': b'data:image/png;' + base64_encode_file(image_path)
+        })
+
+
 def parse_matl_results(output):
     """Convert MATL output to a custom data structure.
 
@@ -151,25 +160,11 @@ def parse_matl_results(output):
         # Strip a single trailing newline
         part = part.rstrip('\n')
 
-        item = dict()
+        item = {}
 
         if part.startswith('[IMAGE'):
-
-            if part.startswith('[IMAGE_NN]'):
-                imtype = 'image_nn'
-            else:
-                imtype = 'image'
-
-            imname = re.sub('\[IMAGE.*?\]', '', part)
-
-            if not os.path.isfile(imname):
-                continue
-
-            # Base64-encode the image.
-            srcstr = b'data:image/png;' + base64_encode_file(imname)
-
-            item['type'] = imtype
-            item['value'] = srcstr
+            item = process_image(re.sub('\[IMAGE.*?\]', '', part),
+                                 part.startswith('[IMAGE]'))
         elif part.startswith('[AUDIO]'):
             filename = part.replace('[AUDIO]', '')
 
@@ -192,7 +187,7 @@ def parse_matl_results(output):
             item['type'] = 'stdout'
             item['value'] = part
 
-        if len(item.keys()):
+        if item:
             result.append(item)
 
     return result
