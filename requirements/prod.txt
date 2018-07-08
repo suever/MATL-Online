@@ -1,5 +1,5 @@
 # General
-flask==0.12.2
+flask==1.0.2
 requests==2.18.4
 beautifulsoup4==4.6.0
 eventlet==0.20.0
