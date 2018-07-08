@@ -2,7 +2,7 @@
 flask==1.0.2
 requests==2.19.1
 beautifulsoup4==4.6.0
-eventlet==0.20.0
+eventlet==0.23.0
 gunicorn==19.7.1
 
 # Python 2/3 Compatibility
