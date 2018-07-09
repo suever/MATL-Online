@@ -134,6 +134,24 @@ def get_matl_folder(version, install=True):
     return matl_folder
 
 
+def process_image(image_path, interpolation=False):
+    """Process an image result returned from MATL."""
+    if os.path.isfile(image_path):
+        return ({
+            'type': 'image' if interpolation else 'image_nn',
+            'value': b'data:image/png;' + base64_encode_file(image_path)
+        })
+
+
+def process_audio(audio_file):
+    """Process an audio file returned from MATL."""
+    if os.path.isfile(audio_file):
+        return {
+            'type': 'audio',
+            'value': b'data:audio/wav;' + base64_encode_file(audio_file)
+        }
+
+
 def parse_matl_results(output):
     """Convert MATL output to a custom data structure.
 
@@ -151,48 +169,21 @@ def parse_matl_results(output):
         # Strip a single trailing newline
         part = part.rstrip('\n')
 
-        item = dict()
+        item = {}
 
         if part.startswith('[IMAGE'):
-
-            if part.startswith('[IMAGE_NN]'):
-                imtype = 'image_nn'
-            else:
-                imtype = 'image'
-
-            imname = re.sub('\[IMAGE.*?\]', '', part)
-
-            if not os.path.isfile(imname):
-                continue
-
-            # Base64-encode the image.
-            srcstr = b'data:image/png;' + base64_encode_file(imname)
-
-            item['type'] = imtype
-            item['value'] = srcstr
+            item = process_image(re.sub('\[IMAGE.*?\]', '', part),
+                                 part.startswith('[IMAGE]'))
         elif part.startswith('[AUDIO]'):
-            filename = part.replace('[AUDIO]', '')
-
-            if not os.path.isfile(filename):
-                continue
-
-            srcstr = b'data:audio/wav;' + base64_encode_file(filename)
-
-            item['type'] = 'audio'
-            item['value'] = srcstr
+            item = process_audio(part.replace('[AUDIO]', ''))
         elif part.startswith('[STDERR]'):
-            msg = part.replace('[STDERR]', '')
-            item['type'] = 'stderr'
-            item['value'] = msg
+            item = {'type': 'stderr', 'value': part.replace('[STDERR]', '')}
         elif part.startswith('[STDOUT]'):
-            item['type'] = 'stdout2'
-            msg = part.replace('[STDOUT]', '')
-            item['value'] = msg
+            item = {'type': 'stdout2', 'value': part.replace('[STDOUT]', '')}
         else:
-            item['type'] = 'stdout'
-            item['value'] = part
+            item = {'type': 'stdout', 'value': part}
 
-        if len(item.keys()):
+        if item:
             result.append(item)
 
     return result
