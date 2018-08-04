@@ -67,6 +67,8 @@ class Config(object):
     ROLLBAR_SERVER_SIDE_TOKEN = os.environ.get('MATL_ONLINE_ROLLBAR_SERVER_SIDE_TOKEN')
     ROLLBAR_CLIENT_SIDE_TOKEN = os.environ.get('MATL_ONLINE_ROLLBAR_CLIENT_SIDE_TOKEN')
 
+    WEBPACK_MANIFEST_PATH = 'webpack/manifest.json'
+
 
 class ProdConfig(Config):
     """Production configuration."""

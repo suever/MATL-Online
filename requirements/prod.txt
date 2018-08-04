@@ -9,8 +9,7 @@ gunicorn==19.8.1
 six==1.11.0
 
 # CSS/JS Assets
-flask_assets==0.12
-yuicompressor==2.4.8
+Flask-Webpack==0.1.0
 
 # Sockets
 flask_socketio==3.0.1

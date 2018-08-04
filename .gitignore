@@ -14,3 +14,13 @@ htmlcov
 
 # Octave files
 octave-workspace
+
+# npm
+node_modules
+
+ # webpack-built files
+matl_online/static/build/
+matl_online/webpack/manifest.json
+
+# Ignore IDE configurations
+.idea

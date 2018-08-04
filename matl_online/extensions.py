@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
 from flask_wtf import CSRFProtect
+from flask_webpack import Webpack
 
 from celery import Celery
 from matl_online.settings import Config
@@ -17,3 +18,4 @@ migrate = Migrate()
 socketio = SocketIO()
 celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
 csrf = CSRFProtect()
+webpack = Webpack()
