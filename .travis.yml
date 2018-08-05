@@ -17,10 +17,15 @@ install:
     # Install packages for reporting coverage information to external tools
     - pip install coveralls
     - pip install codeclimate-test-reporter
+    - yarn install
+
+before_script:
+    - yarn build
 
 script:
     - py.test tests -v --cov=matl_online
     - python manage.py lint
+
 after_success:
     - coveralls
     - codeclimate-test-reporter
