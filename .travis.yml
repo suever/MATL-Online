@@ -17,8 +17,8 @@ install:
     # Install packages for reporting coverage information to external tools
     - pip install coveralls
     - pip install codeclimate-test-reporter
-    - nvm install 6.10
-    - nvm use 6.10
+    - nvm install 8.10
+    - nvm use 8.10
     - yarn install
 
 before_script:
