@@ -16,6 +16,7 @@ const publicHost = debug ? 'http://localhost:2992' : '';
   context: __dirname,
   entry: {
     main_js: './assets/js/main',
+    privacy_js: './assets/js/privacy',
     main_css: [
       './node_modules/font-awesome/css/font-awesome.css',
       './node_modules/bootstrap/dist/css/bootstrap.css',
@@ -58,6 +59,10 @@ const publicHost = debug ? 'http://localhost:2992' : '';
         jQuery: 'jquery',
         'window.jQuery': 'jquery',
         'window.$': 'jquery'
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'commons',
+      filename: '[name].[hash].js',
     }),
     new ManifestRevisionPlugin(__dirname + '/matl_online/webpack/manifest.json', {
       rootAssetPath,

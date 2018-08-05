@@ -6,13 +6,13 @@
     <h2>Privacy Policy</h2>
     <p>Google Analytics is used on <a href="https://matl.suever.net">matl.suever.com</a> in order to get information about visitors to the site as well as their successful and/or unsuccessful interactions with the site.</p>
 
-    <p>This information includes:
+    <p>This information includes:</p>
     <ul>
       <li>What website referred you to this site.</li>
       <li>How long you remained on the site.</li>
       <li>What device and operating system you used to access the site.</li>
       <li>Information about errors you may have encountered while using the site.</li>
-    </ul></p>
+    </ul>
 
     <p>I am able to use this information to get an idea of how the site is being used as well as ensure that the site is designed to provide the optimal experience to the majority of users. I also use it to monitor and investigate potential issues with the site.</p>
 
@@ -21,7 +21,7 @@
     <div style="text-align:center;">
       <form id="optout">
         <label class="custom-control custom-checkbox">
-          <input id="optout_check" type="checkbox">
+          <input id="optout_check" type="checkbox" data-url="{{ url_for('public.privacy_opt') }}" data-status="{{ request.cookies.get('gaoptout') or False }}">
           <span class="custom-control-indicator"></span>
           <span class="custom-control-description">
             I would like to OPT-OUT of Google Analytics
@@ -36,21 +36,5 @@
 {% endblock %}
 
 {% block javascript %}
-<script>
-  $(document).ready(function(){
-
-    var checkbox = $('#optout_check');
-
-    {% if request.cookies.get('gaoptout') %}
-    $(checkbox).prop('checked', {{ request.cookies.get('gaoptout') }});
-    {% endif %}
-
-    $(checkbox).change(function(){
-      $.get({
-        url: "{{ url_for('public.privacy_opt') }}",
-        data: { value: this.checked }
-      });
-    });
-  });
-</script>
+  {{ javascript_tag('privacy_js') | safe }}
 {% endblock %}
