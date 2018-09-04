@@ -6,7 +6,7 @@ pytest==3.7.4
 factory-boy==2.11.1
 pytest-mock==1.10.0
 webtest==2.0.30
-pytest-cov==2.5.1
+pytest-cov==2.6.0
 
 # Lint and code style
 flake8==3.5.0
