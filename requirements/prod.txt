@@ -28,7 +28,7 @@ octave-kernel==0.28.4
 ipython==5.4.1 # pyup: ignore
 
 # Octave packages
-sympy==1.2
+sympy==1.3
 
 # Database
 SQLAlchemy==1.2.11
