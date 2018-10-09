@@ -3,7 +3,7 @@ flask==1.0.2
 requests==2.19.1
 beautifulsoup4==4.6.3
 eventlet==0.24.1
-gunicorn==19.8.1
+gunicorn==19.9.0
 
 # Python 2/3 Compatibility
 six==1.11.0
