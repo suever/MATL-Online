@@ -93,7 +93,7 @@ class TestDocLinks:
         double = DocLink(name='double')
         links = (DocLink(name='func1'), DocLink(name='func2'))
 
-        docstring = ("doc string for <strong>'%s'</strong>, " +
+        docstring = ("doc string for <strong>'%s'</strong>, "
                      '<strong>%s</strong> and <strong>%s</strong>') % \
             (double.name, links[0].name, links[1].name)
 
