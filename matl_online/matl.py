@@ -16,7 +16,7 @@ from matl_online.public.models import Release, DocumentationLink
 from matl_online.utils import unzip, parse_iso8601, base64_encode_file
 
 # Regular expression for pulling out content between <strong></strong> tags
-STRONG_RE = re.compile('\<strong\>.*?\<\/strong\>')
+STRONG_RE = re.compile(r'\<strong\>.*?\<\/strong\>')
 
 
 def install_matl(version, folder):
@@ -93,8 +93,8 @@ def help_file(version):
         if not info.inOutTogether[k] or len(info.out[k]) == 0:
             arguments = ''
         else:
-            arguments = '%s;  %s' % \
-                (info.__getattribute__('in')[k], info.out[k])
+            values = (info.__getattribute__('in')[k], info.out[k])
+            arguments = '%s;  %s' % values
 
         # Put hyperlinks to the MATLAB documentation in the description
         info.descr[k] = add_doc_links(info.descr[k])
@@ -160,7 +160,7 @@ def parse_matl_results(output):
     """
     result = list()
 
-    parts = re.split('(\[.*?\][^\n].*\n?)', output)
+    parts = re.split(r'(\[.*?\][^\n].*\n?)', output)
 
     for part in parts:
         if part == '':
@@ -172,7 +172,7 @@ def parse_matl_results(output):
         item = {}
 
         if part.startswith('[IMAGE'):
-            item = process_image(re.sub('\[IMAGE.*?\]', '', part),
+            item = process_image(re.sub(r'\[IMAGE.*?\]', '', part),
                                  part.startswith('[IMAGE]'))
         elif part.startswith('[AUDIO]'):
             item = process_audio(part.replace('[AUDIO]', ''))
