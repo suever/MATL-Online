@@ -2,7 +2,7 @@
 -r prod.txt
 
 # Testing
-pytest==3.10.0
+pytest==3.10.1
 factory-boy==2.11.1
 pytest-mock==1.10.0
 webtest==2.0.32
