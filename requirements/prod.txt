@@ -13,7 +13,7 @@ flask_assets==0.12
 yuicompressor==2.4.8
 
 # Sockets
-flask_socketio==3.1.0
+flask_socketio==3.1.1
 python-engineio==3.0.0
 python-socketio==2.1.0
 
