@@ -7,7 +7,7 @@ from flask import current_app
 from stackexchange import Site, ProgrammingPuzzlesampCodeGolf
 from stackexchange.models import Answer as StackExchangeAnswer
 
-from matl_online.utils import grouper
+from matl_online.utils import grouper, grouper_iterator
 from matl_online.analytics.models import Answer, StackExchangeUser
 
 
@@ -18,12 +18,46 @@ ANSWER_FILTER = '!b0OfNb3Hk1Ze71'
 class MATLAnswer(StackExchangeAnswer):
     """A Class for representing a MATL Answer on PPCG."""
 
+    BODY_REGEX = re.compile('MATL[,\s]')
+    QUERY_PARAMS = {'q': 'MATL', 'tagged': 'code-golf', 'body': 'MATL', 'comments': ''}
+
     # This is a default ID to prevent issues when one is not-assigned
     id = 0
+
+    @classmethod
+    def find_all(cls):
+
+        client = Site(ProgrammingPuzzlesampCodeGolf,
+                      current_app.config['STACK_EXCHANGE_KEY'])
+
+        generator = client.build('search/excerpts', cls, True, cls.QUERY_PARAMS)
+        for answer in generator:
+            print('Fetching answer %d' % answer.id)
+            if answer.is_valid():
+                yield answer
+            else:
+                model = answer.model()
+
+                if model:
+                    model.delete(commit=True)
+
+    def model(self):
+        return Answer.query.filter(Answer.answer_id == self.id).first()
+
+    def is_answer(self):
+        return self.id is not 0
+
+    def is_valid(self):
+        return self.is_answer() and \
+               self.BODY_REGEX.match(self.body) is not None
 
 
 def fetch_answers():
     """Fetch MATL Answers using the StackExchange API."""
+    site = Site(ProgrammingPuzzlesampCodeGolf,
+                current_app.config['STACK_EXCHANGE_KEY'])
+
+    '''
     site = Site(ProgrammingPuzzlesampCodeGolf,
                 current_app.config['STACK_EXCHANGE_KEY'])
 
@@ -36,8 +70,19 @@ def fetch_answers():
 
     # Grab a collection of MATLAnswers by searching for MATL
     response = site.build('search/excerpts', MATLAnswer, True, query)
+    import pdb
+    pdb.set_trace()
     answers = [answer for answer in response]
+    '''
+    responses = MATLAnswer.find_all()
 
+    for batch in grouper_iterator(10, responses):
+        answers = site.answers([answer.id for answer in batch],
+                               filter=ANSWER_FILTER)
+        import pdb
+        pdb.set_trace()
+
+    '''
     # Remove anything with an ID of 0 (a question)
     answers = [answer for answer in answers if answer.id != 0]
 
@@ -45,6 +90,7 @@ def fetch_answers():
     #
     #   1) Not in the database at all
     #   2) Have had activity since the last check date
+    '''
 
     to_fetch = []
 
@@ -67,7 +113,7 @@ def fetch_answers():
     answers = to_fetch
 
     users = StackExchangeUser.query.all()
-    users = {u.user_id: u for u in users}
+    user_map = {u.user_id: u for u in users}
 
     # Get more detailed information on each set of 100 questions
     groups = grouper(100, answers)
@@ -111,7 +157,7 @@ def fetch_answers():
                      url=answer.url)
 
             # Create the user if it doesn't exist already
-            if answer.owner_id not in users:
+            if answer.owner_id not in user_map:
                 owner = site.user(answer.owner_id)
                 user = StackExchangeUser.create(user_id=owner.id,
                                                 username=owner.display_name,
@@ -119,4 +165,4 @@ def fetch_answers():
                                                 avatar_url=owner.profile_image)
 
                 # Save it for future reference
-                users[user.user_id] = user
+                user_map[user.user_id] = user

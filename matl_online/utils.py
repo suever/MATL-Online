@@ -1,10 +1,7 @@
 """Miscelaneous utility functions for the application."""
 
-<<<<<<< HEAD
 import base64
-=======
 import itertools
->>>>>>> 0aa7dfb... Adds initial version of analytics page
 import os
 import zipfile
 
@@ -17,6 +14,14 @@ def base64_encode_file(filename):
     """Load a file and return the base64-encoded version of the contents."""
     with open(filename, 'rb') as fid:
         return b'base64,' + base64.b64encode(fid.read())
+
+
+def grouper_iterator(n, items):
+    """Group the input into chunks and yield each chunk"""
+    args = [iter(items)] * n
+    for group in itertools.izip_longest(*args):
+        # This filter removes fill values
+        yield [item for item in group if item is not None]
 
 
 def grouper(n, items):
