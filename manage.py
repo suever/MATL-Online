@@ -77,7 +77,7 @@ class Lint(Command):
             command_line = list(args) + files_and_directories
             print('{}: {}'.format(description, ' '.join(command_line)))
             rv = call(command_line)
-            if rv is not 0:
+            if rv != 0:
                 exit(rv)
 
         if fix_imports:
