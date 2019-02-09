@@ -5,7 +5,7 @@
 pytest==4.2.0
 factory-boy==2.11.1
 pytest-mock==1.10.1
-webtest==2.0.32
+webtest==2.0.33
 pytest-cov==2.6.1
 
 # Lint and code style
