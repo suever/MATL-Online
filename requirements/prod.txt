@@ -14,8 +14,6 @@ yuicompressor==2.4.8
 
 # Sockets
 flask_socketio==3.3.2
-python-engineio==3.4.3
-python-socketio==3.1.2
 
 # Celery
 celery==4.2.1
