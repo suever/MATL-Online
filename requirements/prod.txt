@@ -16,8 +16,8 @@ yuicompressor==2.4.8
 flask_socketio==3.3.2
 
 # Celery
-celery==4.2.1
-redis==2.10.6
+celery==4.3.0rc2
+redis==3.2.1
 
 # Octave interaction
 scipy==1.2.1
