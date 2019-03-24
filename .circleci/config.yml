@@ -1,0 +1,45 @@
+version: 2
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-3.6
+      - test-3.5
+      - test-2.7
+jobs:
+  test-3.6: &test-template
+    docker:
+      - image: circleci/python:3.6-jessie
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Install Octave
+          command: |
+            sudo add-apt-repository --yes ppa:octave/stable
+            sudo apt-get update -qq
+            sudo apt-get install -qq octave liboctave-dev libmpfr-dev
+      - run:
+          name: Install Dependencies
+          command: |
+            pip install --upgrade pip setuptools wheel
+            pip install coveralls codeclimate-test-reporter
+            pip install --only-binary=numpy,scipy -r requirements/dev.txt
+      - run:
+          name: Run tests
+          command: |
+            py.test tests -v --cov=matl_online
+            python manage.py lint
+      - run:
+          name: Report Coverage
+          command: |
+            coveralls
+            codeclimate-test-reporter
+  test-3.5:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.5-jessie
+  test-2.7:
+    <<: *test-template
+    docker:
+      - image: circleci/python:2.7-jessie
