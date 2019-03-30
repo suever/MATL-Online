@@ -21,8 +21,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
-            sudo pip install --upgrade pip setuptools wheel
-            sudo pip install coveralls codeclimate-test-reporter
+            sudo pip install --upgrade pip setuptools wheel coveralls
             sudo pip install --only-binary=numpy,scipy -r requirements/dev.txt
       - run:
           name: Run tests
@@ -33,7 +32,6 @@ jobs:
           name: Report Coverage
           command: |
             coveralls
-            codeclimate-test-reporter
   test-3.5:
     <<: *test-template
     docker:
