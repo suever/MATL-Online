@@ -16,15 +16,13 @@ jobs:
       - run:
           name: Install Octave
           command: |
-            sudo add-apt-repository --yes ppa:octave/stable
             sudo apt-get update -qq
             sudo apt-get install -qq octave liboctave-dev libmpfr-dev
       - run:
           name: Install Dependencies
           command: |
-            pip install --upgrade pip setuptools wheel
-            pip install coveralls codeclimate-test-reporter
-            pip install --only-binary=numpy,scipy -r requirements/dev.txt
+            sudo pip install --upgrade pip setuptools wheel coveralls
+            sudo pip install --only-binary=numpy,scipy -r requirements/dev.txt
       - run:
           name: Run tests
           command: |
@@ -34,7 +32,6 @@ jobs:
           name: Report Coverage
           command: |
             coveralls
-            codeclimate-test-reporter
   test-3.5:
     <<: *test-template
     docker:
