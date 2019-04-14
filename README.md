@@ -13,6 +13,27 @@ The core of the application is the lightweight Python web framework, [Flask][fla
 
 Technologies: [jQuery][jquery], [SocketIO][socketio], [flask][flask], [flask-socketio][flask-socketio], [celery][celery], [octave_kernel][octave_kernel], [Octave][octave]
 
+### Running Locally
+
+It's recommended that you run the application using `virtualenv`, so you'll want
+to create the virtualenv with the following:
+
+    virtualenv ./env
+
+If you choose a different location for your virtualenv, you will want to set the
+`VIRTUAL_ENV` variable in the `.env` to reflect that.
+
+Then you will want to install development dependencies into your virtualenv
+using `pip`:
+
+    ./env/bin/pip install -r requirements/dev.txt
+
+Then you can start the web and worker portions of the application using `honcho`
+
+    ./env/bin/honcho start
+
+You will then be able to access the application at http://localhost:5000.
+
 
 ### Planned Future Improvements
 
