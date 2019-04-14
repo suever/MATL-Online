@@ -35,6 +35,7 @@ Flask-SQLAlchemy==2.3.2
 # App management
 Flask-Migrate==2.4.0
 Flask-Script==2.0.6
+honcho==1.0.1
 
 # Forms
 flask_wtf==0.14.2
