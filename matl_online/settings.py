@@ -47,17 +47,6 @@ class Config(object):
         'http://www.mathworks.com/help/stats/functionlist.html',
         'http://www.mathworks.com/help/symbolic/functionlist.html']
 
-    # Flower configuration
-    FLOWER_OAUTH2_KEY = os.environ.get('MATL_ONLINE_GITHUB_CLIENT_ID')
-    FLOWER_OAUTH2_SECRET = os.environ.get('MATL_ONLINE_GITHUB_CLIENT_SECRET')
-    FLOWER_OAUTH2_REDIRECT_URI = 'https://matl.suever.net/admin/login'
-    FLOWER_BROKER_API = CELERY_BROKER_URL
-    FLOWER_URL_PREFIX = 'admin'
-    FLOWER_PERSISTENT = True
-    FLOWER_AUTH_PROVIDER = 'flower.views.auth.GithubLoginHandler'
-    FLOWER_COOKIE_SECRET = SECRET_KEY
-    FLOWER_AUTH = os.environ.get('MATL_ONLINE_FLOWER_AUTH')
-
     # Don't use google analytics unless we are on production
     GOOGLE_ANALYTICS_UNIVERSAL_ID = None
 
