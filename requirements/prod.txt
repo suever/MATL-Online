@@ -36,7 +36,7 @@ Flask-SQLAlchemy==2.3.2
 Flask-Migrate==2.4.0
 Flask-Script==2.0.6
 honcho==1.0.1
--e git://github.com/suever/honcho-export-systemd.git@60a60ec981918d9baeae56e25552204ca52979b3#egg=honcho-export-systemd
+-e git://github.com/suever/honcho-export-systemd.git#egg=honcho-export-systemd
 
 # Forms
 flask_wtf==0.14.2
