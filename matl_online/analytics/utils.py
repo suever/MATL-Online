@@ -60,7 +60,8 @@ class MATLAnswer(StackExchangeAnswer):
     def refresh(cls):
         """Lookup all MATL answers and update the database records accordingly."""
         for answer in cls.find_all():
-            answer.update()
+            if answer.code:
+                answer.update()
 
     @classmethod
     def find_all(cls, details=True):
@@ -111,13 +112,12 @@ class MATLAnswer(StackExchangeAnswer):
     def is_valid(self):
         """Boolean indicating if an answer is valid."""
         return self.is_answer() and \
-            self.BODY_REGEX.match(self.body) is not None and \
-            self.code is not None
+            self.BODY_REGEX.match(self.body) is not None
 
     @property
     def owner_id(self):
         """Id of the owner of the answer."""
-        self.details.owner_id
+        return self.details.owner_id
 
     @property
     def owner(self):
@@ -138,7 +138,7 @@ class MATLAnswer(StackExchangeAnswer):
     @property
     def codeblocks(self):
         """All blocks of code detected in the answer."""
-        soup = BeautifulSoup(self.body, 'html.parser')
+        soup = BeautifulSoup(self.details.body, 'html.parser')
 
         blocks = []
 
@@ -164,7 +164,8 @@ class MATLAnswer(StackExchangeAnswer):
             return None
 
         # The shortest codeblock should be returned
-        self.__code = codeblocks.sort(key=len)[0]
+        codeblocks.sort(key=len)
+        self.__code = codeblocks[0]
         return self.__code
 
     def __query(self):
