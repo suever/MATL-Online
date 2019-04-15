@@ -33,7 +33,6 @@ def fetch_answer_details(answers):
     """Get more detailed information for each answer."""
     # We batch these into groups of 100 to improve efficiency
     for batch in grouper_iterator(100, answers):
-        print('Fetching details for {}'.format(len(batch)))
         lookup = {answer.id: answer for answer in batch}
         details = client.answers(lookup.keys(), filter=ANSWER_FILTER)
 

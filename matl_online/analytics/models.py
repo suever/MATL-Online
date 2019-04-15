@@ -24,14 +24,12 @@ class StackExchangeUser(Model):
     def from_cache(cls, user_id, fallback=None):
         """Lookup a user in the cache."""
         if user_id in cls.__cache__:
-            print('Hit cache')
             return cls.__cache__[user_id]
 
         # Fallback to a lookup in the database
         user = cls.query.filter(cls.user_id == user_id).first()
 
         if user:
-            print('Lookup in database')
             cls.__cache__[user_id] = user
             return user
 
