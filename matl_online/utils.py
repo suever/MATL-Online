@@ -17,7 +17,7 @@ def base64_encode_file(filename):
 
 
 def grouper_iterator(n, items):
-    """Group the input into chunks and yield each chunk"""
+    """Group the input into chunks and yield each chunk."""
     args = [iter(items)] * n
     for group in itertools.izip_longest(*args):
         # This filter removes fill values

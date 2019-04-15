@@ -224,7 +224,7 @@ def _initialize_process(**kwargs):
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    """Function for scheduling periodic tasks."""
+    """Schedule periodic tasks."""
     sender.add_periodic_task(config.ANSWER_CHECK_INTERVAL,
                              refresh_answers.s(''),
                              name='Refresh Answers')

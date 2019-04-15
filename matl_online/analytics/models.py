@@ -22,6 +22,7 @@ class StackExchangeUser(Model):
 
     @classmethod
     def from_cache(cls, user_id, fallback=None):
+        """Lookup a user in the cache."""
         if user_id in cls.__cache__:
             print('Hit cache')
             return cls.__cache__[user_id]

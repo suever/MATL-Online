@@ -20,6 +20,7 @@ client = Site(
 
 
 def filter_invalid_answers(answers):
+    """Remove any invalid answers from the retrieved answers."""
     for answer in answers:
         if answer.is_valid():
             yield answer
@@ -29,6 +30,7 @@ def filter_invalid_answers(answers):
 
 
 def fetch_answer_details(answers):
+    """Get more detailed information for each answer."""
     # We batch these into groups of 100 to improve efficiency
     for batch in grouper_iterator(100, answers):
         print('Fetching details for {}'.format(len(batch)))
@@ -57,11 +59,13 @@ class MATLAnswer(StackExchangeAnswer):
 
     @classmethod
     def refresh(cls):
+        """Lookup all MATL answers and update the database records accordingly."""
         for answer in cls.find_all():
             answer.update()
 
     @classmethod
     def find_all(cls, details=True):
+        """Identify all MATL answers on the Code Golf site."""
         answers = client.build('search/excerpts', cls, True, cls.QUERY_PARAMS)
         answers = filter_invalid_answers(answers)
 
@@ -73,9 +77,11 @@ class MATLAnswer(StackExchangeAnswer):
             yield answer
 
     def delete(self):
+        """Remove any persisted information about this answer."""
         self.__query().delete()
 
     def update(self):
+        """Update the database model representation of this answer."""
         record = self.model() or Answer()
 
         # Make sure we create the owner record as well
@@ -96,22 +102,27 @@ class MATLAnswer(StackExchangeAnswer):
         )
 
     def model(self):
+        """Underlying database model."""
         return self.__query().first()
 
     def is_answer(self):
+        """Boolean indicating whether this is an answer or not."""
         return self.id != 0
 
     def is_valid(self):
+        """Boolean indicating if an answer is valid."""
         return self.is_answer() and \
             self.BODY_REGEX.match(self.body) is not None and \
             self.code is not None
 
     @property
     def owner_id(self):
+        """Id of the owner of the answer."""
         self.details.owner_id
 
     @property
     def owner(self):
+        """User corresponding to the owner of the answer."""
         owner = StackExchangeUser.from_cache(self.owner_id)
 
         if owner:
@@ -127,6 +138,7 @@ class MATLAnswer(StackExchangeAnswer):
 
     @property
     def codeblocks(self):
+        """All blocks of code detected in the answer."""
         soup = BeautifulSoup(self.body, 'html.parser')
 
         blocks = []
@@ -141,6 +153,7 @@ class MATLAnswer(StackExchangeAnswer):
 
     @property
     def code(self):
+        """Primary code block."""
         try:
             return self.__code
         except AttributeError:

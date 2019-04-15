@@ -20,12 +20,12 @@ groupers = {
 
 
 def to_epoch(date):
-    """Helper function for converting datetimes to seconds."""
+    """Convert datetimes to seconds."""
     return (date - dt(1970, 1, 1)).total_seconds()
 
 
 def group_by_date(date, span):
-    """Helper function for grouping by a given time span."""
+    """Group by a given time span."""
     read_fmt, write_fmt = groupers[span]
     return to_epoch(dt.strptime(date.strftime(read_fmt), write_fmt))
 
@@ -60,7 +60,7 @@ def histogram():
 
 @blueprint.route('/answers')
 def answers():
-    """A list of all MATL answers that we have stored."""
+    """List of all MATL answers that we have stored."""
     output = list()
 
     for answer in Answer.query.all():
@@ -105,5 +105,5 @@ def inject_modified_date():
 
 @blueprint.route('/')
 def home():
-    """Main analytics page."""
+    """Primary page for displaying analytics data."""
     return render_template('analytics.html')
