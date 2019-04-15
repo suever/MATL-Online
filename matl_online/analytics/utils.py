@@ -3,166 +3,157 @@
 import re
 
 from bs4 import BeautifulSoup
-from flask import current_app
 from stackexchange import Site, ProgrammingPuzzlesampCodeGolf
 from stackexchange.models import Answer as StackExchangeAnswer
 
-from matl_online.utils import grouper, grouper_iterator
 from matl_online.analytics.models import Answer, StackExchangeUser
-
+from matl_online.settings import config
+from matl_online.utils import grouper_iterator
 
 # An Answer filter to use for the SE API so that we get back specific fields
 ANSWER_FILTER = '!b0OfNb3Hk1Ze71'
+
+client = Site(
+    ProgrammingPuzzlesampCodeGolf,
+    config.STACK_EXCHANGE_KEY
+)
+
+
+def filter_invalid_answers(answers):
+    for answer in answers:
+        if answer.is_valid():
+            yield answer
+        else:
+            # Delete any invalid record we may have persisted previously
+            answer.delete()
+
+
+def fetch_answer_details(answers):
+    # We batch these into groups of 100 to improve efficiency
+    for batch in grouper_iterator(100, answers):
+        print('Fetching details for {}'.format(len(batch)))
+        lookup = {answer.id: answer for answer in batch}
+        details = client.answers(lookup.keys(), filter=ANSWER_FILTER)
+
+        for detail in details:
+            answer = lookup[detail.id]
+            answer.details = detail
+            yield answer
 
 
 class MATLAnswer(StackExchangeAnswer):
     """A Class for representing a MATL Answer on PPCG."""
 
-    BODY_REGEX = re.compile('MATL[,\s]')
-    QUERY_PARAMS = {'q': 'MATL', 'tagged': 'code-golf', 'body': 'MATL', 'comments': ''}
+    BODY_REGEX = re.compile(r'MATL[,\s]')
+    QUERY_PARAMS = {
+        'q': 'MATL',
+        'tagged': 'code-golf',
+        'body': 'MATL',
+        'comments': ''
+    }
 
     # This is a default ID to prevent issues when one is not-assigned
     id = 0
 
     @classmethod
-    def find_all(cls):
+    def refresh(cls):
+        for answer in cls.find_all():
+            answer.update()
 
-        client = Site(ProgrammingPuzzlesampCodeGolf,
-                      current_app.config['STACK_EXCHANGE_KEY'])
+    @classmethod
+    def find_all(cls, details=True):
+        answers = client.build('search/excerpts', cls, True, cls.QUERY_PARAMS)
+        answers = filter_invalid_answers(answers)
 
-        generator = client.build('search/excerpts', cls, True, cls.QUERY_PARAMS)
-        for answer in generator:
-            print('Fetching answer %d' % answer.id)
-            if answer.is_valid():
-                yield answer
-            else:
-                model = answer.model()
+        # If requested, fetch detailed info on these answers
+        if details:
+            answers = fetch_answer_details(answers)
 
-                if model:
-                    model.delete(commit=True)
+        for answer in answers:
+            yield answer
+
+    def delete(self):
+        self.__query().delete()
+
+    def update(self):
+        record = self.model() or Answer()
+
+        # Make sure we create the owner record as well
+        self.owner
+
+        # Now update the fields we care about
+        record.update(
+            answer_id=self.id,
+            owner_id=self.owner_id,
+            title=self.title,
+            question_id=self.question_id,
+            accepted=self.is_accepted,
+            created=self.creation_date,
+            updated=self.last_activity_date,
+            score=self.score,
+            source_code=self.code,
+            url=self.url
+        )
 
     def model(self):
-        return Answer.query.filter(Answer.answer_id == self.id).first()
+        return self.__query().first()
 
     def is_answer(self):
-        return self.id is not 0
+        return self.id != 0
 
     def is_valid(self):
         return self.is_answer() and \
-               self.BODY_REGEX.match(self.body) is not None
+            self.BODY_REGEX.match(self.body) is not None and \
+            self.code is not None
 
+    @property
+    def owner_id(self):
+        self.details.owner_id
 
-def fetch_answers():
-    """Fetch MATL Answers using the StackExchange API."""
-    site = Site(ProgrammingPuzzlesampCodeGolf,
-                current_app.config['STACK_EXCHANGE_KEY'])
+    @property
+    def owner(self):
+        owner = StackExchangeUser.from_cache(self.owner_id)
 
-    '''
-    site = Site(ProgrammingPuzzlesampCodeGolf,
-                current_app.config['STACK_EXCHANGE_KEY'])
+        if owner:
+            return owner
 
-    # We would like answers that contain "MATL" and are tagged with
-    # code-golf
-    query = {'q': 'MATL',
-             'tagged': 'code-golf',
-             'body': 'MATL',
-             'comments': ''}
+        info = client.user(self.owner_id)
+        return StackExchangeUser.create(
+            user_id=info.id,
+            username=info.display_name,
+            profile_url=info.url,
+            avatar_url=info.profile_image
+        )
 
-    # Grab a collection of MATLAnswers by searching for MATL
-    response = site.build('search/excerpts', MATLAnswer, True, query)
-    import pdb
-    pdb.set_trace()
-    answers = [answer for answer in response]
-    '''
-    responses = MATLAnswer.find_all()
+    @property
+    def codeblocks(self):
+        soup = BeautifulSoup(self.body, 'html.parser')
 
-    for batch in grouper_iterator(10, responses):
-        answers = site.answers([answer.id for answer in batch],
-                               filter=ANSWER_FILTER)
-        import pdb
-        pdb.set_trace()
+        blocks = []
 
-    '''
-    # Remove anything with an ID of 0 (a question)
-    answers = [answer for answer in answers if answer.id != 0]
+        for pre in soup.findAll('pre'):
+            codeblock = pre.find('code')
 
-    # Now we want to go through and find the ones that are either:
-    #
-    #   1) Not in the database at all
-    #   2) Have had activity since the last check date
-    '''
+            if codeblock:
+                blocks.append(codeblock.text.strip())
 
-    to_fetch = []
+        return blocks
 
-    for answer in answers:
-        entry = Answer.query.filter(Answer.answer_id == answer.id).first()
+    @property
+    def code(self):
+        try:
+            return self.__code
+        except AttributeError:
+            pass
 
-        if re.match('MATL[,\s]', answer.body) is None:
-            if entry:
-                entry.delete()
-            continue
+        codeblocks = self.codeblocks
 
-        to_fetch.append(answer)
+        if len(codeblocks) == 0:
+            return None
 
-        continue
+        # The shortest codeblock should be returned
+        self.__code = codeblocks.sort(key=len)[0]
+        return self.__code
 
-        # If we don't have an entry yet, then we need to fetch it
-        if entry is None or answer.last_activity_date < entry.updated:
-            to_fetch.append((answer, entry))
-
-    answers = to_fetch
-
-    users = StackExchangeUser.query.all()
-    user_map = {u.user_id: u for u in users}
-
-    # Get more detailed information on each set of 100 questions
-    groups = grouper(100, answers)
-
-    for group in groups:
-        ans = site.answers([answer.id for answer in group],
-                           filter=ANSWER_FILTER)
-
-        for answer in ans:
-            soup = BeautifulSoup(answer.body, 'html.parser')
-
-            code = None
-
-            # Find the shortest codeblock
-            for pre in soup.findAll('pre'):
-                codeblock = pre.find('code')
-
-                if codeblock:
-                    code = codeblock.text.strip()
-                    break
-
-            # Skip if we didn't find any source code
-            if code is None:
-                continue
-
-            # Look up the answer to determine if we need
-            a = Answer.query.filter(Answer.answer_id == answer.id).first()
-
-            if a is None:
-                a = Answer()
-
-            a.update(answer_id=answer.id,
-                     owner_id=answer.owner_id,
-                     title=answer.title,
-                     question_id=answer.question_id,
-                     accepted=answer.is_accepted,
-                     created=answer.creation_date,
-                     updated=answer.last_activity_date,
-                     score=answer.score,
-                     source_code=code,
-                     url=answer.url)
-
-            # Create the user if it doesn't exist already
-            if answer.owner_id not in user_map:
-                owner = site.user(answer.owner_id)
-                user = StackExchangeUser.create(user_id=owner.id,
-                                                username=owner.display_name,
-                                                profile_url=owner.url,
-                                                avatar_url=owner.profile_image)
-
-                # Save it for future reference
-                user_map[user.user_id] = user
+    def __query(self):
+        return Answer.query.filter(Answer.answer_id == self.id)

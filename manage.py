@@ -15,7 +15,7 @@ from matl_online.app import create_app, socketio
 from matl_online.database import db
 from matl_online import matl
 from matl_online.settings import config
-from matl_online.analytics.utils import fetch_answers
+from matl_online.analytics.utils import MATLAnswer
 
 eventlet.monkey_patch()
 
@@ -48,7 +48,7 @@ def refresh_releases():
 @manager.command
 def refresh_answers():
     """Update the local database of submitted answers."""
-    fetch_answers()
+    MATLAnswer.refresh()
 
 
 class Lint(Command):
