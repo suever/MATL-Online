@@ -1,6 +1,6 @@
 """Module for interacting with MATL and it's source code."""
 
-import cgi
+import html
 import json
 import os
 import re
@@ -106,10 +106,12 @@ def help_file(version):
         if not isinstance(info.comm[k], six.string_types[0]):
             info.comm[k] = ''
 
-        item = {'source': cgi.escape(info.sourcePlain[k]),
-                'brief': info.comm[k],
-                'description': info.descr[k],
-                'arguments': arguments}
+        item = {
+            'source': html.escape(info.sourcePlain[k]),
+            'brief': info.comm[k],
+            'description': info.descr[k],
+            'arguments': arguments
+        }
 
         result.append(item)
 
