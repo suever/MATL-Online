@@ -120,7 +120,7 @@ class TestLogHandler:
 
         send_func = mocker.patch('matl_online.tasks.OutputHandler.send')
 
-        logger.warn('warning')
+        logger.warning('warning')
         logger.error('error')
         logger.debug('debug')
 
