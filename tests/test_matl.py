@@ -340,7 +340,7 @@ class TestInstall:
         get = mocker.patch('matl_online.matl.requests.get')
         get.return_value.status_code = 200
         get.return_value.json = lambda: {'zipball_url': 'zipball'}
-        content = 'zipball_content'
+        content = b'zipball_content'
         get.return_value.content = content
 
         zipper = mocker.patch('matl_online.matl.unzip')
