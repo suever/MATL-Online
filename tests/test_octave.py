@@ -2,7 +2,7 @@
 
 import os
 
-from six.moves import mock
+from unittest import mock
 
 from matl_online.octave import OctaveSession
 
