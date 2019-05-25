@@ -9,7 +9,7 @@ import shutil
 import six
 
 from flask import current_app
-from six import StringIO
+from io import BytesIO
 from scipy.io import loadmat
 
 from matl_online.public.models import Release, DocumentationLink
@@ -28,7 +28,7 @@ def install_matl(version, folder):
     if response.status_code == 404:
         raise KeyError('Tag "%s" is invalid' % version)
 
-    unzip(StringIO(response.content), folder)
+    unzip(BytesIO(response.content), folder)
 
 
 def add_doc_links(description):
