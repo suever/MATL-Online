@@ -3,7 +3,7 @@ import requests
 
 from bs4 import BeautifulSoup
 from flask import current_app
-from six.moves.urllib.parse import urljoin
+from urllib.parse import urljoin
 from sqlalchemy import or_
 from sqlalchemy.ext.hybrid import hybrid_property
 
