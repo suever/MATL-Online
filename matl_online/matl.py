@@ -6,7 +6,6 @@ import os
 import re
 import requests
 import shutil
-import six
 
 from flask import current_app
 from io import BytesIO
@@ -103,7 +102,7 @@ def help_file(version):
         info.descr[k] = info.descr[k].replace('\n', '')
 
         # Scipy loads empty char arrays as numeric arrays
-        if not isinstance(info.comm[k], six.string_types[0]):
+        if not isinstance(info.comm[k], str):
             info.comm[k] = ''
 
         item = {
