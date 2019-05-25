@@ -2,7 +2,6 @@
 
 import hmac
 import json
-import six
 
 from hashlib import sha1
 from flask import url_for
@@ -104,7 +103,6 @@ class TestReleaseHook:
 
     def get_signature(self, app, data):
         """Create a signature header from the secret and payload."""
-        secret = app.config['GITHUB_HOOK_SECRET']
-        sign = hmac.new(six.b(secret or ''), msg=six.b(data),
-                        digestmod=sha1).hexdigest()
+        secret = str.encode(app.config['GITHUB_HOOK_SECRET'] or '')
+        sign = hmac.new(secret, msg=data.encode(), digestmod=sha1).hexdigest()
         return {'X-Hub-Signature': 'sha1=' + sign}
