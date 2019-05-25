@@ -5,7 +5,6 @@ import hmac
 import os
 import re
 import requests
-import six
 import uuid
 
 from datetime import datetime
@@ -110,7 +109,7 @@ def privacy():
 def github_hook():
     """Github web hook for receiving information about MATL releases."""
     # Now verify that the secret is correct
-    secret = current_app.config['GITHUB_HOOK_SECRET']
+    secret = str.encode(current_app.config['GITHUB_HOOK_SECRET'] or '')
 
     # Extract the signature from the custom header
     signature = request.headers.get('X-Hub-Signature')
@@ -123,9 +122,7 @@ def github_hook():
 
     signature = pieces[1]
 
-    mac = hmac.new(six.b(secret or ''),
-                   msg=six.b(request.get_data(as_text=True)),
-                   digestmod=sha1)
+    mac = hmac.new(secret, msg=request.get_data(), digestmod=sha1)
 
     if str(mac.hexdigest()) != str(signature):
         abort(403)
