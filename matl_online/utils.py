@@ -12,7 +12,7 @@ ISO8601_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 def base64_encode_file(filename):
     """Load a file and return the base64-encoded version of the contents."""
     with open(filename, 'rb') as fid:
-        return b'base64,' + base64.b64encode(fid.read())
+        return 'base64,' + base64.b64encode(fid.read()).decode()
 
 
 def parse_iso8601(date):
