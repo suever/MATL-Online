@@ -140,7 +140,7 @@ def process_image(image_path, interpolation=False):
     if os.path.isfile(image_path):
         return ({
             'type': 'image' if interpolation else 'image_nn',
-            'value': b'data:image/png;' + base64_encode_file(image_path)
+            'value': 'data:image/png;' + base64_encode_file(image_path)
         })
 
 
@@ -149,7 +149,7 @@ def process_audio(audio_file):
     if os.path.isfile(audio_file):
         return {
             'type': 'audio',
-            'value': b'data:audio/wav;' + base64_encode_file(audio_file)
+            'value': 'data:audio/wav;' + base64_encode_file(audio_file)
         }
 
 
