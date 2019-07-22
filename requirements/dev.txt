@@ -15,4 +15,4 @@ flake8-quotes==2.0.1
 pep8-naming==0.8.2
 
 # TOMBSTONE: Pin this until flake8-docstrings gets updated
-pydocstyle==4.0.0
+pydocstyle<=4.0.0 # pyup: ignore
