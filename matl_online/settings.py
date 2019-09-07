@@ -56,6 +56,9 @@ class Config(object):
     ROLLBAR_SERVER_SIDE_TOKEN = os.environ.get('MATL_ONLINE_ROLLBAR_SERVER_SIDE_TOKEN')
     ROLLBAR_CLIENT_SIDE_TOKEN = os.environ.get('MATL_ONLINE_ROLLBAR_CLIENT_SIDE_TOKEN')
 
+    # CORS Configuration for Flask SocketIO
+    CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS') or []
+
 
 class ProdConfig(Config):
     """Production configuration."""
