@@ -15,7 +15,7 @@ python_socketio==4.4.0
 python_engineio==3.10.0
 
 # Celery
-celery==4.3.0
+celery==4.4.0
 redis==3.3.11
 
 # Octave interaction
