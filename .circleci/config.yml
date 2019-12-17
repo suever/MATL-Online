@@ -3,8 +3,8 @@ workflows:
   version: 2
   test:
     jobs:
+      - test-3.7
       - test-3.6
-      - test-3.5
 jobs:
   test-3.6: &test-template
     docker:
@@ -31,7 +31,7 @@ jobs:
           name: Report Coverage
           command: |
             coveralls
-  test-3.5:
+  test-3.7:
     <<: *test-template
     docker:
-      - image: circleci/python:3.5-jessie
+      - image: circleci/python:3.7-buster
