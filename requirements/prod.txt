@@ -6,7 +6,7 @@ eventlet==0.25.1
 gunicorn==20.0.4
 
 # CSS/JS Assets
-flask_assets==0.12
+flask_assets==2.0
 yuicompressor==2.4.8
 
 # Sockets
