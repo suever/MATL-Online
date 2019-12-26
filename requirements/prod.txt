@@ -20,7 +20,7 @@ redis==3.3.11
 
 # Octave interaction
 scipy==1.4.1
-numpy==1.17.4
+numpy==1.18.0
 octave-kernel==0.31.0
 ipython==7.10.2 # pyup: ignore
 
