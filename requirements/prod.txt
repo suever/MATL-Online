@@ -22,7 +22,7 @@ redis==3.3.11
 scipy==1.4.1
 numpy==1.18.0
 octave-kernel==0.31.0
-ipython==7.10.2 # pyup: ignore
+ipython==7.11.0 # pyup: ignore
 
 # Octave packages
 sympy==1.5
