@@ -93,7 +93,7 @@ class TestDocLinks:
         double = DocLink(name='double')
         links = (DocLink(name='func1'), DocLink(name='func2'))
 
-        docstring = ("doc string for <strong>'%s'</strong>, " +
+        docstring = ("doc string for <strong>'%s'</strong>, "
                      '<strong>%s</strong> and <strong>%s</strong>') % \
             (double.name, links[0].name, links[1].name)
 
@@ -176,8 +176,8 @@ class TestResults:
         assert result[0]['type'] == 'image_nn'
 
         # Since the file is empty it should just be the header portion
-        encoded = base64.b64encode(contents)
-        assert result[0]['value'] == b'data:image/png;base64,' + encoded
+        encoded = base64.b64encode(contents).decode()
+        assert result[0]['value'] == 'data:image/png;base64,' + encoded
 
         # Make sure the file was not removed
         assert os.path.isfile(fileobj.strpath)
@@ -196,8 +196,8 @@ class TestResults:
         assert result[0]['type'] == 'image'
 
         # Since the file is empty it should just be the header portion
-        encoded = base64.b64encode(contents)
-        assert result[0]['value'] == b'data:image/png;base64,' + encoded
+        encoded = base64.b64encode(contents).decode()
+        assert result[0]['value'] == 'data:image/png;base64,' + encoded
 
         # Make sure the file was not removed
         assert os.path.isfile(fileobj.strpath)
@@ -223,8 +223,8 @@ class TestResults:
         assert len(result) == 1
         assert result[0]['type'] == 'audio'
 
-        encoded = base64.b64encode(contents)
-        assert result[0]['value'] == b'data:audio/wav;base64,' + encoded
+        encoded = base64.b64encode(contents).decode()
+        assert result[0]['value'] == 'data:audio/wav;base64,' + encoded
 
         # Make sure that the file was not removed
         assert os.path.isfile(fileobj.strpath)
@@ -340,7 +340,7 @@ class TestInstall:
         get = mocker.patch('matl_online.matl.requests.get')
         get.return_value.status_code = 200
         get.return_value.json = lambda: {'zipball_url': 'zipball'}
-        content = 'zipball_content'
+        content = b'zipball_content'
         get.return_value.content = content
 
         zipper = mocker.patch('matl_online.matl.unzip')

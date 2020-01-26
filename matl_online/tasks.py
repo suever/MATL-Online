@@ -182,7 +182,7 @@ def matl_task(self, *args, **kwargs):
 
     try:
         matl(self.octave, *args, folder=self.folder,
-             stream_handler=self.handler.process_message, **kwargs)
+             line_handler=self.handler.process_message, **kwargs)
         result = self.send_results()
 
     # In the case of an interrupt (either through a time limit or a

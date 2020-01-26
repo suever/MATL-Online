@@ -6,7 +6,6 @@ import pytest
 import uuid
 
 from flask_socketio import SocketIOTestClient
-from six import add_move, MovedModule
 from webtest import TestApp
 
 os.environ['MATL_ONLINE_ENV'] = 'test'
@@ -16,8 +15,6 @@ from matl_online.database import db as _db
 from matl_online.extensions import socketio
 from matl_online.settings import config
 from matl_online.tasks import OutputHandler
-
-add_move(MovedModule('mock', 'mock', 'unittest.mock'))
 
 
 @pytest.fixture(scope='function')

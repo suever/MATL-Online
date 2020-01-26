@@ -1,0 +1,37 @@
+version: 2
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-3.7
+      - test-3.6
+jobs:
+  test-3.6: &test-template
+    docker:
+      - image: circleci/python:3.6-jessie
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Install Octave
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -qq octave liboctave-dev libmpfr-dev
+      - run:
+          name: Install Dependencies
+          command: |
+            sudo pip install --upgrade pip setuptools wheel coveralls
+            sudo pip install --only-binary=numpy,scipy -r requirements/dev.txt
+      - run:
+          name: Run tests
+          command: |
+            py.test tests -v --cov=matl_online
+            python manage.py lint
+      - run:
+          name: Report Coverage
+          command: |
+            coveralls
+  test-3.7:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.7-buster

@@ -1,6 +1,6 @@
 # MATL Online
 
-[![Build Status](https://travis-ci.org/suever/MATL-Online.svg?branch=master)](https://travis-ci.org/suever/MATL-Online)
+[![Build Status](https://circleci.com/gh/suever/MATL-Online.svg?style=svg)](https://circleci.com/gh/suever/MATL-Online)
 [![Coverage Status](https://coveralls.io/repos/github/suever/MATL-Online/badge.svg?branch=master)](https://coveralls.io/github/suever/MATL-Online?branch=master)
 [![Code Climate](https://codeclimate.com/github/suever/MATL-Online/badges/gpa.svg)](https://codeclimate.com/github/suever/MATL-Online) 
 [![Updates](https://pyup.io/repos/github/suever/MATL-Online/shield.svg)](https://pyup.io/repos/github/suever/MATL-Online/)
@@ -12,6 +12,27 @@ This is a Python-based online interpreter for the [MATL][matl] programming langu
 The core of the application is the lightweight Python web framework, [Flask][flask]. Two-way communication between the JavaScript front-end and the application is handled by [SocketIO][socketio]. MATL code and input arguments are submitted to the server and [celery][celery] assigns the task to one of many available worker processes. Each worker process uses the [`octave_kernel`][octave_kernel] library to communicate with an underlying [Octave][octave] instance to evaluate the provided code. All [Octave][octave] output from the process (including text and graphics) is streamed in real-time back to the browser via [SocketIO][socketio]. 
 
 Technologies: [jQuery][jquery], [SocketIO][socketio], [flask][flask], [flask-socketio][flask-socketio], [celery][celery], [octave_kernel][octave_kernel], [Octave][octave]
+
+### Running Locally
+
+It's recommended that you run the application using `virtualenv`, so you'll want
+to create the virtualenv with the following:
+
+    virtualenv ./env
+
+If you choose a different location for your virtualenv, you will want to set the
+`VIRTUAL_ENV` variable in the `.env` to reflect that.
+
+Then you will want to install development dependencies into your virtualenv
+using `pip`:
+
+    ./env/bin/pip install -r requirements/dev.txt
+
+Then you can start the web and worker portions of the application using `honcho`
+
+    ./env/bin/honcho start
+
+You will then be able to access the application at http://localhost:5000.
 
 
 ### Planned Future Improvements

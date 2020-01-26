@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 """Management script."""
 
-import eventlet
 import os
+
+import eventlet
+eventlet.monkey_patch()
 
 from glob import glob
 from subprocess import call
@@ -10,13 +12,10 @@ from subprocess import call
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Server, Shell, Command, Option
 from flask_script.commands import Clean, ShowUrls
-
 from matl_online.app import create_app, socketio
 from matl_online.database import db
 from matl_online import matl
 from matl_online.settings import config
-
-eventlet.monkey_patch()
 
 app = create_app(config)
 
@@ -77,7 +76,7 @@ class Lint(Command):
             command_line = list(args) + files_and_directories
             print('{}: {}'.format(description, ' '.join(command_line)))
             rv = call(command_line)
-            if rv is not 0:
+            if rv != 0:
                 exit(rv)
 
         if fix_imports:

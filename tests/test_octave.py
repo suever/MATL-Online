@@ -2,7 +2,7 @@
 
 import os
 
-from six.moves import mock
+from unittest import mock
 
 from matl_online.octave import OctaveSession
 
@@ -69,9 +69,9 @@ class TestOctaveSession:
         output_list = list()
         handler = output_list.append
 
-        session.eval(code, stream_handler=handler)
+        session.eval(code, line_handler=handler)
 
-        assert session._engine.stream_handler == handler
+        assert session._engine.line_handler == handler
         mock.assert_called_with(code)
 
     def test_terminate(self, mocker):

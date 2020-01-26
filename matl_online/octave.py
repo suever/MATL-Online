@@ -33,8 +33,8 @@ class OctaveSession:
 
     def eval(self, code, **kwargs):
         """Evaluate some code in Octave."""
-        handler = kwargs.pop('stream_handler', self._engine.stream_handler)
-        self._engine.stream_handler = handler
+        handler = kwargs.pop('line_handler', self._engine.line_handler)
+        self._engine.line_handler = handler
         return self._engine.eval(code, **kwargs)
 
     def restart(self):

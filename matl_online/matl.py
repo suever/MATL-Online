@@ -1,22 +1,21 @@
 """Module for interacting with MATL and it's source code."""
 
-import cgi
+import html
 import json
 import os
 import re
 import requests
 import shutil
-import six
 
 from flask import current_app
-from six import StringIO
+from io import BytesIO
 from scipy.io import loadmat
 
 from matl_online.public.models import Release, DocumentationLink
 from matl_online.utils import unzip, parse_iso8601, base64_encode_file
 
 # Regular expression for pulling out content between <strong></strong> tags
-STRONG_RE = re.compile('\<strong\>.*?\<\/strong\>')
+STRONG_RE = re.compile(r'\<strong\>.*?\<\/strong\>')
 
 
 def install_matl(version, folder):
@@ -28,7 +27,7 @@ def install_matl(version, folder):
     if response.status_code == 404:
         raise KeyError('Tag "%s" is invalid' % version)
 
-    unzip(StringIO(response.content), folder)
+    unzip(BytesIO(response.content), folder)
 
 
 def add_doc_links(description):
@@ -93,8 +92,8 @@ def help_file(version):
         if not info.inOutTogether[k] or len(info.out[k]) == 0:
             arguments = ''
         else:
-            arguments = '%s;  %s' % \
-                (info.__getattribute__('in')[k], info.out[k])
+            values = (info.__getattribute__('in')[k], info.out[k])
+            arguments = '%s;  %s' % values
 
         # Put hyperlinks to the MATLAB documentation in the description
         info.descr[k] = add_doc_links(info.descr[k])
@@ -103,13 +102,15 @@ def help_file(version):
         info.descr[k] = info.descr[k].replace('\n', '')
 
         # Scipy loads empty char arrays as numeric arrays
-        if not isinstance(info.comm[k], six.string_types[0]):
+        if not isinstance(info.comm[k], str):
             info.comm[k] = ''
 
-        item = {'source': cgi.escape(info.sourcePlain[k]),
-                'brief': info.comm[k],
-                'description': info.descr[k],
-                'arguments': arguments}
+        item = {
+            'source': html.escape(info.sourcePlain[k]),
+            'brief': info.comm[k],
+            'description': info.descr[k],
+            'arguments': arguments
+        }
 
         result.append(item)
 
@@ -139,7 +140,7 @@ def process_image(image_path, interpolation=False):
     if os.path.isfile(image_path):
         return ({
             'type': 'image' if interpolation else 'image_nn',
-            'value': b'data:image/png;' + base64_encode_file(image_path)
+            'value': 'data:image/png;' + base64_encode_file(image_path)
         })
 
 
@@ -148,7 +149,7 @@ def process_audio(audio_file):
     if os.path.isfile(audio_file):
         return {
             'type': 'audio',
-            'value': b'data:audio/wav;' + base64_encode_file(audio_file)
+            'value': 'data:audio/wav;' + base64_encode_file(audio_file)
         }
 
 
@@ -160,7 +161,7 @@ def parse_matl_results(output):
     """
     result = list()
 
-    parts = re.split('(\[.*?\][^\n].*\n?)', output)
+    parts = re.split(r'(\[.*?\][^\n].*\n?)', output)
 
     for part in parts:
         if part == '':
@@ -172,7 +173,7 @@ def parse_matl_results(output):
         item = {}
 
         if part.startswith('[IMAGE'):
-            item = process_image(re.sub('\[IMAGE.*?\]', '', part),
+            item = process_image(re.sub(r'\[IMAGE.*?\]', '', part),
                                  part.startswith('[IMAGE]'))
         elif part.startswith('[AUDIO]'):
             item = process_audio(part.replace('[AUDIO]', ''))
@@ -189,7 +190,7 @@ def parse_matl_results(output):
     return result
 
 
-def matl(octave, flags, code='', inputs='', version='', folder='', stream_handler=None):
+def matl(octave, flags, code='', inputs='', version='', folder='', line_handler=None):
     """Open a session with Octave and manages input/output as well as errors."""
     # Remember what directory octave is current in
     def escape(x):
@@ -215,7 +216,7 @@ def matl(octave, flags, code='', inputs='', version='', folder='', stream_handle
         cmd = "matl_runner('%s', %s);\n" % (flags, code)
 
     # Actually run the MATL code
-    octave.eval(cmd, stream_handler=stream_handler)
+    octave.eval(cmd, line_handler=line_handler)
 
     # Change back to the original directory
     cmd = "cd('%s')" % escape(current_app.config['PROJECT_ROOT'])
