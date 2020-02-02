@@ -16,7 +16,7 @@ python_engineio==3.11.2
 
 # Celery
 celery==4.4.0
-redis==3.4.0
+redis==3.4.1
 
 # Octave interaction
 scipy==1.4.1
