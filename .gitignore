@@ -2,6 +2,9 @@
 *.pyc
 env*
 
+# IDE Configuration
+.idea
+
 # Ignore database
 *.db
 
