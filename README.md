@@ -3,7 +3,6 @@
 [![Build Status](https://circleci.com/gh/suever/MATL-Online.svg?style=svg)](https://circleci.com/gh/suever/MATL-Online)
 [![Coverage Status](https://coveralls.io/repos/github/suever/MATL-Online/badge.svg?branch=master)](https://coveralls.io/github/suever/MATL-Online?branch=master)
 [![Code Climate](https://codeclimate.com/github/suever/MATL-Online/badges/gpa.svg)](https://codeclimate.com/github/suever/MATL-Online) 
-[![Updates](https://pyup.io/repos/github/suever/MATL-Online/shield.svg)](https://pyup.io/repos/github/suever/MATL-Online/)
 
 This is a Python-based online interpreter for the [MATL][matl] programming language, a golfing language based on [MATLAB][matlab] and [Octave][octave]. A live version of this application is hosted at [matl.suever.net][matl.suever.net].
 
