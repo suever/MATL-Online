@@ -1,7 +1,7 @@
 # General
 flask==1.1.2
 requests==2.24.0
-beautifulsoup4==4.9.2
+beautifulsoup4==4.9.3
 eventlet==0.28.0
 gunicorn==20.0.4
 
