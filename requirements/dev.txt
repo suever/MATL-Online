@@ -9,7 +9,7 @@ webtest==2.0.35
 pytest-cov==2.10.1
 
 # Lint and code style
-flake8==3.8.3
+flake8==3.8.4
 flake8-docstrings==1.5.0
 flake8-quotes==3.2.0
 pep8-naming==0.11.1
