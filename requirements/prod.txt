@@ -2,7 +2,7 @@
 flask==1.1.2
 requests==2.25.0
 beautifulsoup4==4.9.3
-eventlet==0.29.1
+eventlet==0.30.0
 gunicorn==20.0.4
 
 # CSS/JS Assets
