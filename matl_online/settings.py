@@ -6,8 +6,8 @@ import uuid
 class Config(object):
     """Base configuration."""
 
-    CELERY_BROKER_URL = 'redis://localhost:6379/0'
-    CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+    CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
     CELERYD_TASK_SOFT_TIME_LIMIT = 30
     CELERYD_TASK_TIME_LIMIT = 60
 
@@ -45,12 +45,13 @@ class Config(object):
         'http://www.mathworks.com/help/matlab/functionlist.html',
         'http://www.mathworks.com/help/images/functionlist.html',
         'http://www.mathworks.com/help/stats/functionlist.html',
-        'http://www.mathworks.com/help/symbolic/functionlist.html']
+        'http://www.mathworks.com/help/symbolic/functionlist.html'
+    ]
 
     # Don't use google analytics unless we are on production
     GOOGLE_ANALYTICS_UNIVERSAL_ID = None
 
-    SOCKETIO_MESSAGE_QUEUE = None
+    SOCKETIO_MESSAGE_QUEUE = os.environ.get('SOCKETIO_MESSAGE_QUEUE')
 
     # Rollbar
     ROLLBAR_SERVER_SIDE_TOKEN = os.environ.get('MATL_ONLINE_ROLLBAR_SERVER_SIDE_TOKEN')
@@ -69,8 +70,6 @@ class ProdConfig(Config):
 
     GOOGLE_ANALYTICS_UNIVERSAL_ID = os.environ.get('GOOGLE_ANALYTICS_UNIVERSAL_ID')
 
-    SOCKETIO_MESSAGE_QUEUE = 'redis://'
-
     ROLLBAR_ENV = 'production'
 
 
@@ -80,8 +79,6 @@ class DevConfig(Config):
     ENV = 'dev'
     DEBUG = True
     ASSETS_DEBUG = True
-
-    SOCKETIO_MESSAGE_QUEUE = 'redis://'
 
     ROLLBAR_ENV = 'development'
 
