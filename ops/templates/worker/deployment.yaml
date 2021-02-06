@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: matl-online
+  labels:
+    app: matl-online
+spec:
+  selector:
+    matchLabels:
+      app: matl-online
+  template:
+    metadata:
+      name: worker
+      namespace: matl-online
+      labels:
+        app: matl-online
+    spec:
+      containers:
+        - name: worker
+          image: "suever/matl-online:{{ .Values.CommitHash }}"
+          command:
+            - celery
+            - worker
+            - --app=worker.celery
+            - --autoscale=4,2
+            - --purge
+            - -Ofair
+            - --loglevel=INFO
+          ports:
+            - containerPort: 5000
+          env:
+            - name: CELERY_BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_URL
+                  name: secrets
+            - name: CELERY_RESULT_BACKEND
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_URL
+                  name: secrets
+            - name: EVENTLET_NO_GREENDNS
+              value: "yes"
+            - name: SOCKETIO_MESSAGE_QUEUE
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_URL
+                  name: secrets
+            - name: MATL_ONLINE_ENV
+              value: prod
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 8877

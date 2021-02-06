@@ -1,6 +1,5 @@
 .circleci
 .github
-.git
 
 .pytest_cache
 
