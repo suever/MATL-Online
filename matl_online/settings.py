@@ -24,7 +24,7 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DB_NAME = 'database.db'
     DB_PATH = os.path.join(PROJECT_ROOT, DB_NAME)
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(DB_PATH)
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///{0}'.format(DB_PATH))
 
     # Directories
     MATL_FOLDER = os.path.join(PROJECT_ROOT, 'MATL')
