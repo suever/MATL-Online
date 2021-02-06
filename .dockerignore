@@ -1,0 +1,11 @@
+.circleci
+.github
+.git
+
+.pytest_cache
+
+__pycache__
+*env
+*.db
+
+ops
