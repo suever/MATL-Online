@@ -21,8 +21,8 @@ spec:
           image: "suever/matl-online:{{ .Values.CommitHash }}"
           command:
             - celery
-            - worker
             - --app=worker.celery
+            - worker
             - --autoscale=4,2
             - --purge
             - -Ofair
