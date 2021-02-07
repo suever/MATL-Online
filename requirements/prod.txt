@@ -19,7 +19,7 @@ celery==5.0.5
 redis==3.5.3
 
 # Octave interaction
-scipy==1.5.4
+scipy==1.6.0
 numpy==1.19.4
 octave-kernel==0.32.0
 ipython==7.16.1
