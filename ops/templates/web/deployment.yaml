@@ -53,6 +53,31 @@ spec:
                 secretKeyRef:
                   key: REDIS_URL
                   name: secrets
+            - name: MATL_ONLINE_IMGUR_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: MATL_ONLINE_IMGUR_CLIENT_ID
+                  name: secrets
+            - name: MATL_ONLINE_GITHUB_HOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: MATL_ONLINE_GITHUB_HOOK_SECRET
+                  name: secrets
+            - name: MATL_ONLINE_ROLLBAR_SERVER_SIDE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: MATL_ONLINE_ROLLBAR_SERVER_SIDE_TOKEN
+                  name: secrets
+            - name: MATL_ONLINE_ROLLBAR_CLIENT_SIDE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: MATL_ONLINE_ROLLBAR_CLIENT_SIDE_TOKEN
+                  name: secrets
+            - name: GOOGLE_ANALYTICS_UNIVERSAL_ID
+              valueFrom:
+                secretKeyRef:
+                  key: GOOGLE_ANALYTICS_UNIVERSAL_ID
+                  name: secrets
             - name: MATL_ONLINE_ENV
               value: prod
           securityContext:
