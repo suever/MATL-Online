@@ -28,7 +28,6 @@ jobs:
           name: Install Node dependencies
           command: |
             yarn install --frozen-lockfile
-            export PATH="$(yarn bin):${PATH}"
       - run:
           name: Install Python Dependencies
           command: |
@@ -37,6 +36,7 @@ jobs:
       - run:
           name: Run tests
           command: |
+            export PATH="$(yarn bin):$PATH"
             MATL_ONLINE_ENV=test python manage.py test
       - run:
           name: Run Linting
