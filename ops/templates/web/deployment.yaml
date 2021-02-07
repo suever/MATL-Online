@@ -92,3 +92,10 @@ spec:
           livenessProbe:
             tcpSocket:
               port: 5000
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
