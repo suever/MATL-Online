@@ -26,6 +26,7 @@ spec:
             # Flask-SocketIO requires only a single worker since eventlet does not
             # have sticky sessions
             - --workers=1
+            - --threads=16
             - wsgi:app
           ports:
             - containerPort: 5000
