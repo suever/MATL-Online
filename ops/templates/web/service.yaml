@@ -6,5 +6,6 @@ metadata:
 spec:
   selector:
     app: matl-online
+    role: web
   ports:
     - port: 5000

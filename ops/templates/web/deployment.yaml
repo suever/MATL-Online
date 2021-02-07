@@ -5,16 +5,19 @@ metadata:
   namespace: matl-online
   labels:
     app: matl-online
+    role: web
 spec:
   selector:
     matchLabels:
       app: matl-online
+      role: web
   template:
     metadata:
       name: web
       namespace: matl-online
       labels:
         app: matl-online
+        role: web
     spec:
       containers:
         - name: web

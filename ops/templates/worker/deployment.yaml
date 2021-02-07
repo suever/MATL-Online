@@ -5,16 +5,19 @@ metadata:
   namespace: matl-online
   labels:
     app: matl-online
+    role: worker
 spec:
   selector:
     matchLabels:
       app: matl-online
+      role: worker
   template:
     metadata:
       name: worker
       namespace: matl-online
       labels:
         app: matl-online
+        role: worker
     spec:
       containers:
         - name: worker
