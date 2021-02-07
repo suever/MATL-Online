@@ -14,4 +14,4 @@ deploy: docker
 		kubectl apply -f -
 
 test:
-	MATL_ONLINE_ENV=test pytest .
+	MATL_ONLINE_ENV=test python manage.py test
