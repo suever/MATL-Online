@@ -1,0 +1,11 @@
+{
+  "name": "matl-online",
+  "description": "Online Interpreter for MATL",
+  "main": "index.js",
+  "repository": "https://github.com/suever/matl-online",
+  "author": "Jonathan Suever <suever@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "clean-css-cli": "^4.3.0"
+  }
+}

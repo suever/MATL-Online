@@ -17,3 +17,6 @@ htmlcov
 
 # Octave files
 octave-workspace
+
+# Node Module
+node_modules
