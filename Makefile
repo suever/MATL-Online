@@ -12,3 +12,6 @@ deploy: docker
 		--set CommitHash=$(COMMIT_HASH) \
 		--values ops/values/default.yaml | \
 		kubectl apply -f -
+
+test:
+	MATL_ONLINE_ENV=test pytest .
