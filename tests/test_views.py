@@ -28,12 +28,16 @@ class TestShare:
         assert csrf.call_count == 1
         assert post.call_count == 1
 
-        head_expect = {'Authorization':
-                       'Client-ID ' + app.config['IMGUR_CLIENT_ID']}
+        head_expect = {
+            'Authorization':
+            'Client-ID ' + app.config['IMGUR_CLIENT_ID']
+        }
 
-        post.assert_called_once_with('https://api.imgur.com/3/image',
-                                     {'image': 'data', 'type': 'base64'},
-                                     headers=head_expect)
+        post.assert_called_once_with(
+            'https://api.imgur.com/3/image',
+            {'image': 'data', 'type': 'base64'},
+            headers=head_expect
+        )
 
         # Make sure that the response was correct
         assert response.status_code == 200
