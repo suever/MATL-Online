@@ -20,7 +20,7 @@ import logging
 
 octave = None
 
-socket = SocketIO(message_queue='redis://')
+socket = SocketIO(message_queue=config.SOCKETIO_MESSAGE_QUEUE)
 
 
 class OutputHandler(StreamHandler):

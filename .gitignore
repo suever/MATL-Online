@@ -1,6 +1,6 @@
 *.log
 *.pyc
-env*
+*env
 
 # IDE Configuration
 .idea
@@ -17,3 +17,6 @@ htmlcov
 
 # Octave files
 octave-workspace
+
+# Node Module
+node_modules

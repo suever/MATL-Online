@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """Management script."""
 
-import os
-
 import eventlet
 eventlet.monkey_patch()
+
+import os
 
 from glob import glob
 from subprocess import call

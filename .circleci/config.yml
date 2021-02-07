@@ -18,14 +18,29 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -qq octave liboctave-dev libmpfr-dev
       - run:
-          name: Install Dependencies
+          name: Install Yarn and Node
+          command: |
+            curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+            echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+            sudo apt-get update -qq
+            sudo apt-get install -qq yarn
+      - run:
+          name: Install Node dependencies
+          command: |
+            yarn install --frozen-lockfile
+      - run:
+          name: Install Python Dependencies
           command: |
             sudo pip install --upgrade pip setuptools wheel coveralls
             sudo pip install --only-binary=numpy,scipy -r requirements/dev.txt
       - run:
           name: Run tests
           command: |
-            py.test tests -v --cov=matl_online
+            export PATH="$(yarn bin):$PATH"
+            MATL_ONLINE_ENV=test python manage.py test
+      - run:
+          name: Run Linting
+          command: |
             python manage.py lint
       - run:
           name: Report Coverage

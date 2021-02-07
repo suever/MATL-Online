@@ -4,19 +4,19 @@ from flask_assets import Bundle, Environment
 
 css = Bundle(
     'css/style.css',
-    filters='yui_css',
+    filters='cleancss',
     output='public/css/common.css'
 )
 
 js = Bundle(
     'js/main.js',
-    filters='yui_js',
+    filters='jsmin',
     output='public/js/common.js'
 )
 
 vendor_css = Bundle(
     'vendor/css/bootstrap-drawer.min.css',
-    filters='yui_css',
+    filters='cleancss',
     output='public/vendor/common.css'
 )
 

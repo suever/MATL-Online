@@ -14,6 +14,6 @@ asynpool.PROC_ALIVE_TIMEOUT = Config.CELERY_PROCESS_INIT_TIMEOUT
 
 db = SQLAlchemy()
 migrate = Migrate()
-socketio = SocketIO(cors_allowed_origins=Config.CORS_ALLOWED_ORIGINS)
+socketio = SocketIO()
 celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
 csrf = CSRFProtect()

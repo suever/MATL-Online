@@ -1,0 +1,18 @@
+apiVersion: getambassador.io/v2
+kind: Mapping
+metadata:
+  name: matl-online
+  namespace: matl-online
+spec:
+  host: matl.suever.com
+  prefix: /
+  service: "matl-online.matl-online:5000"
+  timeout_ms: 0
+  resolver: endpoint
+  load_balancer:
+    policy: ring_hash
+    cookie:
+      name: sticky-cookie
+      ttl: 360s
+  allow_upgrade:
+    - websocket
