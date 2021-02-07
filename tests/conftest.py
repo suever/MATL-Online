@@ -23,13 +23,13 @@ def testapp(app):
     return TestApp(app)
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.fixture(scope='function')
 def socketclient(app):
     """Fake socketio client."""
     yield SocketIOTestClient(app, socketio)
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.fixture(scope='function')
 def app():
     """Flask app instance."""
     _app = create_app(TestConfig)
@@ -41,7 +41,7 @@ def app():
     ctx.pop()
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.fixture(scope='function')
 def logger():
     """Logger which can be used to monitor logging calls."""
     # Create a new random log
@@ -73,7 +73,7 @@ def moctave(mocker, logger):
     return moctave
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.fixture(scope='function')
 def db(app):
     """Database instance."""
     _db.app = app
