@@ -6,6 +6,7 @@ import pytest
 
 from celery.exceptions import SoftTimeLimitExceeded
 from matl_online.tasks import OctaveTask, matl_task
+from .helpers import session_id_for_client
 
 
 def prepare_folder_testcase(mocker, moctave, tmpdir):
@@ -102,7 +103,7 @@ class TestMATLTask:
         mocker.patch('matl_online.tasks.socket',
                      new_callable=lambda: socketclient.socketio)
 
-        matl_task('-ro', '1D', session=socketclient.sid)
+        matl_task('-ro', '1D', session=session_id_for_client(socketclient))
 
         received = socketclient.get_received()
         assert received[-1]['args'][0] == {'message': '', 'success': True}
@@ -118,13 +119,13 @@ class TestMATLTask:
         ev.side_effect = KeyboardInterrupt
 
         with pytest.raises(KeyboardInterrupt):
-            matl_task('-ro', '1D', session=socketclient.sid)
+            matl_task('-ro', '1D', session=session_id_for_client(socketclient))
 
         received = socketclient.get_received()
 
         payload = received[0]['args'][0]
 
-        assert payload.get('session') == socketclient.sid
+        assert payload.get('session') == session_id_for_client(socketclient)
         assert payload['data'][0]['type'] == 'stderr'
         assert payload['data'][0]['value'] == 'Job cancelled'
 
@@ -142,13 +143,13 @@ class TestMATLTask:
         ev.side_effect = SoftTimeLimitExceeded
 
         with pytest.raises(SoftTimeLimitExceeded):
-            matl_task('-ro', '1D', session=socketclient.sid)
+            matl_task('-ro', '1D', session=session_id_for_client(socketclient))
 
         received = socketclient.get_received()
 
         payload = received[0]['args'][0]
 
-        assert payload.get('session') == socketclient.sid
+        assert payload.get('session') == session_id_for_client(socketclient)
         assert payload['data'][0]['type'] == 'stderr'
         assert payload['data'][0]['value'] == 'Operation timed out'
 

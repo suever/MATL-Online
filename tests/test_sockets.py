@@ -1,6 +1,7 @@
 """Unit tests for socket interaction between server and client."""
 
 from matl_online.extensions import socketio
+from .helpers import session_id_for_client
 
 
 def session(client):
@@ -23,7 +24,8 @@ class TestSockets:
 
         assert len(payload) == 1
         assert 'session_id' in payload[0]
-        assert payload[0]['session_id'] == socketclient.sid
+
+        assert payload[0]['session_id'] == session_id_for_client(socketclient)
 
     def test_submit_empty(self, socketclient, mocker, db):
         """If no code is provided, no tasks should ever run."""
@@ -32,8 +34,10 @@ class TestSockets:
 
         task = mocker.patch('matl_online.tasks.matl_task')
 
-        socketclient.emit('submit',
-                          {'uid': socketclient.sid, 'code': ''})
+        socketclient.emit('submit', {
+            'uid': session_id_for_client(socketclient),
+            'code': '',
+        })
 
         assert len(socketclient.get_received()) == 0
         task.assert_not_called()
@@ -48,10 +52,11 @@ class TestSockets:
         task_id = '12345'
         task.return_value = type('obj', (object,), {'id': task_id})
 
-        socketclient.emit('submit',
-                          {'uid': socketclient.sid,
-                           'code': 'D',
-                           'inputs': '1'})
+        socketclient.emit('submit', {
+            'uid': session_id_for_client(socketclient),
+            'code': '0',
+            'inputs': '1',
+        })
 
         assert task.call_count == 1
         assert session(socketclient).get('taskid') == task_id
