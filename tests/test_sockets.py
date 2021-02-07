@@ -1,12 +1,14 @@
 """Unit tests for socket interaction between server and client."""
 
+from flask_socketio import SocketIOTestClient
+
 from matl_online.extensions import socketio
 from .helpers import session_id_for_client
 
 
-def session(client):
+def session(client: SocketIOTestClient):
     """Retrieve a client's session."""
-    return socketio.server.environ[client.sid].get('saved_session', {})
+    return socketio.server.environ[client.eio_sid].get('saved_session', {})
 
 
 class TestSockets:
