@@ -1,1 +1,2 @@
--r requirements/prod.txt
+# When not specified, install development requirements
+-r requirements/dev.txt

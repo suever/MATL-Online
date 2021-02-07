@@ -26,6 +26,7 @@ RUN octave-cli --eval "pkg install -forge image"
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python3.8 get-pip.py
 
+# Explicitly install only the production dependencies
 COPY requirements/prod.txt requirements.txt
 
 RUN python3.8 -m pip install -r requirements.txt
