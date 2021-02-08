@@ -1,0 +1,41 @@
+version: "3.3"
+services:
+  web:
+    image: suever/matl-online
+    command: |
+      bash -c "python3.8 manage.py db upgrade \
+        && python3.8 manage.py refresh_releases \
+        && gunicorn --worker-class eventlet --bind 0.0.0.0:5000 --workers 1 wsgi:app"
+    ports:
+      - "5000:5000"
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379
+      CELERY_RESULT_BACKEND: redis://redis:6379
+      SOCKETIO_MESSAGE_QUEUE: redis://redis:6379
+      EVENTLET_NO_GREENDNS: "yes"
+      MATL_ONLINE_ENV: prod
+      SQLALCHEMY_DATABASE_URI: postgres://postgres@postgres
+    depends_on:
+      - redis
+
+  worker:
+    image: suever/matl-online
+    command: celery --app worker.celery worker --purge -Ofair --loglevel INFO
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379
+      CELERY_RESULT_BACKEND: redis://redis:6379
+      SOCKETIO_MESSAGE_QUEUE: redis://redis:6379
+      EVENTLET_NO_GREENDNS: "yes"
+      MATL_ONLINE_ENV: prod
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    ports:
+    - 6379
+
+  postgres:
+    image: postgres
+    ports:
+      - 5432
