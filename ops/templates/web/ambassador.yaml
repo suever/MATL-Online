@@ -4,7 +4,8 @@ metadata:
   name: matl-online
   namespace: matl-online
 spec:
-  host: matl.suever.com
+  host: matl\.suever\.(com|net)
+  host_regex: true
   prefix: /
   service: "matl-online.matl-online:5000"
   timeout_ms: 0
