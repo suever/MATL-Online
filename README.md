@@ -33,22 +33,15 @@ Technologies:
 
 ### Running Locally
 
-It's recommended that you run the application using `virtualenv`, so you'll want
-to create the virtualenv with the following:
+The easiest way to run the application locally is to use [Docker
+Compose][docker-compose] which will start the web service, celery worker, redis
+instance, and postgres database. Prior to running `docker-compose`, be sure to
+build the local docker image:
 
-    virtualenv ./env
-
-If you choose a different location for your virtualenv, you will want to set the
-`VIRTUAL_ENV` variable in the `.env` to reflect that.
-
-Then you will want to install development dependencies into your virtualenv
-using `pip`:
-
-    ./env/bin/pip install -r requirements/dev.txt
-
-Then you can start the web and worker portions of the application using `honcho`
-
-    ./env/bin/honcho start
+```bash
+make docker
+docker-compose up
+```
 
 You will then be able to access the application at http://localhost:5000.
 
@@ -72,6 +65,7 @@ This software is licensed under the MIT License.
 
 [celery]: http://www.celeryproject.org/
 [docker]: https://www.docker.com/
+[docker-compose]: https://docs.docker.com/compose/
 [flask-socketio]: https://flask-socketio.readthedocs.io/en/latest/
 [flask]: https://flask.pocoo.org
 [issues]: https://github.com/suever/MATL-Online/issues/new
