@@ -12,6 +12,9 @@ deploy: docker
 		--set CommitHash=$(COMMIT_HASH) \
 		--values ops/values/default.yaml | \
 		kubectl apply -f -
+	kubectl rollout status -n matl-online deploy/web
+	kubectl rollout status -n matl-online deploy/worker
+
 
 test:
 	MATL_ONLINE_ENV=test python manage.py test
