@@ -8,7 +8,7 @@ spec:
   host_regex: true
   prefix: /
   service: "matl-online.matl-online:5000"
-  timeout_ms: 0
+  timeout_ms: 120000
   resolver: endpoint
   load_balancer:
     policy: ring_hash
