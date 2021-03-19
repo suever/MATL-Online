@@ -10,11 +10,14 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
 RUN apt update \
     && apt install -y software-properties-common \
     && add-apt-repository -y ppa:deadsnakes/ppa \
+    && curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh \
+    && bash nodesource_setup.sh \
     && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
     && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
     && apt update \
     && apt install -y \
         netbase \
+        nodejs \
         python3.8 \
         python3.8-dev \
         python3.8-distutils \
