@@ -25,7 +25,7 @@ octave-kernel==0.32.0
 ipython==7.22.0
 
 # Octave packages
-sympy==1.7.1
+sympy==1.8
 
 # Database
 SQLAlchemy==1.4.6
