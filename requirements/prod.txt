@@ -28,7 +28,7 @@ ipython==7.22.0
 sympy==1.8
 
 # Database
-SQLAlchemy==1.4.9
+SQLAlchemy==1.4.10
 Flask-SQLAlchemy==2.5.1
 psycopg2-binary==2.8.6
 
