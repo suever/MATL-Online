@@ -4,7 +4,7 @@
 # Testing
 pytest==6.2.3
 factory-boy==3.2.0
-pytest-mock==3.6.0
+pytest-mock==3.6.1
 webtest==2.0.35
 pytest-cov==2.11.1
 
