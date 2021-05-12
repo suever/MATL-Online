@@ -12,7 +12,7 @@ jsmin==2.2.2
 # Sockets
 flask_socketio==5.0.1
 python_engineio==4.0.0
-python_socketio==5.1.0
+python_socketio==5.2.1
 
 # Celery
 celery==5.0.5
