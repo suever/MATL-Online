@@ -10,7 +10,7 @@ flask_assets==2.0
 jsmin==2.2.2
 
 # Sockets
-flask_socketio==5.0.1
+flask_socketio==5.0.3
 python_engineio==4.0.0
 python_socketio==5.1.0
 
