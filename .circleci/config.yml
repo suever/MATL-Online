@@ -1,6 +1,9 @@
 version: 2
 workflows:
   version: 2
+  integratino:
+    jobs:
+      - integration
   build:
     jobs:
       - docker
@@ -10,7 +13,7 @@ workflows:
       - test-3.8
       - test-3.9
 jobs:
-  docker:
+  integration:
     machine:
       image: ubuntu-2004:202101-01
     steps:
@@ -18,6 +21,12 @@ jobs:
       - run:
           name: Build Docker Image
           command: make docker
+      - run:
+          name: Run Acceptance Tests
+          command: |
+            docker-compose -d up && \
+            sleep 15 && \
+            make acceptance-tests
   test-3.7: &test-template
     docker:
       - image: circleci/python:3.7-buster
