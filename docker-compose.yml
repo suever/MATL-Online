@@ -1,7 +1,9 @@
 version: "3.3"
 services:
   web:
-    image: suever/matl-online
+    build:
+      context: .
+      dockerfile: ops/Dockerfile
     command: |
       bash -c "python3.8 manage.py db upgrade \
         && python3.8 manage.py refresh_releases \
@@ -15,11 +17,20 @@ services:
       EVENTLET_NO_GREENDNS: "yes"
       MATL_ONLINE_ENV: prod
       SQLALCHEMY_DATABASE_URI: postgresql://postgres:password@postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
     depends_on:
       - redis
+      - postgres
+      - worker
 
   worker:
-    image: suever/matl-online
+    build:
+      context: .
+      dockerfile: ops/Dockerfile
     command: celery --app worker.celery worker --purge -Ofair --loglevel INFO
     environment:
       CELERY_BROKER_URL: redis://redis:6379
