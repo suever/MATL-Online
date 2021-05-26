@@ -36,18 +36,6 @@ services:
     depends_on:
       - redis
 
-  tests:
-    profiles:
-      - testing
-    image: ppodgorsek/robot-framework
-    environment:
-      BROWSER: chrome
-      SERVER: web:5000
-    volumes:
-      - ./integration_tests:/opt/robotframework/tests:Z
-    depends_on:
-      - web
-
   redis:
     image: redis:alpine
     ports:

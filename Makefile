@@ -20,5 +20,5 @@ test:
 	MATL_ONLINE_ENV=test python manage.py test
 
 integration-tests:
-	robot integration_tests
+	docker-compose -f docker-compose.yml -f docker-compose.test.yml run tests
 

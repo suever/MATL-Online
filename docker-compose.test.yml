@@ -1,0 +1,14 @@
+version: "3.3"
+services:
+  tests:
+    image: ppodgorsek/robot-framework
+    environment:
+      BROWSER: chrome
+      SERVER: web:5000
+    volumes:
+      - ./integration_tests:/opt/robotframework/tests:Z
+    depends_on:
+      - web
+      - worker
+
+
