@@ -15,12 +15,9 @@ workflows:
 jobs:
   integration:
     machine:
-      image: ubuntu-2004:202101-01
+      image: circleci/python3.9-browsers
     steps:
       - checkout
-      - run:
-          name: Build Docker Image
-          command: make docker
       - run:
           name: Run Acceptance Tests
           command: |

@@ -1,7 +1,9 @@
 version: "3.3"
 services:
   web:
-    image: suever/matl-online
+    build:
+      context: .
+      dockerfile: ops/Dockerfile
     command: |
       bash -c "python3.8 manage.py db upgrade \
         && python3.8 manage.py refresh_releases \
@@ -19,7 +21,9 @@ services:
       - redis
 
   worker:
-    image: suever/matl-online
+    build:
+      context: .
+      dockerfile: ops/Dockerfile
     command: celery --app worker.celery worker --purge -Ofair --loglevel INFO
     environment:
       CELERY_BROKER_URL: redis://redis:6379
