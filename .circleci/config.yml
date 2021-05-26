@@ -14,8 +14,8 @@ workflows:
       - test-3.9
 jobs:
   integration:
-    machine:
-      image: circleci/python:3.9-browsers
+    docker:
+      - image: circleci/python:3.9-browsers
     steps:
       - checkout
       - run:
