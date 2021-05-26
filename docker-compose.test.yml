@@ -8,7 +8,7 @@ services:
     volumes:
       - ./integration_tests:/opt/robotframework/tests:Z
     depends_on:
-      - web
-      - worker
+      web:
+        condition: service_healthy
 
 
