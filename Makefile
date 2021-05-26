@@ -19,6 +19,6 @@ deploy: docker
 test:
 	MATL_ONLINE_ENV=test python manage.py test
 
-acceptance-tests:
-	robot acceptance_tests
+integration-tests:
+	robot integration_tests
 

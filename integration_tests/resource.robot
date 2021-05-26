@@ -3,8 +3,8 @@ Documentation    A resource file with reusable keywords and variables.
 Library          SeleniumLibrary
 
 *** Variables ***
-${SERVER}    localhost:5000
-${BROWSER}   Chrome
+${SERVER}    %{SERVER=localhost:5000}
+${BROWSER}   %{BROWSER=chrome}
 ${DELAY}     0
 ${MAIN_URL}  http://${SERVER}/
 
