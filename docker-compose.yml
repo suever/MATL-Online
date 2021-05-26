@@ -14,7 +14,7 @@ services:
       SOCKETIO_MESSAGE_QUEUE: redis://redis:6379
       EVENTLET_NO_GREENDNS: "yes"
       MATL_ONLINE_ENV: prod
-      SQLALCHEMY_DATABASE_URI: postgres://postgres@postgres
+      SQLALCHEMY_DATABASE_URI: postgresql://postgres:password@postgres
     depends_on:
       - redis
 
@@ -37,5 +37,7 @@ services:
 
   postgres:
     image: postgres
+    environment:
+      POSTGRES_PASSWORD: password
     ports:
       - 5432
