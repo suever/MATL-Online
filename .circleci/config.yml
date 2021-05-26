@@ -4,9 +4,6 @@ workflows:
   integration-tests:
     jobs:
       - integration-tests
-  build:
-    jobs:
-      - docker
   test:
     jobs:
       - test-3.7
