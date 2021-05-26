@@ -15,7 +15,7 @@ workflows:
 jobs:
   integration:
     machine:
-      image: circleci/python3.9-browsers
+      image: circleci/python:3.9-browsers
     steps:
       - checkout
       - run:
