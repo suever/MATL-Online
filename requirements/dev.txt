@@ -5,7 +5,7 @@
 pytest==6.2.4
 factory-boy==3.2.0
 pytest-mock==3.6.1
-webtest==2.0.35
+webtest==3.0.0
 pytest-cov==2.12.1
 
 # Acceptance Testing
