@@ -6,6 +6,6 @@
   "author": "Jonathan Suever <suever@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "clean-css-cli": "^5.3.3"
+    "clean-css-cli": "^5.4.1"
   }
 }
