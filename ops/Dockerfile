@@ -1,11 +1,8 @@
-FROM mtmiller/octave
+FROM gnuoctave/octave:6.4.0
+
+USER root
 
 WORKDIR /app
-
-# configure tzdata to avoid prompts during installation
-ENV TZ=Etc/UTC
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
-    && echo $TZ > /etc/timezone
 
 RUN apt update \
     && apt install -y software-properties-common \
@@ -18,9 +15,10 @@ RUN apt update \
     && apt install -y \
         netbase \
         nodejs \
-        python3.8 \
-        python3.8-dev \
-        python3.8-distutils \
+        python-is-python3 \
+        python3 \
+        python3-dev \
+        python3-distutils \
         yarn \
     && rm -rf /var/lib/apt/lists/*
 
@@ -31,7 +29,7 @@ RUN octave-cli --eval "pkg install -forge symbolic"
 RUN octave-cli --eval "pkg install -forge image"
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
-    && python3.8 get-pip.py
+    && python get-pip.py
 
 # Install Node dependencies and add them to the PATH
 COPY package.json yarn.lock ./
@@ -41,12 +39,13 @@ ENV PATH="/app/node_modules/.bin:${PATH}"
 # Explicitly install only the production dependencies
 COPY requirements/prod.txt requirements.txt
 
-RUN python3.8 -m pip install -r requirements.txt
+RUN python -m pip install -r requirements.txt
 
-RUN useradd -u 8877 matl
-RUN chown matl:matl /app
-USER matl
+RUN chown jovyan:users /app
+USER jovyan
 
-COPY --chown=matl . .
+COPY --chown=jovyan . .
 
-CMD ["python3.8"]
+ENTRYPOINT []
+
+CMD ["python"]
