@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   tests:
-    image: ppodgorsek/robot-framework
+    image: ppodgorsek/robot-framework:3.8.0
     environment:
       BROWSER: chrome
       SERVER: web:5000
