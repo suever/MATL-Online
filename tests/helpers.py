@@ -1,6 +1,7 @@
 """Functions to be used across tests for convenience."""
 
 from typing import Optional
+
 from flask_socketio import SocketIOTestClient
 
 

@@ -49,11 +49,11 @@ jobs:
           name: Run tests
           command: |
             export PATH="$(yarn bin):$PATH"
-            MATL_ONLINE_ENV=test python manage.py test
+            MATL_ONLINE_ENV=test flask test
       - run:
           name: Run Linting
           command: |
-            python manage.py lint
+            make lint
       - run:
           name: Report Coverage
           command: |

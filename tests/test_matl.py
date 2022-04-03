@@ -3,15 +3,16 @@
 import base64
 import json
 import os
-import pytest
 import shutil
-
-from bs4 import BeautifulSoup
 from datetime import datetime
 
+import pytest
+from bs4 import BeautifulSoup
+
 from matl_online import matl
-from matl_online.utils import parse_iso8601, ISO8601_FORMAT
 from matl_online.public.models import Release
+from matl_online.utils import ISO8601_FORMAT, parse_iso8601
+
 from .factories import DocumentationLinkFactory as DocLink
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')

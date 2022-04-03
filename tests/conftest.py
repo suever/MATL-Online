@@ -2,9 +2,9 @@
 
 import logging
 import os
-import pytest
 import uuid
 
+import pytest
 from flask_socketio import SocketIOTestClient
 from webtest import TestApp
 

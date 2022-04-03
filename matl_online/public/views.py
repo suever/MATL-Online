@@ -1,30 +1,22 @@
 """Public-facing routes of our application."""
 
-import json
 import hmac
+import json
 import os
 import re
-import requests
 import uuid
-
 from datetime import datetime
+from hashlib import sha1
 
-from flask import (Blueprint,
-                   abort,
-                   current_app,
-                   request,
-                   jsonify,
-                   send_file,
-                   session)
+import requests
+from flask import Blueprint, abort, current_app, jsonify
 from flask import render_template as _render_template
-
+from flask import request, send_file, session
 from flask_socketio import emit, rooms
 from flask_wtf.csrf import validate_csrf
-
-from hashlib import sha1
 from wtforms import ValidationError
 
-from matl_online.extensions import socketio, celery, csrf
+from matl_online.extensions import celery, csrf, socketio
 from matl_online.matl import help_file, refresh_releases
 from matl_online.public.models import Release
 from matl_online.settings import Config

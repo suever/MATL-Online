@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from factory import Sequence, LazyFunction, LazyAttribute
+from factory import LazyAttribute, LazyFunction, Sequence
 from factory.alchemy import SQLAlchemyModelFactory
 
 from matl_online.database import db

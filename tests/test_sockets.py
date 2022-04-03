@@ -3,6 +3,7 @@
 from flask_socketio import SocketIOTestClient
 
 from matl_online.extensions import socketio
+
 from .helpers import session_id_for_client
 
 

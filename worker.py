@@ -2,7 +2,7 @@
 
 """Worker module for creating celery workers."""
 
-from matl_online.app import create_app, celery
+from matl_online.app import celery, create_app
 from matl_online.settings import config
 
 app = create_app(config)

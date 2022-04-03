@@ -3,6 +3,7 @@
 import pytest
 
 from matl_online.public.models import DocumentationLink
+
 from .factories import DocumentationLinkFactory as DocLink
 
 

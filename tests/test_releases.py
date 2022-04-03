@@ -1,10 +1,11 @@
 """Unit tests for checking database models and behavior."""
 
-import pytest
-
 from datetime import datetime
 
+import pytest
+
 from matl_online.public.models import Release
+
 from .factories import ReleaseFactory
 
 
