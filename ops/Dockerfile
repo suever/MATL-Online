@@ -44,7 +44,7 @@ RUN python -m pip install -r requirements.txt
 RUN chown jovyan:users /app
 USER jovyan
 
-COPY --chown=jovyan . .
+COPY --chown=jovyan:users . .
 
 ENTRYPOINT []
 
