@@ -41,10 +41,11 @@ COPY requirements/prod.txt requirements.txt
 
 RUN python -m pip install -r requirements.txt
 
-RUN chown jovyan:users /app
-USER jovyan
+RUN useradd -u 8877 matl
+RUN chown matl:matl /app
+USER matl
 
-COPY --chown=jovyan:users . .
+COPY --chown=matl . .
 
 ENTRYPOINT []
 
