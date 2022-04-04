@@ -1,9 +1,10 @@
 # General
-flask==1.1.2
+flask==2.1.1
 requests==2.26.0
 beautifulsoup4==4.10.0
 eventlet==0.30.2
 gunicorn==20.1.0
+Jinja2==3.1.1
 
 # CSS/JS Assets
 flask_assets==2.0
@@ -11,11 +12,11 @@ jsmin==3.0.0
 
 # Sockets
 flask_socketio==5.1.1
-python_engineio==4.2.0
-python_socketio==5.4.0
+python_engineio==4.3.1
+python_socketio==5.5.2
 
 # Celery
-celery==5.1.2
+celery==5.2.3
 redis==3.5.3
 
 # Octave interaction
@@ -30,12 +31,14 @@ sympy==1.8
 # Database
 SQLAlchemy==1.4.25
 Flask-SQLAlchemy==2.5.1
-psycopg2-binary==2.9.1
+psycopg2-binary==2.9.3
 
 # App management
-Flask-Migrate==2.7.0
-Flask-Script==2.0.6
+Flask-Migrate==3.1.0
 honcho==1.0.1
 
 # Forms
 flask_wtf==0.15.1
+
+# Forced pinned versions
+markupsafe==2.0.1
