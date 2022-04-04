@@ -1,6 +1,6 @@
 # General
 flask==2.1.1
-requests==2.26.0
+requests==2.27.1
 beautifulsoup4==4.10.0
 eventlet==0.30.2
 gunicorn==20.1.0
@@ -8,7 +8,7 @@ Jinja2==3.1.1
 
 # CSS/JS Assets
 flask_assets==2.0
-jsmin==3.0.0
+jsmin==3.0.1
 
 # Sockets
 flask_socketio==5.1.1
@@ -16,26 +16,26 @@ python_engineio==4.3.1
 python_socketio==5.5.2
 
 # Celery
-celery==5.2.3
-redis==3.5.3
+celery==5.2.5
+redis==4.2.1
 
 # Octave interaction
-scipy==1.7.1
-numpy==1.21.2
-octave-kernel==0.32.0
-ipython==7.28.0
+scipy==1.8.0
+numpy==1.22.3
+octave-kernel==0.34.2
+ipython==8.2.0
 
 # Octave packages
-sympy==1.8
+sympy==1.10.1
 
 # Database
-SQLAlchemy==1.4.25
+SQLAlchemy==1.4.34
 Flask-SQLAlchemy==2.5.1
-psycopg2-binary==2.9.1
+psycopg2-binary==2.9.3
 
 # App management
 Flask-Migrate==3.1.0
-honcho==1.0.1
+honcho==1.1.0
 
 # Forms
 flask_wtf==0.15.1
