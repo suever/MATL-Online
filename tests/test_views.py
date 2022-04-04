@@ -3,9 +3,10 @@
 import json
 
 from flask import url_for
-from .factories import ReleaseFactory
 
 from matl_online.public.models import Release
+
+from .factories import ReleaseFactory
 
 
 class TestShare:

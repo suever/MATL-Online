@@ -2,10 +2,12 @@
 
 import logging
 import os
-import pytest
 
+import pytest
 from celery.exceptions import SoftTimeLimitExceeded
+
 from matl_online.tasks import OctaveTask, matl_task
+
 from .helpers import session_id_for_client
 
 

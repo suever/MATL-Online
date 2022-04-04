@@ -5,8 +5,8 @@ services:
       context: .
       dockerfile: ops/Dockerfile
     command: |
-      bash -c "python3.8 manage.py db upgrade \
-        && python3.8 manage.py refresh_releases \
+      bash -c "flask db upgrade \
+        && flask refresh_releases \
         && gunicorn --worker-class eventlet --bind 0.0.0.0:5000 --workers 1 wsgi:app"
     ports:
       - "5000:5000"

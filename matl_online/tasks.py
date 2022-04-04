@@ -1,22 +1,20 @@
 """Celery tasks for running MATL programs."""
 
+import logging
 import os
-import tempfile
 import shutil
+import tempfile
+from logging import StreamHandler
 
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import worker_process_init
-
 from flask_socketio import SocketIO
 
 from matl_online.extensions import celery
 from matl_online.matl import matl, parse_matl_results
-from matl_online.settings import config
 from matl_online.octave import OctaveSession
-
-from logging import StreamHandler
-import logging
+from matl_online.settings import config
 
 octave = None
 

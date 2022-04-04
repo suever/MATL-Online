@@ -1,13 +1,13 @@
 """SQLAlchemy models."""
-import requests
+from urllib.parse import urljoin
 
+import requests
 from bs4 import BeautifulSoup
 from flask import current_app
-from urllib.parse import urljoin
 from sqlalchemy import or_
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from matl_online.database import db, Model, Column
+from matl_online.database import Column, Model, db
 
 
 class Release(Model):

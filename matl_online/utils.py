@@ -3,7 +3,6 @@
 import base64
 import os
 import zipfile
-
 from datetime import datetime
 
 ISO8601_FORMAT = '%Y-%m-%dT%H:%M:%SZ'

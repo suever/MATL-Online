@@ -3,16 +3,18 @@ from flask import Flask
 
 from matl_online import public
 from matl_online.assets import assets
-from matl_online.extensions import db, migrate, socketio, celery, csrf
-from matl_online.settings import ProdConfig
+from matl_online.commands import register_commands
+from matl_online.extensions import celery, csrf, db, migrate, socketio
+from matl_online.settings import get_config
 
 
-def create_app(config_object=ProdConfig):
-    """Application factory for creating flask apps."""
+def create_app(config_object=None):
+    """Application factor- for creating flask apps."""
     app = Flask(__name__)
-    app.config.from_object(config_object)
+    app.config.from_object(config_object or get_config())
     register_extensions(app)
     register_blueprints(app)
+    register_commands(app)
     return app
 
 

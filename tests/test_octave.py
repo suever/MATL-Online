@@ -1,7 +1,6 @@
 """Unit tests for the module for interacting with Octave."""
 
 import os
-
 from unittest import mock
 
 from matl_online.octave import OctaveSession

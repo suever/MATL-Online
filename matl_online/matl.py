@@ -4,15 +4,15 @@ import html
 import json
 import os
 import re
-import requests
 import shutil
-
-from flask import current_app
 from io import BytesIO
+
+import requests
+from flask import current_app
 from scipy.io import loadmat
 
-from matl_online.public.models import Release, DocumentationLink
-from matl_online.utils import unzip, parse_iso8601, base64_encode_file
+from matl_online.public.models import DocumentationLink, Release
+from matl_online.utils import base64_encode_file, parse_iso8601, unzip
 
 # Regular expression for pulling out content between <strong></strong> tags
 STRONG_RE = re.compile(r'\<strong\>.*?\<\/strong\>')
