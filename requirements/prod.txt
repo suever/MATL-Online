@@ -42,4 +42,4 @@ honcho==1.1.0
 flask_wtf==1.0.1
 
 # Forced pinned versions
-markupsafe==2.0.1
+markupsafe==2.1.1
