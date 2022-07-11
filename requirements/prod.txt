@@ -21,7 +21,7 @@ redis==4.3.4
 
 # Octave interaction
 scipy==1.8.1
-numpy==1.22.4
+numpy==1.23.1
 octave-kernel==0.34.2
 ipython==8.4.0
 
