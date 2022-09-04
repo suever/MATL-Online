@@ -1,11 +1,47 @@
-apiVersion: getambassador.io/v2
+---
+apiVersion: getambassador.io/v3alpha1
 kind: Mapping
 metadata:
-  name: matl-online
+  name: matl-suever-com
   namespace: matl-online
 spec:
-  host: matl\.suever\.(com|net)
-  host_regex: true
+  host: matl.suever.com
+  host_redirect: true
+  service: matl.io
+  prefix: /
+  redirect_response_code: 301
+---
+apiVersion: getambassador.io/v3alpha1
+kind: Mapping
+metadata:
+  name: matl-suever-net
+  namespace: matl-online
+spec:
+  host: matl.suever.net
+  host_redirect: true
+  service: matl.io
+  prefix: /
+  redirect_response_code: 301
+---
+apiVersion: getambassador.io/v3alpha1
+kind: Mapping
+metadata:
+  name: www-matl-io
+  namespace: matl-online
+spec:
+  host: www.matl.io
+  service: matl.io
+  host_redirect: true
+  prefix: /
+  redirect_response_code: 301
+---
+apiVersion: getambassador.io/v3alpha1
+kind: Mapping
+metadata:
+  name: matl-io
+  namespace: matl-online
+spec:
+  host: matl.io
   prefix: /
   service: "matl-online.matl-online:5000"
   timeout_ms: 120000

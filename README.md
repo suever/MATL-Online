@@ -8,7 +8,7 @@
 This is a Python-based online interpreter for the [MATL][matl] programming
 language, a golfing language based on [MATLAB][matlab] and [Octave][octave]. A
 live version of this application is hosted at
-[matl.suever.net][matl.suever.net].
+[matl.io][matl.io].
 
 ### The Stack
 
@@ -70,7 +70,7 @@ This software is licensed under the MIT License.
 [flask]: https://flask.pocoo.org
 [issues]: https://github.com/suever/MATL-Online/issues/new
 [jquery]: https://jquery.com
-[matl.suever.net]: https://matl.suever.net/
+[matl.io]: https://matl.io
 [matl]: https://github.com/lmendo/MATL
 [matlab]: https://www.mathworks.com/products/matlab/
 [octave]: https://www.gnu.org/software/octave/
