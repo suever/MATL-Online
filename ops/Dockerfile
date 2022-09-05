@@ -1,4 +1,4 @@
-FROM gnuoctave/octave:6.4.0
+FROM suever/octave:4.2.2
 
 USER root
 
@@ -13,19 +13,24 @@ RUN apt update \
     && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
     && apt update \
     && apt install -y \
-        netbase \
-        nodejs \
-        python-is-python3 \
-        python3 \
-        python3-dev \
-        python3-distutils \
-        yarn \
+    netbase \
+    nodejs \
+    python-is-python3 \
+    python3 \
+    python3-dev \
+    python3-distutils \
+    yarn \
     && rm -rf /var/lib/apt/lists/*
 
 # Install octave requirements
 RUN octave-cli --eval "pkg install -forge io"
 RUN octave-cli --eval "pkg install -forge statistics"
-RUN octave-cli --eval "pkg install -forge symbolic"
+
+# Need a specific version of the symbolic package to work with octave 4.2.2
+RUN wget "https://github.com/cbm755/octsympy/releases/download/v2.9.0/symbolic-2.9.0.tar.gz" && \
+    octave-cli --eval "pkg install symbolic-2.9.0.tar.gz" && \
+    rm -rf "symbolic-2.9.0.tar.gz"
+
 RUN octave-cli --eval "pkg install -forge image"
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
