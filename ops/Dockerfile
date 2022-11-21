@@ -23,15 +23,10 @@ RUN apt update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install octave requirements
-RUN octave-cli --eval "pkg install -forge io"
-RUN octave-cli --eval "pkg install -forge statistics"
-
-# Need a specific version of the symbolic package to work with octave 4.2.2
-RUN wget "https://github.com/cbm755/octsympy/releases/download/v2.9.0/symbolic-2.9.0.tar.gz" && \
-    octave-cli --eval "pkg install symbolic-2.9.0.tar.gz" && \
-    rm -rf "symbolic-2.9.0.tar.gz"
-
-RUN octave-cli --eval "pkg install -forge image"
+RUN octave-cli --eval 'pkg install "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/io-2.6.4.tar.gz"'
+RUN octave-cli --eval 'pkg install "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/statistics-1.4.3.tar.gz"'
+RUN octave-cli --eval 'pkg install "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/symbolic-2.9.0.tar.gz"'
+RUN octave-cli --eval 'pkg install "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/image-2.14.0.tar.gz"'
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
     && python get-pip.py
