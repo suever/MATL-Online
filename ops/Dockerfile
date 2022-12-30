@@ -23,10 +23,18 @@ RUN apt update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install octave requirements
-RUN octave-cli --eval 'pkg install "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/io-2.6.4.tar.gz"'
-RUN octave-cli --eval 'pkg install "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/statistics-1.4.3.tar.gz"'
-RUN octave-cli --eval 'pkg install "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/symbolic-2.9.0.tar.gz"'
-RUN octave-cli --eval 'pkg install "https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/image-2.14.0.tar.gz"'
+RUN wget "https://github.com/suever/matl-online-octave-packages/raw/main/io-2.6.4.tar.gz" \
+    && octave-cli --eval 'pkg install "io-2.6.4.tar.gz"' \
+    && rm -rf io-2.6.4.tar.gz
+RUN wget "https://github.com/suever/matl-online-octave-packages/raw/main/statistics-1.4.3.tar.gz" \
+    && octave-cli --eval 'pkg install "statistics-1.4.3.tar.gz"' \
+    && rm -rf statistics-1.4.3.tar.gz
+RUN wget "https://github.com/suever/matl-online-octave-packages/raw/main/symbolic-2.9.0.tar.gz" \
+    && octave-cli --eval 'pkg install "symbolic-2.9.0.tar.gz"' \
+    && rm -rf symbolic-2.9.0.tar.gz
+RUN wget "https://github.com/suever/matl-online-octave-packages/raw/main/image-2.14.0.tar.gz" \
+    && octave-cli --eval 'pkg install "image-2.14.0.tar.gz"' \
+    && rm -rf image-2.14.0.tar.gz
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
     && python get-pip.py
