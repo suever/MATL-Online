@@ -34,7 +34,7 @@ Flask-SQLAlchemy==3.0.2
 psycopg2-binary==2.9.5
 
 # App management
-Flask-Migrate==4.0.0
+Flask-Migrate==4.0.3
 honcho==1.1.0
 
 # Forms
