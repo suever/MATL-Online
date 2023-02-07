@@ -83,27 +83,27 @@ class TestRelease:
 
     def test_release_update(self):
         """Any details of a release can be updated programmatically."""
-        olddate = datetime(2000, 1, 1)
-        oldtag = "1.2.3"
-        release = Release.create(date=olddate, tag=oldtag)
+        old_date = datetime(2000, 1, 1)
+        old_tag = "1.2.3"
+        release = Release.create(date=old_date, tag=old_tag)
 
-        assert release.date == olddate
+        assert release.date == old_date
 
         # Make sure that we can update the time
-        newdate = datetime(2001, 1, 1)
+        new_date = datetime(2001, 1, 1)
 
-        release.update(date=newdate)
+        release.update(date=new_date)
 
-        assert release.date == newdate
+        assert release.date == new_date
 
         # Make sure we can update the tag
-        newtag = "4.5.6"
+        new_tag = "4.5.6"
 
-        assert release.tag == oldtag
+        assert release.tag == old_tag
 
-        release.update(tag=newtag)
+        release.update(tag=new_tag)
 
-        assert release.tag == newtag
+        assert release.tag == new_tag
 
     def test_release_repr(self):
         """Check that the release is displayed properly if coerced."""

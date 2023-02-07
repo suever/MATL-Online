@@ -39,20 +39,20 @@ class Config(object):
     OCTAVE_EXECUTABLE = "octave-cli"
     OCTAVERC = os.path.join(MATL_WRAP_DIR, ".octaverc")
 
-    # Github / Repo settings
+    # GitHub / Repo settings
     MATL_REPO = "lmendo/MATL"
     GITHUB_API = "https://api.github.com"
     GITHUB_HOOK_SECRET = os.environ.get("MATL_ONLINE_GITHUB_HOOK_SECRET")
 
     # MATLAB Online Documentation links
     MATLAB_DOC_LINKS = [
-        "http://www.mathworks.com/help/matlab/functionlist.html",
-        "http://www.mathworks.com/help/images/functionlist.html",
-        "http://www.mathworks.com/help/stats/functionlist.html",
-        "http://www.mathworks.com/help/symbolic/functionlist.html",
+        "https://www.mathworks.com/help/matlab/functionlist.html",
+        "https://www.mathworks.com/help/images/functionlist.html",
+        "https://www.mathworks.com/help/stats/functionlist.html",
+        "https://www.mathworks.com/help/symbolic/functionlist.html",
     ]
 
-    # Don't use google analytics unless we are on production
+    # Don't use Google Analytics unless we are on production
     GOOGLE_ANALYTICS_UNIVERSAL_ID = None
 
     SOCKETIO_MESSAGE_QUEUE = os.environ.get("SOCKETIO_MESSAGE_QUEUE")

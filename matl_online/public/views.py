@@ -24,14 +24,15 @@ from matl_online.tasks import matl_task
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 
-modtime = os.stat(os.path.join(Config.PROJECT_ROOT, ".git")).st_mtime
-last_modified = datetime.utcfromtimestamp(modtime).strftime("%Y/%m/%d")
+last_modified_time = os.stat(os.path.join(Config.PROJECT_ROOT, ".git")).st_mtime
+last_modified_datetime = datetime.utcfromtimestamp(last_modified_time)
+last_modified_date = last_modified_datetime.strftime("%Y/%m/%d")
 
 
 def render_template(*args, **kwargs):
     """Add common properties via a custom render_template function."""
-    kwargs["modified"] = kwargs.get("modified", last_modified)
-    kwargs["current_year"] = kwargs.get("current_year", datetime.now().year)
+    kwargs["modified"] = kwargs.get("modified", last_modified_date)
+    kwargs["current_year"] = kwargs.get("current_year", last_modified_datetime.year)
 
     analytics_id = current_app.config["GOOGLE_ANALYTICS_UNIVERSAL_ID"]
     kwargs["google_analytics_id"] = analytics_id
@@ -50,7 +51,7 @@ def _latest_version_tag():
 
 
 def _parse_version(version):
-    if not version or re.match(r"^[A-Za-z0-9\.]*$", version) is None:
+    if not version or re.match(r"^[A-Za-z0-9.]*$", version) is None:
         version = _latest_version_tag()
     return version[: min(len(version), 8)]
 
@@ -88,14 +89,14 @@ def privacy_opt():
 
 @blueprint.route("/privacy")
 def privacy():
-    """Disclaimer about google analytics and opt out option."""
+    """Disclaimer about Google Analytics and opt out option."""
     return render_template("privacy.html")
 
 
 @csrf.exempt
 @blueprint.route("/hook", methods=["POST"])
 def github_hook():
-    """Github web hook for receiving information about MATL releases."""
+    """GitHub web hook for receiving information about MATL releases."""
     # Now verify that the secret is correct
     secret = str.encode(current_app.config["GITHUB_HOOK_SECRET"] or "")
 
@@ -144,20 +145,21 @@ def share():
     except ValidationError as e:
         abort(400, str(e))
 
-    result = {"success": True, "link": "https://imgur.com/opoxoisdf.png"}
-
     # Add the authorization headers
-    clientid = current_app.config["IMGUR_CLIENT_ID"]
-    header = {"Authorization": "Client-ID %s" % clientid}
+    client_id = current_app.config["IMGUR_CLIENT_ID"]
+    header = {"Authorization": "Client-ID %s" % client_id}
 
     # POST parameters for imgur API
     payload = {"image": img.split("base64,")[-1], "type": "base64"}
 
-    resp = requests.post("https://api.imgur.com/3/image", payload, headers=header)
-    respdata = json.loads(resp.text)
+    response = requests.post("https://api.imgur.com/3/image", payload, headers=header)
+    response_data = json.loads(response.text)
 
-    if respdata["success"]:
-        result = {"success": respdata["success"], "link": respdata["data"]["link"]}
+    if response_data["success"]:
+        result = {
+            "success": response_data["success"],
+            "link": response_data["data"]["link"],
+        }
 
         return jsonify(result), 200
 
@@ -219,7 +221,7 @@ def explain():
 
 
 @blueprint.route("/help/<version>", methods=["GET"])
-def help(version):
+def documentation(version):
     """Return a JSON representation of the help for the requested version."""
     version = version[: min(len(version), 8)]
     return send_file(help_file(version))

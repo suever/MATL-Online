@@ -14,31 +14,31 @@ class TestDocumentationLink:
     def test_refresh_single(self, mocker, testapp):
         """Handle parsing a single doc entry."""
         req = mocker.patch("matl_online.matl.requests.get")
-        testapp.app.config["MATLAB_DOC_LINKS"] = ["http://mathworks.com"]
+        testapp.app.config["MATLAB_DOC_LINKS"] = ["https://mathworks.com"]
 
-        funcname = "func"
-        funclink = "http://link.html"
+        function_name = "func"
+        function_link = "http://link.html"
 
-        req.return_value.text = _create_html([(funcname, funclink)])
+        req.return_value.text = _create_html([(function_name, function_link)])
 
         out = DocumentationLink.refresh()
         assert len(out) == 1
 
         link = out[0]
 
-        assert link.name == funcname
-        assert link.link == funclink
+        assert link.name == function_name
+        assert link.link == function_link
         assert req.call_count == 1
 
     def test_refresh_multiple(self, mocker, testapp):
         """Parse out multiple functions at the same time."""
         req = mocker.patch("matl_online.matl.requests.get")
-        testapp.app.config["MATLAB_DOC_LINKS"] = ["http://mathworks.com"]
+        testapp.app.config["MATLAB_DOC_LINKS"] = ["https://mathworks.com"]
 
         funcs = [
-            ("func1", "http://func1.html"),
-            ("func2", "http://func2.html"),
-            ("func3", "http://func3.html"),
+            ("func1", "https://func1.html"),
+            ("func2", "https://func2.html"),
+            ("func3", "https://func3.html"),
         ]
 
         req.return_value.text = _create_html(funcs)
@@ -55,13 +55,13 @@ class TestDocumentationLink:
     def test_refresh_duplicates(self, mocker, testapp):
         """Handle two entries for the same function."""
         req = mocker.patch("matl_online.matl.requests.get")
-        testapp.app.config["MATLAB_DOC_LINKS"] = ["http://mathworks.com"]
+        testapp.app.config["MATLAB_DOC_LINKS"] = ["https://mathworks.com"]
 
         funcs = [
-            ("func1", "http://func1.html"),
-            ("func2", "http://func2.html"),
-            ("func3", "http://func3.html"),
-            ("func3", "http://func3.html"),
+            ("func1", "https://func1.html"),
+            ("func2", "https://func2.html"),
+            ("func3", "https://func3.html"),
+            ("func3", "https://func3.html"),
         ]
 
         req.return_value.text = _create_html(funcs)
@@ -78,7 +78,7 @@ class TestDocumentationLink:
     def test_remove_ij(self, mocker, testapp):
         """Variables i and j should be removed by default if they are present."""
         req = mocker.patch("matl_online.matl.requests.get")
-        testapp.app.config["MATLAB_DOC_LINKS"] = ["http://mathworks.com"]
+        testapp.app.config["MATLAB_DOC_LINKS"] = ["https://mathworks.com"]
 
         # Go ahead and add i and j entries
         DocLink(name="i")
@@ -89,10 +89,10 @@ class TestDocumentationLink:
         assert DocumentationLink.query.filter_by(name="j").count() == 1
 
         # Now pass a single function in
-        funcname = "func"
-        funclink = "http://link.html"
+        function_name = "func"
+        function_link = "http://link.html"
 
-        req.return_value.text = _create_html([(funcname, funclink)])
+        req.return_value.text = _create_html([(function_name, function_link)])
 
         out = DocumentationLink.refresh()
 

@@ -28,7 +28,7 @@ class OutputHandler(StreamHandler):
         """Initialize the handler with the task we are handling."""
         StreamHandler.__init__(self, *args, **kwargs)
         self.task = task
-        self.clear()
+        self.contents = []
 
     def clear(self):
         """Clear all messages that have been logged so far."""
@@ -135,7 +135,7 @@ class OctaveTask(Task):
 
     def on_term(self):
         """Clean up after termination event."""
-        # Restart octave so we're ready to go with future calls
+        # Restart octave, so we're ready to go with future calls
         self.octave.restart()
         _initialize_process()
 
@@ -149,7 +149,7 @@ class OctaveTask(Task):
         This is a hard kill by celery so this worker will be destroyed. No
         need to restart octave
         """
-        self.octave._engine.repl.terminate()
+        self.octave.terminate()
         self.on_failure()
 
     def send_results(self):
@@ -212,7 +212,7 @@ def matl_task(self, *args, **kwargs):
 
 
 def _initialize_process(**kwargs):
-    """Initialize the the octave instance.
+    """Initialize the octave instance.
 
     Function to be called when a worker process is spawned. We use this to
     opportunity to actually launch octave and execute a quick MATL program

@@ -29,6 +29,7 @@ ipython==8.9.0
 sympy==1.11.1
 
 # Database
+alembic==1.9.2
 SQLAlchemy==2.0.2
 Flask-SQLAlchemy==3.0.2
 psycopg2-binary==2.9.5
@@ -39,3 +40,4 @@ honcho==1.1.0
 
 # Forms
 flask_wtf==1.1.1
+wtforms==3.0.1

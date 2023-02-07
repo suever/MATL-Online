@@ -22,7 +22,7 @@ class TestSourceCache:
     """Series of tests to check if source code is managed properly."""
 
     def test_no_source_no_install(self, app, tmpdir):
-        """The source folder does not exist and we won't create it."""
+        """The source folder does not exist, and we won't create it."""
         app.config["MATL_FOLDER"] = tmpdir.strpath
         folder = matl.get_matl_folder("18.3.0", install=False)
 
@@ -30,7 +30,7 @@ class TestSourceCache:
         assert folder is None
 
     def test_no_source_install(self, app, tmpdir, mocker):
-        """The source folder does not exist but we'll fetch the source."""
+        """The source folder does not exist, but we'll fetch the source."""
         mock_install = mocker.patch("matl_online.matl.install_matl")
         app.config["MATL_FOLDER"] = tmpdir.strpath
 
@@ -48,11 +48,11 @@ class TestSourceCache:
 
         # Create the source folder
         version = "13.4.0"
-        versiondir = tmpdir.mkdir(version)
+        version_directory = tmpdir.mkdir(version)
         folder = matl.get_matl_folder(version, install=False)
 
         # Make sure that we only return the source folder
-        assert folder == versiondir.strpath
+        assert folder == version_directory.strpath
 
 
 class TestDocLinks:
@@ -81,11 +81,11 @@ class TestDocLinks:
 
         soup = BeautifulSoup(output, "html.parser")
 
-        strongs = soup.findAll("strong")
+        strong_tags = soup.findAll("strong")
 
-        assert len(strongs) == len(links)
+        assert len(strong_tags) == len(links)
 
-        for k, strong in enumerate(strongs):
+        for k, strong in enumerate(strong_tags):
             assert strong.a["href"] == links[k].link
             assert strong.a.text == links[k].name
 
@@ -102,17 +102,17 @@ class TestDocLinks:
         output = matl.add_doc_links(docstring)
 
         soup = BeautifulSoup(output, "html.parser")
-        strongs = soup.findAll("strong")
+        strong_tags = soup.findAll("strong")
 
         # Make sure the first one wasn't converted to a link
-        assert strongs[0].a is None
+        assert strong_tags[0].a is None
 
         # Remove it and make sure everything else is golden
-        strongs = strongs[1:]
+        strong_tags = strong_tags[1:]
 
-        assert len(strongs) == len(links)
+        assert len(strong_tags) == len(links)
 
-        for k, strong in enumerate(strongs):
+        for k, strong in enumerate(strong_tags):
             assert strong.a["href"] == links[k].link
             assert strong.a.text == links[k].name
 
@@ -166,12 +166,12 @@ class TestResults:
 
     def test_nn_image_parsing(self, tmpdir):
         """Test for nearest-neighbor interpolated image."""
-        fileobj = tmpdir.join("image.png")
+        file_handle = tmpdir.join("image.png")
         contents = b"hello"
-        fileobj.write(contents)
+        file_handle.write(contents)
 
         # Parse the string
-        result = matl.parse_matl_results("[IMAGE_NN]" + fileobj.strpath)
+        result = matl.parse_matl_results("[IMAGE_NN]" + file_handle.strpath)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -182,16 +182,16 @@ class TestResults:
         assert result[0]["value"] == "data:image/png;base64," + encoded
 
         # Make sure the file was not removed
-        assert os.path.isfile(fileobj.strpath)
+        assert os.path.isfile(file_handle.strpath)
 
     def test_image_parsing(self, tmpdir):
         """Test valid image result."""
-        fileobj = tmpdir.join("image.png")
+        file_handle = tmpdir.join("image.png")
         contents = b"hello"
-        fileobj.write(contents)
+        file_handle.write(contents)
 
         # Parse the string
-        result = matl.parse_matl_results("[IMAGE]" + fileobj.strpath)
+        result = matl.parse_matl_results("[IMAGE]" + file_handle.strpath)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -202,7 +202,7 @@ class TestResults:
         assert result[0]["value"] == "data:image/png;base64," + encoded
 
         # Make sure the file was not removed
-        assert os.path.isfile(fileobj.strpath)
+        assert os.path.isfile(file_handle.strpath)
 
     def test_invalid_audio_parsing(self):
         """Test with a bad filename and ensure no result."""
@@ -214,12 +214,12 @@ class TestResults:
 
     def test_audio_parsing(self, tmpdir):
         """Test valid audio result."""
-        fileobj = tmpdir.join("audio.wav")
+        file_handle = tmpdir.join("audio.wav")
         contents = b"AUDIO"
-        fileobj.write(contents)
+        file_handle.write(contents)
 
         # Parse the string
-        result = matl.parse_matl_results("[AUDIO]" + fileobj.strpath)
+        result = matl.parse_matl_results("[AUDIO]" + file_handle.strpath)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -229,7 +229,7 @@ class TestResults:
         assert result[0]["value"] == "data:audio/wav;base64," + encoded
 
         # Make sure that the file was not removed
-        assert os.path.isfile(fileobj.strpath)
+        assert os.path.isfile(file_handle.strpath)
 
     def test_stdout2_parsing(self):
         """Test potential to have a second type of STDOUT."""
@@ -340,7 +340,7 @@ class TestInstall:
     """Tests to check if MATL is properly downloaded and installed."""
 
     def test_valid_version(self, tmpdir, mocker, app):
-        """Test using a version which we know to exist on github."""
+        """Test using a version which we know to exist on GitHub."""
         get = mocker.patch("matl_online.matl.requests.get")
         get.return_value.status_code = 200
         get.return_value.json = lambda: {"zipball_url": "zipball"}
@@ -356,7 +356,7 @@ class TestInstall:
         assert zipper.call_args[0][1] == tmpdir.strpath
 
     def test_invalid_version(self, tmpdir, mocker, app):
-        """Try to install a version which does NOT exist on github."""
+        """Try to install a version which does NOT exist on GitHub."""
         get = mocker.patch("matl_online.matl.requests.get")
         get.return_value.status_code = 404
 
@@ -365,7 +365,7 @@ class TestInstall:
 
 
 class TestReleaseRefresh:
-    """Tests for updating our local release database from github."""
+    """Tests for updating our local release database from GitHub."""
 
     def test_all_new(self, mocker, app, db):
         """Completely populate the database (no previous entries)."""
@@ -387,7 +387,7 @@ class TestReleaseRefresh:
 
     def test_prerelease(self, mocker, app, db):
         """Ensure that pre-releases are ignored."""
-        # Change one of the releases to a pre release and hope it's ignored
+        # Change one of the releases to a pre-release and hope it's ignored
         get = mocker.patch("matl_online.matl.requests.get")
 
         with open(os.path.join(TEST_DATA_DIR, "releases.json")) as fid:
@@ -422,8 +422,8 @@ class TestReleaseRefresh:
             )
 
             # Now make the pub date something else
-            newdate = datetime(2000, 1, 1)
-            data[0]["published_at"] = newdate.strftime(ISO8601_FORMAT)
+            new_date = datetime(2000, 1, 1)
+            data[0]["published_at"] = new_date.strftime(ISO8601_FORMAT)
 
             get.return_value.json = lambda: data
 
@@ -438,7 +438,7 @@ class TestReleaseRefresh:
         # Now check to make sure that the release has the updated date
         updated = Release.query.filter(Release.tag == tag_of_interest).one()
 
-        assert updated.date == newdate
+        assert updated.date == new_date
 
     def test_updated_release_with_source(self, mocker, app, db, tmpdir):
         """Updated releases should remove the old source code."""
@@ -455,61 +455,61 @@ class TestReleaseRefresh:
 class TestMATLInterface:
     """Some basic tests to check that the MATL interface is working."""
 
-    def test_empty_inputs(self, mocker, app, moctave):
+    def test_empty_inputs(self, mocker, app, octave_mock):
         """If no inputs are provided, MATL shouldn't receive any."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
-        foldername = "folder"
-        get_matl_folder.return_value = foldername
+        folder_name = "folder"
+        get_matl_folder.return_value = folder_name
 
-        matl.matl(moctave, "-ro")
+        matl.matl(octave_mock, "-ro")
 
         # Make sure we only had eval calls (faster)
-        assert len(moctave.method_calls) == 0
+        assert len(octave_mock.method_calls) == 0
 
         # Make sure we move to the temp directory at the beginning
-        assert moctave.evals[0].startswith("cd(")
+        assert octave_mock.evals[0].startswith("cd(")
 
         # Ensure the MATL code gets added to the path
-        assert moctave.evals[1] == "addpath('%s')" % foldername
+        assert octave_mock.evals[1] == "addpath('%s')" % folder_name
 
-        # Make sure we cleanup at the end
-        assert moctave.evals[-1].startswith("cd(")
+        # Make sure we clean up at the end
+        assert octave_mock.evals[-1].startswith("cd(")
 
-    def test_single_input(self, mocker, app, moctave):
+    def test_single_input(self, mocker, app, octave_mock):
         """Single input parameter should be send to matl_runner."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         get_matl_folder.return_value = ""
 
-        matl.matl(moctave, "-ro", code="D", inputs="12")
+        matl.matl(octave_mock, "-ro", code="D", inputs="12")
 
         # Find the call to matl_runner
-        call = [x for x in moctave.evals if x.startswith("matl_runner")]
+        call = [x for x in octave_mock.evals if x.startswith("matl_runner")]
 
         assert len(call) == 1
         assert call[0].rstrip() == "matl_runner('-ro', {'D'}, '12');"
 
-    def test_multiple_inputs(self, mocker, app, moctave):
-        """Multiple input parameters should be send to matl_runner."""
+    def test_multiple_inputs(self, mocker, app, octave_mock):
+        """Multiple input parameters should be sent to matl_runner."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         get_matl_folder.return_value = ""
 
-        matl.matl(moctave, "-ro", code="D", inputs="12\n13")
+        matl.matl(octave_mock, "-ro", code="D", inputs="12\n13")
 
         # Find the call to matl_runner
-        call = [x for x in moctave.evals if x.startswith("matl_runner")]
+        call = [x for x in octave_mock.evals if x.startswith("matl_runner")]
 
         assert len(call) == 1
         assert call[0].rstrip() == "matl_runner('-ro', {'D'}, '12','13');"
 
-    def test_string_escape(self, mocker, app, moctave):
+    def test_string_escape(self, mocker, app, octave_mock):
         """All single quotes need to be escaped properly."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         get_matl_folder.return_value = ""
 
-        matl.matl(moctave, "-ro", code="'abc'")
+        matl.matl(octave_mock, "-ro", code="'abc'")
 
         # Find the call to matl_runner
-        call = [x for x in moctave.evals if x.startswith("matl_runner")]
+        call = [x for x in octave_mock.evals if x.startswith("matl_runner")]
 
         assert len(call) == 1
         assert call[0].rstrip() == "matl_runner('-ro', {'''abc'''});"

@@ -15,9 +15,9 @@ def session(client: SocketIOTestClient):
 class TestSockets:
     """Series of tests to ensure the expected data is passed via sockets."""
 
-    def test_connection(self, socketclient):
+    def test_connection(self, socketio_client):
         """During initial connection, session ID's should be sent."""
-        events = socketclient.get_received()
+        events = socketio_client.get_received()
 
         assert len(events) == 1
         assert events[0]["namespace"] == "/"
@@ -28,29 +28,29 @@ class TestSockets:
         assert len(payload) == 1
         assert "session_id" in payload[0]
 
-        assert payload[0]["session_id"] == session_id_for_client(socketclient)
+        assert payload[0]["session_id"] == session_id_for_client(socketio_client)
 
-    def test_submit_empty(self, socketclient, mocker, db):
+    def test_submit_empty(self, socketio_client, mocker, db):
         """If no code is provided, no tasks should ever run."""
         # Clear previous events
-        socketclient.get_received()
+        socketio_client.get_received()
 
         task = mocker.patch("matl_online.tasks.matl_task")
 
-        socketclient.emit(
+        socketio_client.emit(
             "submit",
             {
-                "uid": session_id_for_client(socketclient),
+                "uid": session_id_for_client(socketio_client),
                 "code": "",
             },
         )
 
-        assert len(socketclient.get_received()) == 0
+        assert len(socketio_client.get_received()) == 0
         task.assert_not_called()
 
-    def test_real_submit(self, socketclient, mocker, db):
+    def test_real_submit(self, socketio_client, mocker, db):
         """A matl_task should run with valid inputs."""
-        socketclient.get_received()
+        socketio_client.get_received()
         # The task ID should be stored in the session
 
         task = mocker.patch("matl_online.public.views.matl_task.delay")
@@ -58,31 +58,31 @@ class TestSockets:
         task_id = "12345"
         task.return_value = type("obj", (object,), {"id": task_id})
 
-        socketclient.emit(
+        socketio_client.emit(
             "submit",
             {
-                "uid": session_id_for_client(socketclient),
+                "uid": session_id_for_client(socketio_client),
                 "code": "0",
                 "inputs": "1",
             },
         )
 
         assert task.call_count == 1
-        assert session(socketclient).get("taskid") == task_id
+        assert session(socketio_client).get("taskid") == task_id
 
-    def test_kill_task_no_task(self, socketclient, mocker):
+    def test_kill_task_no_task(self, socketio_client, mocker):
         """Kill events for invalid tasks should be handled gracefully."""
-        socketclient.get_received()
+        socketio_client.get_received()
 
         mocker.patch("matl_online.tasks.matl_task")
 
-        assert session(socketclient).get("taskid") is None
+        assert session(socketio_client).get("taskid") is None
 
         # Try to kill a task without starting one
-        socketclient.emit("kill", {})
+        socketio_client.emit("kill", {})
 
         # We should get a confirmation back regardless
-        received = socketclient.get_received()
+        received = socketio_client.get_received()
 
         assert len(received) == 1
 
@@ -91,27 +91,27 @@ class TestSockets:
         assert payload.get("success") is False
 
         # Make sure that no task id was aassigned
-        assert session(socketclient).get("taskid") is None
+        assert session(socketio_client).get("taskid") is None
 
-    def test_kill_task(self, socketclient, mocker, db):
+    def test_kill_task(self, socketio_client, mocker, db):
         """Kill events result in a task being revoked and terminated."""
-        socketclient.get_received()
+        socketio_client.get_received()
 
         mocker.patch("matl_online.tasks.matl_task")
         revoke = mocker.patch("matl_online.public.views.celery.control.revoke")
 
         # Start a job to set the session variable
-        self.test_real_submit(socketclient, mocker, db)
+        self.test_real_submit(socketio_client, mocker, db)
 
         # Get the task id
-        taskid = session(socketclient).get("taskid")
+        taskid = session(socketio_client).get("taskid")
 
-        socketclient.emit("kill", {})
+        socketio_client.emit("kill", {})
 
         # Make sure that a message was sent to kill the tasks
         revoke.assert_called_once_with(taskid, terminate=True, signal="SIGTERM")
 
-        received = socketclient.get_received()
+        received = socketio_client.get_received()
 
         assert len(received) == 1
 
@@ -120,4 +120,4 @@ class TestSockets:
         assert payload.get("success") is False
 
         # Make sure that the task id was cleared
-        assert session(socketclient).get("taskid") is None
+        assert session(socketio_client).get("taskid") is None

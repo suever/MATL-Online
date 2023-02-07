@@ -4,6 +4,7 @@ import os
 from octave_kernel.kernel import OctaveEngine
 
 from matl_online.settings import Config
+from typing import Optional
 
 # Set the environment variable to specify additional command-line input
 # arguments to Octave
@@ -14,6 +15,8 @@ os.environ["OCTAVE_EXECUTABLE"] = Config.OCTAVE_EXECUTABLE
 # Initialize an octave session with the desired executable
 class OctaveSession:
     """Class for communicating with Octave."""
+
+    _engine: Optional[OctaveEngine]
 
     def __init__(self, octaverc=None, paths=None):
         """Build the Octave interface with the specified config and PATH."""
@@ -44,7 +47,11 @@ class OctaveSession:
 
         self.launch()
 
+    def terminate_repl(self):
+        """Terminate the REPL but keep the handle around"""
+        self._engine.repl.terminate()
+
     def terminate(self):
         """Terminate the underlying Octave process."""
-        self._engine.repl.terminate()
+        self.terminate_repl()
         self._engine = None

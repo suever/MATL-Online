@@ -74,8 +74,8 @@ class DocumentationLink(Model):
                 doc.save()
 
         # Make sure to remove i and j entries
-        toremove = cls.query.filter(or_(cls.name == "i", cls.name == "j")).all()
-        for item in toremove:
+        to_remove = cls.query.filter(or_(cls.name == "i", cls.name == "j")).all()
+        for item in to_remove:
             item.delete()
 
         return cls.query.all()

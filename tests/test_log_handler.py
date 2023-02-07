@@ -81,7 +81,7 @@ class TestLogHandler:
         assert handler.messages() == msg
 
     def test_ignore_octave_warning(self, logger, mocker):
-        """Occassionally octave will print warning: messages to be ignored."""
+        """Occasionally octave will print warning: messages to be ignored."""
         task = type("task", (object,), {"session_id": "123"})
         handler = OutputHandler(task)
         logger.addHandler(handler)

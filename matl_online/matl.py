@@ -1,4 +1,4 @@
-"""Module for interacting with MATL and it's source code."""
+"""Module for interacting with MATL, and it's source code."""
 
 import html
 import json
@@ -15,7 +15,7 @@ from matl_online.public.models import DocumentationLink, Release
 from matl_online.utils import base64_encode_file, parse_iso8601, unzip
 
 # Regular expression for pulling out content between <strong></strong> tags
-STRONG_RE = re.compile(r"\<strong\>.*?\<\/strong\>")
+STRONG_RE = re.compile(r"<strong>.*?</strong>")
 
 
 def install_matl(version, folder):
@@ -73,9 +73,9 @@ def help_file(version):
     if os.path.isfile(outfile):
         return outfile
 
-    matfile = os.path.join(folder, "help.mat")
+    mat_file = os.path.join(folder, "help.mat")
 
-    info = loadmat(matfile, squeeze_me=True, mat_dtype=True, struct_as_record=False)
+    info = loadmat(mat_file, squeeze_me=True, mat_dtype=True, struct_as_record=False)
     info = info["H"]
 
     # Now create an array of dicts
@@ -83,9 +83,11 @@ def help_file(version):
 
     # Sort everything by the plain source
     src = info.sourcePlain
-    sortinds = [x[0] for x in sorted(enumerate(src), key=lambda x: x[1].swapcase())]
+    sorted_indices = [
+        x[0] for x in sorted(enumerate(src), key=lambda x: x[1].swapcase())
+    ]
 
-    for k in sortinds:
+    for k in sorted_indices:
         if not info.inOutTogether[k] or len(info.out[k]) == 0:
             arguments = ""
         else:
@@ -153,12 +155,12 @@ def process_audio(audio_file):
 def parse_matl_results(output):
     """Convert MATL output to a custom data structure.
 
-    Takes all of the output and parses it out into sections to pass back
+    Takes all the output and parses it out into sections to pass back
     to the client which indicates stderr/stdout/images, etc.
     """
     result = list()
 
-    parts = re.split(r"(\[.*?\][^\n].*\n?)", output)
+    parts = re.split(r"([.*?][^\n].*\n?)", output)
 
     for part in parts:
         if part == "":
@@ -167,11 +169,9 @@ def parse_matl_results(output):
         # Strip a single trailing newline
         part = part.rstrip("\n")
 
-        item = {}
-
         if part.startswith("[IMAGE"):
             item = process_image(
-                re.sub(r"\[IMAGE.*?\]", "", part), part.startswith("[IMAGE]")
+                re.sub(r"\[IMAGE.*?]", "", part), part.startswith("[IMAGE]")
             )
         elif part.startswith("[AUDIO]"):
             item = process_audio(part.replace("[AUDIO]", ""))
@@ -211,7 +211,6 @@ def matl(octave, flags, code="", inputs="", version="", folder="", line_handler=
         inputs = ["'%s'" % escape(item) for item in inputs.split("\n")]
         cmd = "matl_runner('%s', %s, %s);\n" % (flags, code, ",".join(inputs))
     else:
-        inputs = None
         cmd = "matl_runner('%s', %s);\n" % (flags, code)
 
     # Actually run the MATL code
@@ -223,7 +222,7 @@ def matl(octave, flags, code="", inputs="", version="", folder="", line_handler=
 
 
 def refresh_releases():
-    """Fetch new release information from Github and update local database."""
+    """Fetch new release information from GitHub and update local database."""
     repo = current_app.config["MATL_REPO"]
     resp = requests.get("https://api.github.com/repos/%s/releases" % repo)
 
@@ -238,11 +237,11 @@ def refresh_releases():
         release = Release.query.filter_by(tag=item["tag_name"]).first()
 
         if release is None:
-            # This is a new release and we don't need to do much
+            # This is a new release, and we don't need to do much
             Release.create(tag=item["tag_name"], date=pubdate)
 
         elif release.date != pubdate:
-            # We have an updated release and we need to clean up
+            # We have an updated release, and we need to clean up
             source_dir = get_matl_folder(item["tag_name"], install=False)
 
             # If we had previously downloaded this code, then delete it

@@ -18,7 +18,7 @@ class TestShare:
         csrf.return_value = True
 
         post = mocker.patch("matl_online.public.views.requests.post")
-        data = {"success": True, "data": {"link": "http://link"}}
+        data = {"success": True, "data": {"link": "https://link"}}
         post.return_value.text = json.dumps(data)
 
         url = url_for("public.share", data="base64,data")
@@ -147,7 +147,7 @@ class TestPrivacy:
             assert resp.json["current"] == current
             assert testapp.cookies["gaoptout"] == current
 
-    def test_optout(self, testapp):
+    def test_opt_out(self, testapp):
         """Make sure that the cookie is respected."""
         url = url_for("public.privacy")
 

@@ -1,4 +1,4 @@
-"""Miscelaneous utility functions for the application."""
+"""Miscellaneous utility functions for the application."""
 
 import base64
 import os
@@ -15,7 +15,7 @@ def base64_encode_file(filename):
 
 
 def parse_iso8601(date):
-    """Convert a date in ISO 8601 format (used by github) to a datetime object."""
+    """Convert a date in ISO 8601 format (used by GitHub) to a datetime object."""
     return datetime.strptime(date, ISO8601_FORMAT)
 
 
@@ -32,9 +32,9 @@ def get_members(zip_file):
             yield zip_info
 
 
-def unzip(fileobj, destination, flatten=True):
+def unzip(file_handle, destination, flatten=True):
     """Unzip an archive to a specific directory and flatten the shared prefix."""
-    archive = zipfile.ZipFile(fileobj)
+    archive = zipfile.ZipFile(file_handle)
 
     # Ensure that the destination exists
     if not os.path.isdir(destination):

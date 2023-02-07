@@ -13,36 +13,36 @@ class TestUnzip:
 
     def test_unzip_and_flatten(self, mocker, tmpdir):
         """Check that flattening of parent directories works as expected."""
-        mzip = MockZipFile()
-        mzip.add_files("mydir/abcde", "mydir/fghij")
+        mock_zip = MockZipFile()
+        mock_zip.add_files("my_dir/abcde", "my_dir/funky")
 
         zipfile = mocker.patch("matl_online.utils.zipfile.ZipFile")
-        zipfile.return_value = mzip
+        zipfile.return_value = mock_zip
 
         unzip("", tmpdir.strpath)
 
-        extract_args = mzip.extract_arguments
+        extract_args = mock_zip.extract_arguments
 
         assert len(extract_args) == 2
         assert extract_args[0] == tmpdir.strpath
 
-        outnames = [obj.filename for obj in extract_args[1]]
+        output_names = [obj.filename for obj in extract_args[1]]
 
-        assert len(outnames) == 2
-        assert outnames[0] == "abcde"
-        assert outnames[1] == "fghij"
+        assert len(output_names) == 2
+        assert output_names[0] == "abcde"
+        assert output_names[1] == "funky"
 
     def test_unzip_without_flatten(self, mocker, tmpdir):
         """Check that unzipping (without flattening) works."""
-        mzip = MockZipFile()
-        mzip.add_files("mydir/abcde", "mydir/fghij")
+        mock_zip = MockZipFile()
+        mock_zip.add_files("my_dir/abcde", "my_dir/funky")
 
         zipfile = mocker.patch("matl_online.utils.zipfile.ZipFile")
-        zipfile.return_value = mzip
+        zipfile.return_value = mock_zip
 
         unzip("", tmpdir.strpath, flatten=False)
 
-        extract_args = mzip.extract_arguments
+        extract_args = mock_zip.extract_arguments
 
         assert len(extract_args) == 1
         assert extract_args[0] == tmpdir.strpath
@@ -50,20 +50,20 @@ class TestUnzip:
     def test_non_existent_dir(self, mocker, tmpdir):
         """If destination doesn't exist, make sure it's created."""
         subdir = tmpdir.mkdir("sub")
-        subpath = subdir.strpath
-        shutil.rmtree(subpath)
+        sub_path = subdir.strpath
+        shutil.rmtree(sub_path)
 
-        mzip = MockZipFile()
-        mzip.add_files("mydic/abcde", "mydir/fghij")
+        mock_zip = MockZipFile()
+        mock_zip.add_files("my_directory/abcde", "my_directory/funky")
 
         zipfile = mocker.patch("matl_online.utils.zipfile.ZipFile")
-        zipfile.return_value = mzip
+        zipfile.return_value = mock_zip
 
-        assert not os.path.isdir(subpath)
+        assert not os.path.isdir(sub_path)
 
-        unzip("", subpath)
+        unzip("", sub_path)
 
-        extract_args = mzip.extract_arguments
+        extract_args = mock_zip.extract_arguments
 
-        assert os.path.isdir(subpath)
-        assert extract_args[0] == subpath
+        assert os.path.isdir(sub_path)
+        assert extract_args[0] == sub_path

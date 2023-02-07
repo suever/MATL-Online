@@ -1,4 +1,4 @@
-"""Unit tests for checking Github Release web hook."""
+"""Unit tests for checking GitHub Release web hook."""
 
 import hmac
 import json
@@ -7,13 +7,20 @@ from hashlib import sha1
 from flask import url_for
 
 
+def get_signature(app, data):
+    """Create a signature header from the secret and payload."""
+    secret = str.encode(app.config["GITHUB_HOOK_SECRET"] or "")
+    sign = hmac.new(secret, msg=data.encode(), digestmod=sha1).hexdigest()
+    return {"X-Hub-Signature": "sha1=" + sign}
+
+
 class TestReleaseHook:
     """Tests for interacting with the /hook route."""
 
-    def test_ping(self, app, testapp, mocker):
+    def test_ping(self, app, testapp):
         """Send a valid ping event and check the response."""
         # Get a valid header
-        headers = self.get_signature(app, "")
+        headers = get_signature(app, "")
         url = url_for("public.github_hook")
 
         # Specify that this is a ping event
@@ -56,14 +63,14 @@ class TestReleaseHook:
         assert resp.status_code == 403
 
     def test_release_event(self, app, testapp, mocker):
-        """Create a valid release github event."""
+        """Create a valid release GitHub event."""
         url = url_for("public.github_hook")
 
         # Data must contain at least the release number
         data = {"release": "1.2.3"}
 
         # Create the valid headers
-        headers = self.get_signature(app, json.dumps(data))
+        headers = get_signature(app, json.dumps(data))
         headers.update({"X-GitHub-Event": "release"})
 
         # Mock the refresh_releases method
@@ -85,7 +92,7 @@ class TestReleaseHook:
         data = {"not_a_release": "true"}
 
         # Get the valid headers
-        headers = self.get_signature(app, json.dumps(data))
+        headers = get_signature(app, json.dumps(data))
         headers.update({"X-GitHub-Event": "not-release"})
 
         # Mock refresh_releases method
@@ -100,9 +107,3 @@ class TestReleaseHook:
 
         # Make sure that we never refresh the releases for these events
         refresh.assert_not_called()
-
-    def get_signature(self, app, data):
-        """Create a signature header from the secret and payload."""
-        secret = str.encode(app.config["GITHUB_HOOK_SECRET"] or "")
-        sign = hmac.new(secret, msg=data.encode(), digestmod=sha1).hexdigest()
-        return {"X-Hub-Signature": "sha1=" + sign}
