@@ -224,4 +224,9 @@ def explain():
 @blueprint.route("/help/<version>", methods=["GET"])
 def documentation(version):
     """Return a JSON representation of the help for the requested version."""
-    return send_file(help_file(_parse_version(version)))
+    try:
+        sanitize_version(version)
+    except InvalidVersion:
+        return "version not found", 404
+
+    return send_file(help_file(version))
