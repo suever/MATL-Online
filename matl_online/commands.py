@@ -1,6 +1,7 @@
 """Custom Flask CLI Commands."""
 
 import os
+import sys
 
 from matl_online import matl
 from matl_online.settings import config
@@ -14,7 +15,8 @@ def register_commands(app):
         import pytest
 
         test_path = os.path.join(config.PROJECT_ROOT, "tests")
-        return pytest.main([test_path, "--verbose"])
+        result = pytest.main([test_path, "--verbose", "--cov=matl_online"])
+        sys.exit(result.value)
 
     @app.cli.command(name="refresh_releases", help="Update MATL releases from GitHub")
     def refresh_releases():

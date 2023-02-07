@@ -15,7 +15,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run Integreation Tests
+          name: Run Integration Tests
           command: make integration-tests
   test-3.8: &test-template
     docker:
