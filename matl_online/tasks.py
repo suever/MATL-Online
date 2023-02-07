@@ -28,7 +28,7 @@ class OutputHandler(StreamHandler):
         """Initialize the handler with the task we are handling."""
         StreamHandler.__init__(self, *args, **kwargs)
         self.task = task
-        self.clear()
+        self.contents = []
 
     def clear(self):
         """Clear all messages that have been logged so far."""
@@ -36,13 +36,13 @@ class OutputHandler(StreamHandler):
 
     def messages(self):
         """Concatenate all messages into a long stream."""
-        return '\n'.join([x for x in self.contents])
+        return "\n".join([x for x in self.contents])
 
     def send(self):
         """Send a message out to the specified rooms."""
         output = parse_matl_results(self.messages())
-        result = {'data': output, 'session': self.task.session_id}
-        socket.emit('status', result, room=self.task.session_id)
+        result = {"data": output, "session": self.task.session_id}
+        socket.emit("status", result, room=self.task.session_id)
         return result
 
     def emit(self, record):
@@ -61,21 +61,21 @@ class OutputHandler(StreamHandler):
         """Append a message to be send back to the user."""
         print(message)
 
-        if message == '[PAUSE]':
+        if message == "[PAUSE]":
             # For now we send the entire message again. Consider a better
             # approach (i.e. adding a field to the result that says to
             # flush prior to display)
             self.send()
             return
-        elif message == '[CLC]':
+        elif message == "[CLC]":
             self.send()
             self.clear()
             return
-        elif message.startswith('warning:'):
+        elif message.startswith("warning:"):
             return
-        elif message.startswith('MATL run-time error:'):
-            for item in message.split('\n'):
-                self.contents.append('[STDERR]' + item)
+        elif message.startswith("MATL run-time error:"):
+            for item in message.split("\n"):
+                self.contents.append("[STDERR]" + item)
 
             return
 
@@ -119,8 +119,7 @@ class OctaveTask(Task):
         if self._tempfolder is None:
             # Generate the temporary folder
             if self.session_id:
-                self._tempfolder = os.path.join(tempfile.gettempdir(),
-                                                self.session_id)
+                self._tempfolder = os.path.join(tempfile.gettempdir(), self.session_id)
             else:
                 self._tempfolder = tempfile.mkdtemp()
 
@@ -136,13 +135,13 @@ class OctaveTask(Task):
 
     def on_term(self):
         """Clean up after termination event."""
-        # Restart octave so we're ready to go with future calls
+        # Restart octave, so we're ready to go with future calls
         self.octave.restart()
         _initialize_process()
 
     def on_success(self, *args, **kwargs):
         """Send a completion messages upon successful completion."""
-        self.emit('complete', {'success': True, 'message': ''})
+        self.emit("complete", {"success": True, "message": ""})
 
     def on_kill(self):
         """Clean up after a task is killed.
@@ -150,7 +149,7 @@ class OctaveTask(Task):
         This is a hard kill by celery so this worker will be destroyed. No
         need to restart octave
         """
-        self.octave._engine.repl.terminate()
+        self.octave.terminate()
         self.on_failure()
 
     def send_results(self):
@@ -167,31 +166,36 @@ class OctaveTask(Task):
     def on_failure(self, *args, **kwargs):
         """Send a message if the task failed for any reason."""
         self.send_results()
-        self.emit('complete', {'success': False})
+        self.emit("complete", {"success": False})
 
 
 @celery.task(base=OctaveTask, bind=True)
 def matl_task(self, *args, **kwargs):
     """Celery task for processing a MATL command and returning the result."""
-    self.session_id = kwargs.pop('session', '')
+    self.session_id = kwargs.pop("session", "")
     self.handler.clear()
 
-    is_test = config.ENV == 'test'
+    is_test = config.ENV == "test"
 
     try:
-        matl(self.octave, *args, folder=self.folder,
-             line_handler=self.handler.process_message, **kwargs)
+        matl(
+            self.octave,
+            *args,
+            folder=self.folder,
+            line_handler=self.handler.process_message,
+            **kwargs,
+        )
         result = self.send_results()
 
     # In the case of an interrupt (either through a time limit or a
     # revoke() event, we will still clean things up
     except (KeyboardInterrupt, SystemExit):
-        self.handler.process_message('[STDERR]Job cancelled')
+        self.handler.process_message("[STDERR]Job cancelled")
         self.on_kill()
         raise
     except SoftTimeLimitExceeded:
         # Propagate the term event up the chain to actually kill the worker
-        self.handler.process_message('[STDERR]Operation timed out')
+        self.handler.process_message("[STDERR]Operation timed out")
         self.on_term()
 
         if is_test:
@@ -208,15 +212,14 @@ def matl_task(self, *args, **kwargs):
 
 
 def _initialize_process(**kwargs):
-    """Initialize the the octave instance.
+    """Initialize the octave instance.
 
     Function to be called when a worker process is spawned. We use this to
     opportunity to actually launch octave and execute a quick MATL program
     """
     global octave
 
-    octave = OctaveSession(octaverc=config.OCTAVERC,
-                           paths=[config.MATL_WRAP_DIR])
+    octave = OctaveSession(octaverc=config.OCTAVERC, paths=[config.MATL_WRAP_DIR])
 
 
 # When a worker process is spawned, initialize octave

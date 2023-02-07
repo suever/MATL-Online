@@ -14,7 +14,7 @@ $(document).ready(function() {
         d.preventDefault();
     });
 
-    // Setup the text areas to automatically resize based on content
+    // Set up the text areas to automatically resize based on content
     autosize($('#code'));
     autosize($('#inputs'));
 
@@ -50,7 +50,7 @@ $(document).ready(function() {
 
         Rollbar.warning("SocketIO Connection Failed", { uuid: uuid });
 
-        // Send a google analytics event if it's defined
+        // Send a Google Analytics event if it's defined
         sendAnalyticsEvent('errors', 'error', 'Submit failed');
 
         // Force the socket to reconnect
@@ -254,7 +254,7 @@ $(document).ready(function() {
     }
 
     function checkInputType(obj){
-        // If contains any alpha-numeric characters
+        // If contains any alphanumeric characters
         var str = $(obj).val();
 
         if ( str.toLowerCase() === str.toUpperCase() ){

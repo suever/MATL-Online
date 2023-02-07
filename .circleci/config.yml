@@ -50,10 +50,6 @@ jobs:
             export PATH="$(yarn bin):$PATH"
             MATL_ONLINE_ENV=test flask test
       - run:
-          name: Run Linting
-          command: |
-            make lint
-      - run:
           name: Report Coverage
           command: |
             coveralls

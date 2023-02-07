@@ -25,7 +25,12 @@ integration-tests:
 		-f docker-compose.test.yml \
 		run tests
 
-lint:
-	isort .
-	flake8 matl_online
+reformat:
+	black .
+
+format-check:
+	black . --check
+
+flake8:
+	flake8 .
 

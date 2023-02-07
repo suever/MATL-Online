@@ -8,28 +8,28 @@ import pytest
 from flask_socketio import SocketIOTestClient
 from webtest import TestApp
 
-os.environ['MATL_ONLINE_ENV'] = 'test'
+os.environ["MATL_ONLINE_ENV"] = "test"
 
-from matl_online.app import create_app
-from matl_online.database import db as _db
-from matl_online.extensions import socketio
-from matl_online.settings import TestConfig
-from matl_online.tasks import OutputHandler
+from matl_online.app import create_app  # noqa: E402
+from matl_online.database import db as _db  # noqa: E402
+from matl_online.extensions import socketio  # noqa: E402
+from matl_online.settings import TestConfig  # noqa: E402
+from matl_online.tasks import OutputHandler  # noqa: E402
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def testapp(app):
     """A Webtest app."""
     return TestApp(app)
 
 
-@pytest.fixture(scope='function')
-def socketclient(app):
+@pytest.fixture(scope="function")
+def socketio_client(app):
     """Fake socketio client."""
     yield SocketIOTestClient(app, socketio)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def app():
     """Flask app instance."""
     _app = create_app(TestConfig)
@@ -41,7 +41,7 @@ def app():
     ctx.pop()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def logger():
     """Logger which can be used to monitor logging calls."""
     # Create a new random log
@@ -60,20 +60,20 @@ def logger():
 
 
 @pytest.fixture
-def moctave(mocker, logger):
+def octave_mock(mocker, logger):
     """Mock version of OctaveEngine to monitor calls to octave."""
-    moctave = mocker.patch('matl_online.tasks.octave')
-    moctave.evals = list()
+    octave = mocker.patch("matl_online.tasks.octave")
+    octave.evals = list()
 
-    def moctave_eval(*args, **kwargs):
-        moctave.evals.append(*args)
+    def octave_eval(*args, **kwargs):
+        octave.evals.append(*args)
 
-    moctave.eval = moctave_eval
-    moctave.logger = logger
-    return moctave
+    octave.eval = octave_eval
+    octave.logger = logger
+    return octave
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def db(app):
     """Database instance."""
     _db.app = app

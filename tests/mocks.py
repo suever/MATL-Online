@@ -18,10 +18,10 @@ class MockZipFile:
         return self.files
 
     def infolist(self):
-        """Get metadata about all of the files."""
+        """Get metadata about all the files."""
         # filename: filename
-        return [type('info', (object,), {'filename': x}) for x in self.files]
+        return [type("info", (object,), {"filename": x}) for x in self.files]
 
     def extractall(self, *args):
-        """Pretend to extract all of the files and record inputs."""
+        """Pretend to extract all the files and record inputs."""
         self.extract_arguments = args

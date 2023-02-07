@@ -22,7 +22,7 @@ class BaseFactory(SQLAlchemyModelFactory):
 class ReleaseFactory(BaseFactory):
     """Factory for creating Release objects on demand."""
 
-    tag = Sequence(lambda n: '{0}.0.0'.format(n))
+    tag = Sequence(lambda n: "{0}.0.0".format(n))
     date = LazyFunction(datetime.now)
 
     class Meta:
@@ -35,7 +35,7 @@ class DocumentationLinkFactory(BaseFactory):
     """Factory for creating DocumentationLink objects on demand."""
 
     # The default link will simply append .html to the end of the name
-    link = LazyAttribute(lambda o: o.name + '.html')
+    link = LazyAttribute(lambda o: o.name + ".html")
 
     class Meta:
         """Meta information for the factory."""
