@@ -8,7 +8,7 @@ import pytest
 from flask_socketio import SocketIOTestClient
 from webtest import TestApp
 
-os.environ['MATL_ONLINE_ENV'] = 'test'
+os.environ["MATL_ONLINE_ENV"] = "test"
 
 from matl_online.app import create_app
 from matl_online.database import db as _db
@@ -17,19 +17,19 @@ from matl_online.settings import TestConfig
 from matl_online.tasks import OutputHandler
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def testapp(app):
     """A Webtest app."""
     return TestApp(app)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def socketclient(app):
     """Fake socketio client."""
     yield SocketIOTestClient(app, socketio)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def app():
     """Flask app instance."""
     _app = create_app(TestConfig)
@@ -41,7 +41,7 @@ def app():
     ctx.pop()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def logger():
     """Logger which can be used to monitor logging calls."""
     # Create a new random log
@@ -62,7 +62,7 @@ def logger():
 @pytest.fixture
 def moctave(mocker, logger):
     """Mock version of OctaveEngine to monitor calls to octave."""
-    moctave = mocker.patch('matl_online.tasks.octave')
+    moctave = mocker.patch("matl_online.tasks.octave")
     moctave.evals = list()
 
     def moctave_eval(*args, **kwargs):
@@ -73,7 +73,7 @@ def moctave(mocker, logger):
     return moctave
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def db(app):
     """Database instance."""
     _db.app = app

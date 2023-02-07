@@ -13,7 +13,7 @@ from matl_online.database import Column, Model, db
 class Release(Model):
     """Model for storing metadata associated with MATL releases."""
 
-    __tablename__ = 'releases'
+    __tablename__ = "releases"
 
     id = Column(db.Integer, primary_key=True)
     tag = Column(db.String, unique=True, nullable=False)
@@ -21,12 +21,12 @@ class Release(Model):
 
     def __repr__(self):
         """Create a custom string representation."""
-        return '<Release %r>' % self.tag
+        return "<Release %r>" % self.tag
 
     @hybrid_property
     def version(self):
         """Convert release number to tuple for comparisons."""
-        return tuple(int(x) for x in self.tag.split('.'))
+        return tuple(int(x) for x in self.tag.split("."))
 
     @classmethod
     def latest(cls):
@@ -42,7 +42,7 @@ class Release(Model):
 class DocumentationLink(Model):
     """Model for storing hyperlinks to MATLAB's documentation."""
 
-    __tablenamme__ = 'doclinks'
+    __tablenamme__ = "doclinks"
 
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String, unique=True, nullable=False)
@@ -53,19 +53,18 @@ class DocumentationLink(Model):
         """Fetch updated documentation from the Mathworks."""
         # Flip the order of the links so that the first URL listed is the
         # highest priority and will take precedence
-        for url in current_app.config['MATLAB_DOC_LINKS'][::-1]:
+        for url in current_app.config["MATLAB_DOC_LINKS"][::-1]:
             resp = requests.get(url)
-            soup = BeautifulSoup(resp.text, 'html.parser')
+            soup = BeautifulSoup(resp.text, "html.parser")
 
-            terms = soup.findAll('td', {'class': 'term'})
-            links = [term.find('a') for term in terms]
+            terms = soup.findAll("td", {"class": "term"})
+            links = [term.find("a") for term in terms]
 
             for link in links:
-
                 function = link.text.rstrip()
 
                 doc = cls.query.filter_by(name=function).first()
-                doc_url = urljoin(url, link['href'])
+                doc_url = urljoin(url, link["href"])
 
                 # Create an entry if one doesn't already exist
                 if doc is None:
@@ -75,7 +74,7 @@ class DocumentationLink(Model):
                 doc.save()
 
         # Make sure to remove i and j entries
-        toremove = cls.query.filter(or_(cls.name == 'i', cls.name == 'j')).all()
+        toremove = cls.query.filter(or_(cls.name == "i", cls.name == "j")).all()
         for item in toremove:
             item.delete()
 

@@ -14,14 +14,14 @@ class TestShare:
 
     def test_share_with_csrf(self, app, testapp, mocker):
         """Passing CSRF validation check."""
-        csrf = mocker.patch('matl_online.public.views.validate_csrf')
+        csrf = mocker.patch("matl_online.public.views.validate_csrf")
         csrf.return_value = True
 
-        post = mocker.patch('matl_online.public.views.requests.post')
-        data = {'success': True, 'data': {'link': 'http://link'}}
+        post = mocker.patch("matl_online.public.views.requests.post")
+        data = {"success": True, "data": {"link": "http://link"}}
         post.return_value.text = json.dumps(data)
 
-        url = url_for('public.share', data='base64,data')
+        url = url_for("public.share", data="base64,data")
 
         response = testapp.post(url)
 
@@ -29,15 +29,12 @@ class TestShare:
         assert csrf.call_count == 1
         assert post.call_count == 1
 
-        head_expect = {
-            'Authorization':
-            'Client-ID ' + app.config['IMGUR_CLIENT_ID']
-        }
+        head_expect = {"Authorization": "Client-ID " + app.config["IMGUR_CLIENT_ID"]}
 
         post.assert_called_once_with(
-            'https://api.imgur.com/3/image',
-            {'image': 'data', 'type': 'base64'},
-            headers=head_expect
+            "https://api.imgur.com/3/image",
+            {"image": "data", "type": "base64"},
+            headers=head_expect,
         )
 
         # Make sure that the response was correct
@@ -45,30 +42,30 @@ class TestShare:
 
         payload = response.json
 
-        assert payload.get('success') is True
-        assert payload.get('link') == data['data']['link']
+        assert payload.get("success") is True
+        assert payload.get("link") == data["data"]["link"]
 
     def test_share_with_invalid_csrf(self, testapp):
         """Failing CSRF validation produces an error."""
-        url = url_for('public.share', data='INVALID')
-        resp = testapp.post_json(url, '', expect_errors=True)
+        url = url_for("public.share", data="INVALID")
+        resp = testapp.post_json(url, "", expect_errors=True)
         assert resp.status_code == 400
 
     def test_share_without_csrf(self, testapp):
         """Failing CSRF validation produces an error."""
-        url = url_for('public.share', data='')
-        resp = testapp.post_json(url, '', expect_errors=True)
+        url = url_for("public.share", data="")
+        resp = testapp.post_json(url, "", expect_errors=True)
         assert resp.status_code == 400
 
     def test_failed_upload(self, testapp, mocker):
         """Test if there was an error while uploading to imgur."""
-        csrf = mocker.patch('matl_online.public.views.validate_csrf')
+        csrf = mocker.patch("matl_online.public.views.validate_csrf")
         csrf.return_value = True
 
-        post = mocker.patch('matl_online.public.views.requests.post')
-        post.return_value.text = json.dumps({'success': False})
+        post = mocker.patch("matl_online.public.views.requests.post")
+        post.return_value.text = json.dumps({"success": False})
 
-        url = url_for('public.share', data='data')
+        url = url_for("public.share", data="data")
 
         response = testapp.post(url, expect_errors=True)
 
@@ -76,7 +73,7 @@ class TestShare:
         assert post.call_count == 1
 
         assert response.status_code == 400
-        assert response.json.get('success') is False
+        assert response.json.get("success") is False
 
 
 class TestHome:
@@ -84,22 +81,22 @@ class TestHome:
 
     def test_defaults(self, testapp, mocker, db):
         """Check the default arguments passed to template."""
-        url = url_for('public.home')
+        url = url_for("public.home")
         ReleaseFactory.create_batch(size=10)
 
-        render = mocker.patch('matl_online.public.views.render_template')
-        render.return_value = ''
+        render = mocker.patch("matl_online.public.views.render_template")
+        render.return_value = ""
 
         testapp.get(url)
 
         args, params = render.call_args
 
-        assert args[0] == 'index.html'
-        assert params.get('inputs') == ''
-        assert params.get('code') == ''
-        assert params.get('version') == Release.latest().tag
+        assert args[0] == "index.html"
+        assert params.get("inputs") == ""
+        assert params.get("code") == ""
+        assert params.get("version") == Release.latest().tag
 
-        versions = params.get('versions')
+        versions = params.get("versions")
         versions = sorted(versions, key=lambda v: v.tag)
 
         releases = Release.query.all()
@@ -109,15 +106,15 @@ class TestHome:
 
     def test_non_existent_version(self, testapp, mocker, db):
         """Pass an invalid version number via query string."""
-        url = url_for('public.home', version='not a version')
+        url = url_for("public.home", version="not a version")
         ReleaseFactory.create_batch(size=10)
 
-        render = mocker.patch('matl_online.public.views.render_template')
-        render.return_value = ''
+        render = mocker.patch("matl_online.public.views.render_template")
+        render.return_value = ""
 
         testapp.get(url)
 
-        version = render.call_args[1].get('version')
+        version = render.call_args[1].get("version")
         assert version == Release.latest().tag
 
 
@@ -126,43 +123,47 @@ class TestPrivacy:
 
     def test_privacy_page(self, testapp):
         """Test the main view for errors."""
-        url = url_for('public.privacy')
+        url = url_for("public.privacy")
         resp = testapp.get(url)
         assert resp.status_code == 200
 
     def test_api(self, testapp):
         """Test the API for toggling the opt-in/opt-out status."""
-        url = url_for('public.privacy_opt')
+        url = url_for("public.privacy_opt")
 
-        opts = [('true', 'true'), ('true', 'false'),
-                ('false', 'false'), ('false', 'true')]
+        opts = [
+            ("true", "true"),
+            ("true", "false"),
+            ("false", "false"),
+            ("false", "true"),
+        ]
 
         for previous, current in opts:
-            testapp.set_cookie('gaoptout', previous)
-            resp = testapp.get(url, params={'value': current})
+            testapp.set_cookie("gaoptout", previous)
+            resp = testapp.get(url, params={"value": current})
 
             assert resp.status_code == 200
-            assert resp.json['previous'] == previous
-            assert resp.json['current'] == current
-            assert testapp.cookies['gaoptout'] == current
+            assert resp.json["previous"] == previous
+            assert resp.json["current"] == current
+            assert testapp.cookies["gaoptout"] == current
 
     def test_optout(self, testapp):
         """Make sure that the cookie is respected."""
-        url = url_for('public.privacy')
+        url = url_for("public.privacy")
 
         # Opt-In
-        testapp.set_cookie('gaoptout', 'false')
+        testapp.set_cookie("gaoptout", "false")
         resp = testapp.get(url)
 
         assert resp.status_code == 200
-        assert resp.text.find('GoogleAnalyticsObject') != -1
+        assert resp.text.find("GoogleAnalyticsObject") != -1
 
         # Opt-Out
-        testapp.set_cookie('gaoptout', 'true')
+        testapp.set_cookie("gaoptout", "true")
         resp = testapp.get(url)
 
         assert resp.status_code == 200
-        assert resp.text.find('GoogleAnalyticsObject') == -1
+        assert resp.text.find("GoogleAnalyticsObject") == -1
 
 
 class TestExplain:
@@ -170,15 +171,15 @@ class TestExplain:
 
     def test_with_version(self, testapp, mocker, db):
         """Specify a version and get a successful response."""
-        ReleaseFactory(tag='1.2.3')
-        ReleaseFactory(tag='2.4.5')
+        ReleaseFactory(tag="1.2.3")
+        ReleaseFactory(tag="2.4.5")
 
-        version = '1.2.3'
-        url = url_for('public.explain', version=version)
+        version = "1.2.3"
+        url = url_for("public.explain", version=version)
 
-        data = {'data': 'this'}
+        data = {"data": "this"}
 
-        task = mocker.patch('matl_online.public.views.matl_task.delay')
+        task = mocker.patch("matl_online.public.views.matl_task.delay")
         task.return_value.wait = lambda: data
 
         resp = testapp.get(url)
@@ -190,25 +191,25 @@ class TestExplain:
         """Do not specify a version and use the latest version."""
         releases = ReleaseFactory.create_batch(size=3)
 
-        task = mocker.patch('matl_online.public.views.matl_task.delay')
+        task = mocker.patch("matl_online.public.views.matl_task.delay")
         task.return_value.wait = lambda: {}
 
-        resp = testapp.get(url_for('public.explain'))
+        resp = testapp.get(url_for("public.explain"))
 
         assert resp.status_code == 200
-        assert task.call_args[1].get('version') == releases[-1].tag
+        assert task.call_args[1].get("version") == releases[-1].tag
 
 
 def test_fetch_help(testapp, mocker, db, tmpdir):
     """Check that we get the expected JSON when requesting help."""
-    folder = mocker.patch('matl_online.matl.get_matl_folder')
+    folder = mocker.patch("matl_online.matl.get_matl_folder")
     folder.return_value = tmpdir.strpath
 
-    jsonfile = tmpdir.join('help.json')
-    data = {'placeholder': 'value'}
+    jsonfile = tmpdir.join("help.json")
+    data = {"placeholder": "value"}
     jsonfile.write(json.dumps(data))
 
-    url = url_for('public.help', version='1.2.3')
+    url = url_for("public.help", version="1.2.3")
 
     resp = testapp.get(url)
 

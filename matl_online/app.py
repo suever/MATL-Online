@@ -9,7 +9,7 @@ from matl_online.settings import get_config
 
 
 def create_app(config_object=None):
-    """Application factor- for creating flask apps."""
+    """Application factory for creating flask apps."""
     app = Flask(__name__)
     app.config.from_object(config_object or get_config())
     register_extensions(app)
@@ -25,11 +25,11 @@ def register_extensions(app):
     migrate.init_app(app, db)
 
     # Make sure that the client manager isn't remembered
-    socketio.server_options.pop('client_manager', None)
+    socketio.server_options.pop("client_manager", None)
     socketio.init_app(
         app,
-        message_queue=app.config.get('SOCKETIO_MESSAGE_QUEUE'),
-        cors_allowed_origins=app.config.get('CORS_ALLOWED_ORIGINS'),
+        message_queue=app.config.get("SOCKETIO_MESSAGE_QUEUE"),
+        cors_allowed_origins=app.config.get("CORS_ALLOWED_ORIGINS"),
     )
 
     celery.conf.update(app.config)

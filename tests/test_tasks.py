@@ -13,12 +13,12 @@ from .helpers import session_id_for_client
 
 def prepare_folder_testcase(mocker, moctave, tmpdir):
     """Create the necessary mocks."""
-    mocker.patch('matl_online.tasks.Task')
+    mocker.patch("matl_online.tasks.Task")
 
-    mktmp = mocker.patch('matl_online.tasks.tempfile.mkdtemp')
+    mktmp = mocker.patch("matl_online.tasks.tempfile.mkdtemp")
     mktmp.return_value = tmpdir.strpath
 
-    gettmp = mocker.patch('matl_online.tasks.tempfile.gettempdir')
+    gettmp = mocker.patch("matl_online.tasks.tempfile.gettempdir")
     gettmp.return_value = tmpdir.strpath
 
 
@@ -27,7 +27,7 @@ class TestOctaveTask:
 
     def test_octave_property(self, mocker, moctave, logger):
         """Make sure that an instance is created only when requested."""
-        mocker.patch('matl_online.tasks.Task')
+        mocker.patch("matl_online.tasks.Task")
 
         logger.setLevel(logging.ERROR)
         moctave.logger = logger
@@ -67,7 +67,7 @@ class TestOctaveTask:
         prepare_folder_testcase(mocker, moctave, tmpdir)
 
         task = OctaveTask()
-        session_id = '123456'
+        session_id = "123456"
         task.session_id = session_id
 
         outfolder = os.path.join(tmpdir.strpath, session_id)
@@ -78,7 +78,7 @@ class TestOctaveTask:
 
     def test_on_term(self, mocker, moctave):
         """Ensure cleanup is performed as expected when a task is terminated."""
-        initialize = mocker.patch('matl_online.tasks._initialize_process')
+        initialize = mocker.patch("matl_online.tasks._initialize_process")
 
         task = OctaveTask()
 
@@ -88,7 +88,7 @@ class TestOctaveTask:
 
         methods = [m[0] for m in moctave.method_calls]
 
-        assert 'restart' in methods
+        assert "restart" in methods
         assert initialize.call_count == 1
 
 
@@ -102,57 +102,60 @@ class TestMATLTask:
 
         # Overload the use of the message_queue by simply mocking the
         # socket instance in tasks.py
-        mocker.patch('matl_online.tasks.socket',
-                     new_callable=lambda: socketclient.socketio)
+        mocker.patch(
+            "matl_online.tasks.socket", new_callable=lambda: socketclient.socketio
+        )
 
-        matl_task('-ro', '1D', session=session_id_for_client(socketclient))
+        matl_task("-ro", "1D", session=session_id_for_client(socketclient))
 
         received = socketclient.get_received()
-        assert received[-1]['args'][0] == {'message': '', 'success': True}
+        assert received[-1]["args"][0] == {"message": "", "success": True}
 
     def test_keyboard_interupt(self, mocker, moctave, socketclient):
         """Ensure proper handling of keyboard interrupt events."""
         socketclient.get_received()
 
-        mocker.patch('matl_online.tasks.socket',
-                     new_callable=lambda: socketclient.socketio)
+        mocker.patch(
+            "matl_online.tasks.socket", new_callable=lambda: socketclient.socketio
+        )
 
-        ev = mocker.patch('matl_online.tasks.matl_task.octave.eval')
+        ev = mocker.patch("matl_online.tasks.matl_task.octave.eval")
         ev.side_effect = KeyboardInterrupt
 
         with pytest.raises(KeyboardInterrupt):
-            matl_task('-ro', '1D', session=session_id_for_client(socketclient))
+            matl_task("-ro", "1D", session=session_id_for_client(socketclient))
 
         received = socketclient.get_received()
 
-        payload = received[0]['args'][0]
+        payload = received[0]["args"][0]
 
-        assert payload.get('session') == session_id_for_client(socketclient)
-        assert payload['data'][0]['type'] == 'stderr'
-        assert payload['data'][0]['value'] == 'Job cancelled'
+        assert payload.get("session") == session_id_for_client(socketclient)
+        assert payload["data"][0]["type"] == "stderr"
+        assert payload["data"][0]["value"] == "Job cancelled"
 
         # Ultimately we alert the user that it failed
-        assert received[-1]['args'][0] == {'success': False}
+        assert received[-1]["args"][0] == {"success": False}
 
     def test_time_limit(self, mocker, moctave, socketclient):
         """Ensure tasks exceeding the time limit are dealth with properly."""
         socketclient.get_received()
 
-        mocker.patch('matl_online.tasks.socket',
-                     new_callable=lambda: socketclient.socketio)
+        mocker.patch(
+            "matl_online.tasks.socket", new_callable=lambda: socketclient.socketio
+        )
 
-        ev = mocker.patch('matl_online.tasks.matl_task.octave.eval')
+        ev = mocker.patch("matl_online.tasks.matl_task.octave.eval")
         ev.side_effect = SoftTimeLimitExceeded
 
         with pytest.raises(SoftTimeLimitExceeded):
-            matl_task('-ro', '1D', session=session_id_for_client(socketclient))
+            matl_task("-ro", "1D", session=session_id_for_client(socketclient))
 
         received = socketclient.get_received()
 
-        payload = received[0]['args'][0]
+        payload = received[0]["args"][0]
 
-        assert payload.get('session') == session_id_for_client(socketclient)
-        assert payload['data'][0]['type'] == 'stderr'
-        assert payload['data'][0]['value'] == 'Operation timed out'
+        assert payload.get("session") == session_id_for_client(socketclient)
+        assert payload["data"][0]["type"] == "stderr"
+        assert payload["data"][0]["value"] == "Operation timed out"
 
-        assert received[-1]['args'][0] == {'success': False}
+        assert received[-1]["args"][0] == {"success": False}

@@ -8,7 +8,7 @@ class TestLogHandler:
 
     def test_initialization(self, logger):
         """Make sure that all necessary properties are set."""
-        task = type('task', (object,), {'session_id': '123'})
+        task = type("task", (object,), {"session_id": "123"})
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
@@ -16,16 +16,16 @@ class TestLogHandler:
 
         # There should be no messages initially
         assert len(handler.contents) == 0
-        assert handler.messages() == ''
+        assert handler.messages() == ""
 
     def test_stdout_log(self, logger):
         """STDOUT events should create appropriate messages."""
-        task = type('task', (object,), {'session_id': '123'})
+        task = type("task", (object,), {"session_id": "123"})
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
         # Write something to the log
-        msg = 'I am a message'
+        msg = "I am a message"
         logger.info(msg)
 
         assert len(handler.contents) == 1
@@ -33,20 +33,20 @@ class TestLogHandler:
 
     def test_clc_log(self, logger, mocker):
         """CLC should flush the contents."""
-        task = type('task', (object,), {'session_id': '123'})
+        task = type("task", (object,), {"session_id": "123"})
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
-        send_func = mocker.patch('matl_online.tasks.OutputHandler.send')
+        send_func = mocker.patch("matl_online.tasks.OutputHandler.send")
 
         # Write something to the log
-        logger.info('I am an empty message')
+        logger.info("I am an empty message")
 
         send_func.assert_not_called()
         assert len(handler.contents) == 1
 
         # Now send a CLC event
-        logger.info('[CLC]')
+        logger.info("[CLC]")
 
         # Make sure that the send function was called
         assert send_func.call_count == 1
@@ -56,13 +56,13 @@ class TestLogHandler:
 
     def test_pause(self, logger, mocker):
         """For a pause event, we should have data sent but NOT cleared."""
-        task = type('task', (object,), {'session_id': '123'})
+        task = type("task", (object,), {"session_id": "123"})
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
-        send_func = mocker.patch('matl_online.tasks.OutputHandler.send')
+        send_func = mocker.patch("matl_online.tasks.OutputHandler.send")
 
-        msg = 'I am an empty message'
+        msg = "I am an empty message"
 
         # Write something to the log
         logger.info(msg)
@@ -71,7 +71,7 @@ class TestLogHandler:
         assert len(handler.contents) == 1
 
         # Now send a CLC event
-        logger.info('[PAUSE]')
+        logger.info("[PAUSE]")
 
         # Make sure that the send function was called
         assert send_func.call_count == 1
@@ -82,62 +82,62 @@ class TestLogHandler:
 
     def test_ignore_octave_warning(self, logger, mocker):
         """Occassionally octave will print warning: messages to be ignored."""
-        task = type('task', (object,), {'session_id': '123'})
+        task = type("task", (object,), {"session_id": "123"})
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
-        send_func = mocker.patch('matl_online.tasks.OutputHandler.send')
+        send_func = mocker.patch("matl_online.tasks.OutputHandler.send")
 
-        logger.info('warning: I am octave and I like warnings')
-        logger.info('warning: I am octave and I still like warnings')
+        logger.info("warning: I am octave and I like warnings")
+        logger.info("warning: I am octave and I still like warnings")
 
         send_func.assert_not_called()
         assert len(handler.contents) == 0
 
     def test_matl_error_handling(self, logger, mocker):
         """Error messages are prefaced with [STDERR]."""
-        task = type('task', (object,), {'session_id': '123'})
+        task = type("task", (object,), {"session_id": "123"})
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
-        send_func = mocker.patch('matl_online.tasks.OutputHandler.send')
+        send_func = mocker.patch("matl_online.tasks.OutputHandler.send")
 
-        errmsg = 'MATL run-time error:\nline 1\nline 2'
+        errmsg = "MATL run-time error:\nline 1\nline 2"
         logger.info(errmsg)
 
         # Check the contents
         send_func.assert_not_called()
         assert len(handler.contents) == 3
-        assert handler.contents[0] == '[STDERR]MATL run-time error:'
-        assert handler.contents[1] == '[STDERR]line 1'
-        assert handler.contents[2] == '[STDERR]line 2'
+        assert handler.contents[0] == "[STDERR]MATL run-time error:"
+        assert handler.contents[1] == "[STDERR]line 1"
+        assert handler.contents[2] == "[STDERR]line 2"
 
     def test_filter(self, logger, mocker):
         """Ensure that we ONLY get info events."""
-        task = type('task', (object,), {'session_id': '123'})
+        task = type("task", (object,), {"session_id": "123"})
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
-        send_func = mocker.patch('matl_online.tasks.OutputHandler.send')
+        send_func = mocker.patch("matl_online.tasks.OutputHandler.send")
 
-        logger.warning('warning')
-        logger.error('error')
-        logger.debug('debug')
+        logger.warning("warning")
+        logger.error("error")
+        logger.debug("debug")
 
         assert len(handler.contents) == 0
         send_func.assert_not_called()
 
     def test_send(self, logger, mocker):
         """Make sure socket events are issued as expected."""
-        identifier = '123'
-        task = type('task', (object,), {'session_id': identifier})
+        identifier = "123"
+        task = type("task", (object,), {"session_id": identifier})
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
-        emit = mocker.patch('matl_online.tasks.socket.emit')
+        emit = mocker.patch("matl_online.tasks.socket.emit")
 
-        logger.info('test1')
-        logger.info('[STDERR]error')
+        logger.info("test1")
+        logger.info("[STDERR]error")
         handler.send()
 
         assert emit.called == 1
@@ -145,10 +145,14 @@ class TestLogHandler:
 
         event, payload = emit.call_args[0]
 
-        expected_data = {'session': identifier,
-                         'data': [{'type': 'stdout', 'value': 'test1'},
-                                  {'type': 'stderr', 'value': 'error'}]}
+        expected_data = {
+            "session": identifier,
+            "data": [
+                {"type": "stdout", "value": "test1"},
+                {"type": "stderr", "value": "error"},
+            ],
+        }
 
         assert payload == expected_data
-        assert event == 'status'
-        assert emit.call_args[1].get('room') == identifier
+        assert event == "status"
+        assert emit.call_args[1].get("room") == identifier

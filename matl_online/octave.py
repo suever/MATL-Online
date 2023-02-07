@@ -7,8 +7,8 @@ from matl_online.settings import Config
 
 # Set the environment variable to specify additional command-line input
 # arguments to Octave
-os.environ['OCTAVE_CLI_OPTIONS'] = Config.OCTAVE_CLI_OPTIONS
-os.environ['OCTAVE_EXECUTABLE'] = Config.OCTAVE_EXECUTABLE
+os.environ["OCTAVE_CLI_OPTIONS"] = Config.OCTAVE_CLI_OPTIONS
+os.environ["OCTAVE_EXECUTABLE"] = Config.OCTAVE_EXECUTABLE
 
 
 # Initialize an octave session with the desired executable
@@ -26,14 +26,14 @@ class OctaveSession:
         self._engine = OctaveEngine()
 
         if self.octaverc:
-            self.eval('source("''%s''")' % self.octaverc)
+            self.eval('source("' "%s" '")' % self.octaverc)
 
         for path in self.paths:
-            self.eval('addpath("''%s''")' % path)
+            self.eval('addpath("' "%s" '")' % path)
 
     def eval(self, code, **kwargs):
         """Evaluate some code in Octave."""
-        handler = kwargs.pop('line_handler', self._engine.line_handler)
+        handler = kwargs.pop("line_handler", self._engine.line_handler)
         self._engine.line_handler = handler
         return self._engine.eval(code, **kwargs)
 
