@@ -1,9 +1,8 @@
 # MATL Online
 
 [![Build Status](https://circleci.com/gh/suever/MATL-Online.svg?style=svg)](https://circleci.com/gh/suever/MATL-Online)
-[![Coverage Status](https://coveralls.io/repos/github/suever/MATL-Online/badge.svg?branch=master)](https://coveralls.io/github/suever/MATL-Online?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/suever/MATL-Online/badge.svg?branch=main)](https://coveralls.io/github/suever/MATL-Online?branch=main)
 [![Code Climate](https://codeclimate.com/github/suever/MATL-Online/badges/gpa.svg)](https://codeclimate.com/github/suever/MATL-Online)
-[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=suever/MATL-Online)](https://dependabot.com)
 
 This is a Python-based online interpreter for the [MATL][matl] programming
 language, a golfing language based on [MATLAB][matlab] and [Octave][octave]. A

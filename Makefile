@@ -17,7 +17,13 @@ deploy: docker
 
 
 test:
-	MATL_ONLINE_ENV=test flask test
+	MATL_ONLINE_ENV=test \
+		pytest \
+		--verbose \
+		--cov-report=html \
+		--cov-report=term \
+		--cov=matl_online \
+		tests
 
 integration-tests:
 	docker-compose \
