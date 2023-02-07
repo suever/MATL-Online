@@ -38,4 +38,4 @@ Flask-Migrate==4.0.0
 honcho==1.1.0
 
 # Forms
-flask_wtf==1.0.1
+flask_wtf==1.1.1
