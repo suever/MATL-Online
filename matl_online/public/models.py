@@ -30,13 +30,18 @@ class Release(Model):
 
     @classmethod
     def latest(cls):
-        """Get the latest release from Github."""
+        """Get the latest release from GitHub."""
         releases = cls.query.all()
         if len(releases) == 0:
             return None
 
         releases.sort(key=lambda x: x.version)
         return releases[-1]
+
+    @classmethod
+    def exists(cls, tag: str) -> bool:
+        """Checks if the specified release exists."""
+        return cls.query.filter_by(tag=tag).count() > 0
 
 
 class DocumentationLink(Model):

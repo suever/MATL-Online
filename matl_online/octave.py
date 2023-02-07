@@ -1,10 +1,10 @@
 """Module for creating an octave instance."""
 import os
+from typing import Optional
 
 from octave_kernel.kernel import OctaveEngine
 
 from matl_online.settings import Config
-from typing import Optional
 
 # Set the environment variable to specify additional command-line input
 # arguments to Octave

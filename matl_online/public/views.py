@@ -3,10 +3,10 @@
 import hmac
 import json
 import os
-import re
 import uuid
 from datetime import datetime
 from hashlib import sha1
+from typing import Optional
 
 import requests
 from flask import Blueprint, abort, current_app, jsonify
@@ -16,11 +16,13 @@ from flask_socketio import emit, rooms
 from flask_wtf.csrf import validate_csrf
 from wtforms import ValidationError
 
+from matl_online.errors import InvalidVersion
 from matl_online.extensions import celery, csrf, socketio
 from matl_online.matl import help_file, refresh_releases
 from matl_online.public.models import Release
 from matl_online.settings import Config
 from matl_online.tasks import matl_task
+from matl_online.utils import sanitize_version
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 
@@ -43,17 +45,16 @@ def render_template(*args, **kwargs):
 def _latest_version_tag():
     latest = Release.latest()
     if latest is None:
-        version = ""
-    else:
-        version = latest.tag
+        return ""
 
-    return version
+    return latest.tag
 
 
-def _parse_version(version):
-    if not version or re.match(r"^[A-Za-z0-9.]*$", version) is None:
-        version = _latest_version_tag()
-    return version[: min(len(version), 8)]
+def _parse_version(version: Optional[str]) -> str:
+    try:
+        return sanitize_version(version or "")
+    except InvalidVersion:
+        return _latest_version_tag()
 
 
 @blueprint.route("/")
@@ -198,7 +199,7 @@ def submit_job(data):
     inputs = data.get("inputs", "")
     code = data.get("code", "")
 
-    version = _parse_version(data.get("version"))
+    version = _parse_version(data.get("version", ""))
 
     # No op if no inputs are provided
     if code == "":
@@ -214,7 +215,7 @@ def submit_job(data):
 def explain():
     """Provide the user with an explanation of some code."""
     code = request.values.get("code", "")
-    version = request.values.get("version", Release.latest().tag)
+    version = _parse_version(request.values.get("version", ""))
 
     result = matl_task.delay("-eo", code, version=version).wait()
     return jsonify(result), 200
@@ -223,5 +224,4 @@ def explain():
 @blueprint.route("/help/<version>", methods=["GET"])
 def documentation(version):
     """Return a JSON representation of the help for the requested version."""
-    version = version[: min(len(version), 8)]
-    return send_file(help_file(version))
+    return send_file(help_file(_parse_version(version)))

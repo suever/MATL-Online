@@ -1,9 +1,12 @@
 """Unit tests for utils module."""
 
 import os
+import pytest
 import shutil
 
-from matl_online.utils import unzip
+from .factories import ReleaseFactory
+from matl_online.errors import InvalidVersion
+from matl_online.utils import unzip, sanitize_version
 
 from .mocks import MockZipFile
 
@@ -67,3 +70,35 @@ class TestUnzip:
 
         assert os.path.isdir(sub_path)
         assert extract_args[0] == sub_path
+
+
+class TestSanitizeVersion:
+    def test_commit_hash_short(self):
+        assert sanitize_version("abcdef12") == "abcdef12"
+
+    def test_commit_hash_uppercase(self):
+        assert sanitize_version("12ABCDEF") == "12abcdef"
+
+    def test_hash_too_short(self):
+        with pytest.raises(InvalidVersion):
+            sanitize_version("ABC")
+
+    def test_hash_truncation(self):
+        assert sanitize_version("abcdef1234567890") == "abcdef12"
+
+    def test_invalid(self, db):
+        with pytest.raises(InvalidVersion):
+            sanitize_version("invalid")
+
+    def test_version_tag(self, db):
+        # Create the version in the database
+        tag = "v1.2.3.4"
+        ReleaseFactory(tag=tag).save()
+        assert sanitize_version(tag) == tag
+
+    def test_missing_version_tag(self, db):
+        tag = "v1.2.3.4"
+        ReleaseFactory(tag=tag + ".5").save()
+
+        with pytest.raises(InvalidVersion):
+            sanitize_version(tag)

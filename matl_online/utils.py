@@ -2,21 +2,19 @@
 
 import base64
 import os
+import string
 import zipfile
-from datetime import datetime
 
-ISO8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+from matl_online.errors import InvalidVersion
+from matl_online.public.models import Release
+
+COMMIT_HASH_LENGTH = 8
 
 
 def base64_encode_file(filename):
     """Load a file and return the base64-encoded version of the contents."""
     with open(filename, "rb") as fid:
         return "base64," + base64.b64encode(fid.read()).decode()
-
-
-def parse_iso8601(date):
-    """Convert a date in ISO 8601 format (used by GitHub) to a datetime object."""
-    return datetime.strptime(date, ISO8601_FORMAT)
 
 
 def get_members(zip_file):
@@ -46,3 +44,25 @@ def unzip(file_handle, destination, flatten=True):
         inputs = (get_members(archive),)
 
     archive.extractall(destination, *inputs)
+
+
+def is_hexadecimal_string(value: str) -> bool:
+    """Check whether the provide string is a valid hexadecimal string or not."""
+    return all(character in string.hexdigits for character in value)
+
+
+def sanitize_version(version: str) -> str:
+    """Sanitizes the version provided by the user to ensure it is valid and not malicious."""
+
+    # If the version is a commit hash, then pass the first 8 characters through
+    if is_hexadecimal_string(version):
+        if len(version) < COMMIT_HASH_LENGTH:
+            raise InvalidVersion
+
+        return (version[:COMMIT_HASH_LENGTH]).lower()
+
+    # Assume this is a version tag and compare against the known releases of MATL
+    if Release.exists(version):
+        return version
+
+    raise InvalidVersion
