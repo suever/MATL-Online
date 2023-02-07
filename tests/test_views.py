@@ -209,7 +209,7 @@ def test_fetch_help(testapp, mocker, db, tmpdir):
     data = {"placeholder": "value"}
     jsonfile.write(json.dumps(data))
 
-    url = url_for("public.help", version="1.2.3")
+    url = url_for("public.documentation", version="1.2.3")
 
     resp = testapp.get(url)
 

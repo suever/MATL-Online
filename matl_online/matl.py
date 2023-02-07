@@ -160,7 +160,7 @@ def parse_matl_results(output):
     """
     result = list()
 
-    parts = re.split(r"([.*?][^\n].*\n?)", output)
+    parts = re.split(r"(\[.*?][^\n].*\n?)", output)
 
     for part in parts:
         if part == "":
