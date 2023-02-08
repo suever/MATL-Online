@@ -1,11 +1,11 @@
 """Enable third party extensions."""
 
 from celery import Celery
-from celery.concurrency import asynpool
-from flask_migrate import Migrate
-from flask_socketio import SocketIO
+from celery.concurrency import asynpool  # type: ignore
+from flask_migrate import Migrate  # type: ignore
+from flask_socketio import SocketIO  # type: ignore
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import CSRFProtect
+from flask_wtf import CSRFProtect  # type: ignore
 
 from matl_online.settings import Config
 

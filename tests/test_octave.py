@@ -1,7 +1,10 @@
 """Unit tests for the module for interacting with Octave."""
 
 import os
+from typing import List
 from unittest import mock
+
+from pytest_mock.plugin import MockerFixture
 
 from matl_online.octave import OctaveSession
 
@@ -9,7 +12,7 @@ from matl_online.octave import OctaveSession
 class TestOctaveSession:
     """Series of tests for the OctaveSession class."""
 
-    def test_no_inputs(self, mocker):
+    def test_no_inputs(self, mocker: MockerFixture) -> None:
         """Ensure the proper default parameters."""
         # Make sure that eval wasn't called
         octave = mocker.patch("matl_online.octave.OctaveSession.eval")
@@ -21,7 +24,7 @@ class TestOctaveSession:
 
         octave.assert_not_called()
 
-    def test_octaverc(self, mocker):
+    def test_octaverc(self, mocker: MockerFixture) -> None:
         """Ensure that the octaverc file is sourced."""
         octaverc = os.path.join("path", "to", "my", ".octaverc")
 
@@ -34,7 +37,7 @@ class TestOctaveSession:
 
         octave.assert_called_once_with('source("' "%s" '")' % octaverc)
 
-    def test_paths(self, mocker):
+    def test_paths(self, mocker: MockerFixture) -> None:
         """Ensure that the specified paths are added to the path."""
         paths = ["path1", "path2", "path3"]
 
@@ -48,7 +51,7 @@ class TestOctaveSession:
         expected_calls = [mock.call('addpath("' "%s" '")' % path) for path in paths]
         eval_mock.assert_has_calls(expected_calls)
 
-    def test_eval_without_handler(self, mocker):
+    def test_eval_without_handler(self, mocker: MockerFixture) -> None:
         """Ensure that code is sent to octave for evaluation."""
         octave = mocker.patch("matl_online.octave.OctaveEngine.eval")
 
@@ -58,22 +61,24 @@ class TestOctaveSession:
 
         octave.assert_called_with(code)
 
-    def test_eval_with_handler(self, mocker):
+    def test_eval_with_handler(self, mocker: MockerFixture) -> None:
         """Ensure that the stream handler is used."""
         octave = mocker.patch("matl_online.octave.OctaveEngine.eval")
 
         session = OctaveSession()
         code = "1 + 1"
 
-        output_list = list()
+        output_list: List[str] = list()
         handler = output_list.append
 
         session.eval(code, line_handler=handler)
 
+        assert session._engine
+
         assert session._engine.line_handler == handler
         octave.assert_called_with(code)
 
-    def test_terminate(self):
+    def test_terminate(self) -> None:
         """Ensure that we stop the Octave instance."""
         session = OctaveSession()
 
@@ -83,7 +88,7 @@ class TestOctaveSession:
 
         assert session._engine is None
 
-    def test_restart(self):
+    def test_restart(self) -> None:
         """Make sure we stop and restart the octave instance."""
         session = OctaveSession()
 

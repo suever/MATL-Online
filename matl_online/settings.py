@@ -1,10 +1,22 @@
 """Application configuration."""
 import os
 import uuid
+from typing import List, Optional, Type
+
+
+def _get_cors_allowed_origins() -> List[str]:
+    provided_value = os.getenv("CORS_ALLOWED_ORIGINS")
+
+    if provided_value is None or provided_value == "":
+        return []
+
+    return provided_value.split(";")
 
 
 class Config(object):
     """Base configuration."""
+
+    ENV: str = "NONE"
 
     CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
     CELERY_RESULT_BACKEND = os.environ.get(
@@ -53,7 +65,7 @@ class Config(object):
     ]
 
     # Don't use Google Analytics unless we are on production
-    GOOGLE_ANALYTICS_UNIVERSAL_ID = None
+    GOOGLE_ANALYTICS_UNIVERSAL_ID: Optional[str] = None
 
     SOCKETIO_MESSAGE_QUEUE = os.environ.get("SOCKETIO_MESSAGE_QUEUE")
 
@@ -62,7 +74,7 @@ class Config(object):
     ROLLBAR_CLIENT_SIDE_TOKEN = os.environ.get("MATL_ONLINE_ROLLBAR_CLIENT_SIDE_TOKEN")
 
     # CORS Configuration for Flask SocketIO
-    CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS") or []
+    CORS_ALLOWED_ORIGINS: List[str] = _get_cors_allowed_origins()
 
 
 class ProdConfig(Config):
@@ -110,7 +122,7 @@ class TestConfig(Config):
     ROLLBAR_ENV = "testing"
 
 
-def get_config():
+def get_config() -> Type[Config]:
     """Retrieve the current active configuration based on env variables."""
     env = os.environ.get("MATL_ONLINE_ENV", "dev")
 

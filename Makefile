@@ -37,6 +37,11 @@ reformat:
 format-check:
 	black . --check
 
+type-check:
+	mypy
+
 flake8:
 	flake8 .
+
+lint: type-check format-check flake8
 

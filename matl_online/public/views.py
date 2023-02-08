@@ -6,15 +6,15 @@ import os
 import uuid
 from datetime import datetime
 from hashlib import sha1
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple, Union
 
 import requests
-from flask import Blueprint, abort, current_app, jsonify
+from flask import Blueprint, Response, abort, current_app, jsonify
 from flask import render_template as _render_template
 from flask import request, send_file, session
-from flask_socketio import emit, rooms
-from flask_wtf.csrf import validate_csrf
-from wtforms import ValidationError
+from flask_socketio import emit, rooms  # type: ignore
+from flask_wtf.csrf import validate_csrf  # type: ignore
+from wtforms import ValidationError  # type: ignore
 
 from matl_online.errors import InvalidVersion
 from matl_online.extensions import celery, csrf, socketio
@@ -31,23 +31,31 @@ last_modified_datetime = datetime.utcfromtimestamp(last_modified_time)
 last_modified_date = last_modified_datetime.strftime("%Y/%m/%d")
 
 
-def render_template(*args, **kwargs):
+def render_template(
+    *args: Any,
+    modified: str = last_modified_date,
+    current_year: int = last_modified_datetime.year,
+    **kwargs: Any,
+) -> str:
     """Add common properties via a custom render_template function."""
-    kwargs["modified"] = kwargs.get("modified", last_modified_date)
-    kwargs["current_year"] = kwargs.get("current_year", last_modified_datetime.year)
 
     analytics_id = current_app.config["GOOGLE_ANALYTICS_UNIVERSAL_ID"]
-    kwargs["google_analytics_id"] = analytics_id
 
-    return _render_template(*args, **kwargs)
+    return _render_template(
+        *args,
+        modified=modified,
+        current_year=current_year,
+        google_analytics_id=analytics_id,
+        **kwargs,
+    )
 
 
-def _latest_version_tag():
+def _latest_version_tag() -> str:
     latest = Release.latest()
     if latest is None:
         return ""
 
-    return latest.tag
+    return str(latest.tag)
 
 
 def _parse_version(version: Optional[str]) -> str:
@@ -58,7 +66,7 @@ def _parse_version(version: Optional[str]) -> str:
 
 
 @blueprint.route("/")
-def home():
+def home() -> str:
     """Serve the main page of the site."""
     code = request.values.get("code", "")
     inputs = request.values.get("inputs", "")
@@ -75,7 +83,7 @@ def home():
 
 
 @blueprint.route("/privacy/optout")
-def privacy_opt():
+def privacy_opt() -> Response:
     """Endpoint for opting out of Google Analytics."""
     key = "gaoptout"
 
@@ -83,20 +91,20 @@ def privacy_opt():
 
     payload = {"previous": request.cookies.get(key), "current": new}
 
-    resp = jsonify(payload)
+    resp: Response = jsonify(payload)
     resp.set_cookie(key, new)
     return resp
 
 
 @blueprint.route("/privacy")
-def privacy():
+def privacy() -> str:
     """Disclaimer about Google Analytics and opt out option."""
     return render_template("privacy.html")
 
 
-@csrf.exempt
+@csrf.exempt  # type: ignore[misc]
 @blueprint.route("/hook", methods=["POST"])
-def github_hook():
+def github_hook() -> Union[Response, Tuple[str, int]]:
     """GitHub web hook for receiving information about MATL releases."""
     # Now verify that the secret is correct
     secret = str.encode(current_app.config["GITHUB_HOOK_SECRET"] or "")
@@ -120,7 +128,8 @@ def github_hook():
     # Implement ping
     event = request.headers.get("X-GitHub-Event", "ping")
     if event == "ping":
-        return jsonify({"msg": "pong"})
+        response: Response = jsonify({"msg": "pong"})
+        return response
 
     payload = request.json
 
@@ -137,7 +146,7 @@ def github_hook():
 
 
 @blueprint.route("/share", methods=["POST"])
-def share():
+def share() -> Tuple[Response, int]:
     """Route for posting image data to IMGUR to share via a link."""
     img = request.values.get("data")
 
@@ -168,15 +177,15 @@ def share():
         return jsonify({"success": False}), 400
 
 
-@socketio.on("connect")
-def connected():
+@socketio.on("connect")  # type: ignore[misc]
+def connected() -> None:
     """Send an event to the client with the ID of their session."""
     session_id = rooms()[0]
     emit("connection", {"session_id": session_id})
 
 
-@socketio.on("kill")
-def kill_task(data):
+@socketio.on("kill")  # type: ignore[misc]
+def kill_task(data: Any) -> None:
     """Triggered when a kill message is sent to kill a task."""
     taskid = session.get("taskid", None)
     if taskid is not None:
@@ -189,8 +198,8 @@ def kill_task(data):
     session["taskid"] = None
 
 
-@socketio.on("submit")
-def submit_job(data):
+@socketio.on("submit")  # type: ignore[misc]
+def submit_job(data: Dict[str, Any]) -> None:
     """Submit some code and inputs for interpretation."""
     # If we already have a task disable submitting
     uid = data.get("uid", str(uuid.uuid4()))
@@ -205,24 +214,24 @@ def submit_job(data):
     if code == "":
         return
 
-    task = matl_task.delay("-ro", code, inputs, version=version, session=uid)
+    task = matl_task.delay("-ro", code, inputs, version, uid)
 
     # Store the currently executing task ID in the session
     session["taskid"] = task.id
 
 
 @blueprint.route("/explain", methods=["POST", "GET"])
-def explain():
+def explain() -> Tuple[Response, int]:
     """Provide the user with an explanation of some code."""
     code = request.values.get("code", "")
     version = _parse_version(request.values.get("version", ""))
 
-    result = matl_task.delay("-eo", code, version=version).wait()
+    result = matl_task.delay("-eo", code, "", version=version, session="").wait()  # type: ignore
     return jsonify(result), 200
 
 
 @blueprint.route("/help/<version>", methods=["GET"])
-def documentation(version):
+def documentation(version: str) -> Union[Response, Tuple[str, int]]:
     """Return a JSON representation of the help for the requested version."""
     try:
         sanitize_version(version)

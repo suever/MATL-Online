@@ -1,21 +1,29 @@
 """Unit tests for socket interaction between server and client."""
 
-from flask_socketio import SocketIOTestClient
+from typing import Any, Dict
+
+from flask_socketio import SocketIOTestClient  # type: ignore
+from flask_sqlalchemy import SQLAlchemy
+from pytest_mock.plugin import MockerFixture
 
 from matl_online.extensions import socketio
 
 from .helpers import session_id_for_client
 
 
-def session(client: SocketIOTestClient):
+def session(client: SocketIOTestClient) -> Dict[str, Any]:
     """Retrieve a client's session."""
-    return socketio.server.environ[client.eio_sid].get("saved_session", {})
+    saved_session: Dict[str, Any] = socketio.server.environ[client.eio_sid].get(
+        "saved_session", {}
+    )
+
+    return saved_session
 
 
 class TestSockets:
     """Series of tests to ensure the expected data is passed via sockets."""
 
-    def test_connection(self, socketio_client):
+    def test_connection(self, socketio_client: SocketIOTestClient) -> None:
         """During initial connection, session ID's should be sent."""
         events = socketio_client.get_received()
 
@@ -30,7 +38,12 @@ class TestSockets:
 
         assert payload[0]["session_id"] == session_id_for_client(socketio_client)
 
-    def test_submit_empty(self, socketio_client, mocker, db):
+    def test_submit_empty(
+        self,
+        socketio_client: SocketIOTestClient,
+        mocker: MockerFixture,
+        db: SQLAlchemy,
+    ) -> None:
         """If no code is provided, no tasks should ever run."""
         # Clear previous events
         socketio_client.get_received()
@@ -48,7 +61,12 @@ class TestSockets:
         assert len(socketio_client.get_received()) == 0
         task.assert_not_called()
 
-    def test_real_submit(self, socketio_client, mocker, db):
+    def test_real_submit(
+        self,
+        socketio_client: SocketIOTestClient,
+        mocker: MockerFixture,
+        db: SQLAlchemy,
+    ) -> None:
         """A matl_task should run with valid inputs."""
         socketio_client.get_received()
         # The task ID should be stored in the session
@@ -70,7 +88,11 @@ class TestSockets:
         assert task.call_count == 1
         assert session(socketio_client).get("taskid") == task_id
 
-    def test_kill_task_no_task(self, socketio_client, mocker):
+    def test_kill_task_no_task(
+        self,
+        socketio_client: SocketIOTestClient,
+        mocker: MockerFixture,
+    ) -> None:
         """Kill events for invalid tasks should be handled gracefully."""
         socketio_client.get_received()
 
@@ -93,7 +115,12 @@ class TestSockets:
         # Make sure that no task id was aassigned
         assert session(socketio_client).get("taskid") is None
 
-    def test_kill_task(self, socketio_client, mocker, db):
+    def test_kill_task(
+        self,
+        socketio_client: SocketIOTestClient,
+        mocker: MockerFixture,
+        db: SQLAlchemy,
+    ) -> None:
         """Kill events result in a task being revoked and terminated."""
         socketio_client.get_received()
 
