@@ -3,7 +3,7 @@
 import logging
 import os
 import uuid
-from typing import Annotated, Any, Generator
+from typing import Any, Generator
 from unittest.mock import Mock
 
 import pytest
@@ -67,7 +67,7 @@ def logger() -> Generator[logging.Logger, None, None]:
 @pytest.fixture
 def octave_mock(
     mocker: MockerFixture,
-    logger: Annotated[logging.Logger, pytest.fixture],
+    logger: logging.Logger,
 ) -> Mock:
     """Mock version of OctaveEngine to monitor calls to octave."""
     octave = mocker.patch("matl_online.tasks.octave")
