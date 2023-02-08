@@ -6,50 +6,61 @@ import os
 import pathlib
 import shutil
 from datetime import datetime
+from unittest.mock import Mock
 
 import pytest
 from bs4 import BeautifulSoup
 from dateutil import parser as date_parser
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from pytest_mock.plugin import MockerFixture
 
 from matl_online import matl
 from matl_online.public.models import Release
 
 from .factories import DocumentationLinkFactory as DocLink
 
-TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+TEST_DATA_DIR = pathlib.Path(os.path.dirname(__file__)).joinpath("data")
 
 
 class TestSourceCache:
     """Series of tests to check if source code is managed properly."""
 
-    def test_no_source_no_install(self, app, tmpdir):
+    def test_no_source_no_install(self, app: Flask, tmp_path: pathlib.Path) -> None:
         """The source folder does not exist, and we won't create it."""
-        app.config["MATL_FOLDER"] = tmpdir.strpath
+        app.config["MATL_FOLDER"] = tmp_path.as_posix()
         folder = matl.get_matl_folder("18.3.0", install=False)
 
         # In this case, the result should simply be None
         assert folder is None
 
-    def test_no_source_install(self, app, tmpdir, mocker):
+    def test_no_source_install(
+        self,
+        app: Flask,
+        tmp_path: pathlib.Path,
+        mocker: MockerFixture,
+    ) -> None:
         """The source folder does not exist, but we'll fetch the source."""
         mock_install = mocker.patch("matl_online.matl.install_matl")
-        app.config["MATL_FOLDER"] = tmpdir.strpath
+        app.config["MATL_FOLDER"] = tmp_path.as_posix()
 
         version = "0.0.0"
 
         folder = matl.get_matl_folder(version)
-        expected = pathlib.Path(os.path.join(tmpdir.strpath, version))
+        expected = tmp_path.joinpath(version)
 
         mock_install.assert_called_once_with(version, expected)
         assert folder == expected
 
-    def test_source_folder_exists(self, app, tmpdir):
+    def test_source_folder_exists(self, app: Flask, tmp_path: pathlib.Path) -> None:
         """Source folder exists so simply return it."""
-        app.config["MATL_FOLDER"] = tmpdir.strpath
+        app.config["MATL_FOLDER"] = tmp_path.as_posix()
 
         # Create the source folder
         version = "13.4.0"
-        version_directory = pathlib.Path(tmpdir.mkdir(version))
+
+        version_directory = tmp_path.joinpath(version)
+        version_directory.mkdir()
         folder = matl.get_matl_folder(version, install=False)
 
         # Make sure that we only return the source folder
@@ -59,19 +70,21 @@ class TestSourceCache:
 class TestDocLinks:
     """Ensure that documentation hyperlinks are added appropriately."""
 
-    def test_basic_doclink(self, db):
+    def test_basic_doclink(self, db: SQLAlchemy) -> None:
         """Use a straightforward single function name."""
-        link = DocLink(name="ans")
+        link: DocLink = DocLink(name="ans")
         template = "This is a doc string for <strong>%s</strong>"
 
         output = matl.add_doc_links(template % link.name)
 
         soup = BeautifulSoup(output, "html.parser")
 
+        assert soup.strong and soup.strong.a
+
         assert soup.strong.a["href"] == link.link
         assert soup.strong.a.text == link.name
 
-    def test_multiple_doclink(self, db):
+    def test_multiple_doclink(self, db: SQLAlchemy) -> None:
         """Include two functions in the same docstring."""
         links = (DocLink(name="func1"), DocLink(name="func2"))
         template = "This is a doc for <strong>%s</strong>"
@@ -90,9 +103,9 @@ class TestDocLinks:
             assert strong.a["href"] == links[k].link
             assert strong.a.text == links[k].name
 
-    def test_single_quoted(self, db):
+    def test_single_quoted(self, db: SQLAlchemy) -> None:
         """Single quoted function names should be ignored."""
-        double = DocLink(name="double")
+        double: DocLink = DocLink(name="double")
         links = (DocLink(name="func1"), DocLink(name="func2"))
 
         docstring = (
@@ -106,20 +119,19 @@ class TestDocLinks:
         strong_tags = soup.findAll("strong")
 
         # Make sure the first one wasn't converted to a link
-        assert strong_tags[0].a is None
+        first_tag = strong_tags.pop(0)
+        assert first_tag.a is None
 
-        # Remove it and make sure everything else is golden
-        strong_tags = strong_tags[1:]
-
+        # Make sure everything else is golden
         assert len(strong_tags) == len(links)
 
         for k, strong in enumerate(strong_tags):
             assert strong.a["href"] == links[k].link
             assert strong.a.text == links[k].name
 
-    def test_complex_function(self, db):
+    def test_complex_function(self, db: SQLAlchemy) -> None:
         """Test when there is a multi-function example."""
-        mat2cell = DocLink(name="mat2cell")
+        mat2cell: DocLink = DocLink(name="mat2cell")
         ones = DocLink(name="ones")
         size = DocLink(name="size")
         ndims = DocLink(name="ndims")
@@ -135,6 +147,8 @@ class TestDocLinks:
 
         assert len(soup.findAll("strong")) == 1
 
+        assert soup.strong
+
         links = soup.strong.findAll("a")
 
         assert len(links) == len(expected)
@@ -147,7 +161,7 @@ class TestDocLinks:
 class TestResults:
     """Series of tests to ensure proper MATL output parsing."""
 
-    def test_error_parsing(self):
+    def test_error_parsing(self) -> None:
         """All errors are correctly classified."""
         msg = "single error"
         result = matl.parse_matl_results("[STDERR]" + msg)
@@ -157,7 +171,7 @@ class TestResults:
         assert result[0]["type"] == "stderr"
         assert result[0]["value"] == msg
 
-    def test_invalid_image_parsing(self):
+    def test_invalid_image_parsing(self) -> None:
         """Test with a bad filename and ensure no result."""
         filename = "/ignore/this/filename.png"
         result = matl.parse_matl_results("[IMAGE]" + filename)
@@ -165,14 +179,16 @@ class TestResults:
         assert isinstance(result, list)
         assert len(result) == 0
 
-    def test_nn_image_parsing(self, tmpdir):
+    def test_nn_image_parsing(self, tmp_path: pathlib.Path) -> None:
         """Test for nearest-neighbor interpolated image."""
-        file_handle = tmpdir.join("image.png")
+        file_handle = tmp_path.joinpath("image.png")
         contents = b"hello"
-        file_handle.write(contents)
+
+        with open(file_handle, "wb") as fid:
+            fid.write(contents)
 
         # Parse the string
-        result = matl.parse_matl_results("[IMAGE_NN]" + file_handle.strpath)
+        result = matl.parse_matl_results("[IMAGE_NN]" + file_handle.as_posix())
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -183,16 +199,18 @@ class TestResults:
         assert result[0]["value"] == "data:image/png;base64," + encoded
 
         # Make sure the file was not removed
-        assert os.path.isfile(file_handle.strpath)
+        assert file_handle.is_file()
 
-    def test_image_parsing(self, tmpdir):
+    def test_image_parsing(self, tmp_path: pathlib.Path) -> None:
         """Test valid image result."""
-        file_handle = tmpdir.join("image.png")
+        file_handle = tmp_path.joinpath("image.png")
         contents = b"hello"
-        file_handle.write(contents)
+
+        with open(file_handle, "wb") as fid:
+            fid.write(contents)
 
         # Parse the string
-        result = matl.parse_matl_results("[IMAGE]" + file_handle.strpath)
+        result = matl.parse_matl_results("[IMAGE]" + file_handle.as_posix())
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -203,9 +221,9 @@ class TestResults:
         assert result[0]["value"] == "data:image/png;base64," + encoded
 
         # Make sure the file was not removed
-        assert os.path.isfile(file_handle.strpath)
+        assert file_handle.is_file()
 
-    def test_invalid_audio_parsing(self):
+    def test_invalid_audio_parsing(self) -> None:
         """Test with a bad filename and ensure no result."""
         filename = "/ignore/this/audio.wav"
         result = matl.parse_matl_results("[AUDIO]" + filename)
@@ -213,14 +231,16 @@ class TestResults:
         assert isinstance(result, list)
         assert len(result) == 0
 
-    def test_audio_parsing(self, tmpdir):
+    def test_audio_parsing(self, tmp_path: pathlib.Path) -> None:
         """Test valid audio result."""
-        file_handle = tmpdir.join("audio.wav")
+        file_handle = tmp_path.joinpath("audio.wav")
         contents = b"AUDIO"
-        file_handle.write(contents)
+
+        with open(file_handle, "wb") as fid:
+            fid.write(contents)
 
         # Parse the string
-        result = matl.parse_matl_results("[AUDIO]" + file_handle.strpath)
+        result = matl.parse_matl_results("[AUDIO]" + file_handle.as_posix())
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -230,9 +250,9 @@ class TestResults:
         assert result[0]["value"] == "data:audio/wav;base64," + encoded
 
         # Make sure that the file was not removed
-        assert os.path.isfile(file_handle.strpath)
+        assert file_handle.is_file()
 
-    def test_stdout2_parsing(self):
+    def test_stdout2_parsing(self) -> None:
         """Test potential to have a second type of STDOUT."""
         expected = "ouptut2"
         result = matl.parse_matl_results("[STDOUT]" + expected)
@@ -242,7 +262,7 @@ class TestResults:
         assert result[0]["type"] == "stdout2"
         assert result[0]["value"] == expected
 
-    def test_stdout_single_line_parsing(self):
+    def test_stdout_single_line_parsing(self) -> None:
         """A single line of output is handled as STDOUT."""
         expected = "standard output"
         result = matl.parse_matl_results(expected)
@@ -252,7 +272,7 @@ class TestResults:
         assert result[0]["type"] == "stdout"
         assert result[0]["value"] == expected
 
-    def test_stdout_multi_line_parsing(self):
+    def test_stdout_multi_line_parsing(self) -> None:
         """Multi-line output is also handled as STDOUT if not specified."""
         expected = "standard\noutput"
         result = matl.parse_matl_results(expected)
@@ -266,15 +286,20 @@ class TestResults:
 class TestHelpParsing:
     """Series of tests for checking help to JSON conversion."""
 
-    def test_generate_help_json(self, tmpdir, mocker, db):
+    def test_generate_help_json(
+        self,
+        tmp_path: pathlib.Path,
+        mocker: MockerFixture,
+        db: SQLAlchemy,
+    ) -> None:
         """Check all reading / parsing of help .mat file."""
         folder = mocker.patch("matl_online.matl.get_matl_folder")
-        folder.return_value = pathlib.Path(tmpdir.strpath)
+        folder.return_value = tmp_path
 
         # Copy the test file into place
         shutil.copy(
             os.path.join(TEST_DATA_DIR, "help.mat"),
-            os.path.join(tmpdir.strpath, "help.mat"),
+            tmp_path.joinpath("help.mat"),
         )
 
         outfile = matl.help_file("1.2.3")
@@ -319,18 +344,24 @@ class TestHelpParsing:
         assert item.get("source") == "Y?"
         assert item.get("brief") == ""
 
-    def test_help_json_exists(self, tmpdir, mocker):
+    def test_help_json_exists(
+        self,
+        tmp_path: pathlib.Path,
+        mocker: MockerFixture,
+    ) -> None:
         """Verify correctness of output JSON."""
         folder = mocker.patch("matl_online.matl.get_matl_folder")
-        folder.return_value = pathlib.Path(tmpdir.strpath)
+        folder.return_value = tmp_path
 
-        jsonfile = tmpdir.join("help.json")
+        json_file = tmp_path.joinpath("help.json")
         contents = "placeholder"
-        jsonfile.write(contents)
+
+        with open(json_file, "w") as fid:
+            fid.write(contents)
 
         outfile = matl.help_file("1.2.3")
 
-        assert outfile == pathlib.Path(jsonfile.strpath)
+        assert outfile == json_file
 
         # Make sure the file wasn't updated
         with open(outfile, "r") as fid:
@@ -340,7 +371,12 @@ class TestHelpParsing:
 class TestInstall:
     """Tests to check if MATL is properly downloaded and installed."""
 
-    def test_valid_version(self, tmpdir, mocker, app):
+    def test_valid_version(
+        self,
+        tmp_path: pathlib.Path,
+        mocker: MockerFixture,
+        app: Flask,
+    ) -> None:
         """Test using a version which we know to exist on GitHub."""
         get = mocker.patch("matl_online.matl.requests.get")
         get.return_value.status_code = 200
@@ -350,31 +386,34 @@ class TestInstall:
 
         zipper = mocker.patch("matl_online.matl.unzip")
 
-        temporary_directory = pathlib.Path(tmpdir)
-
-        matl.install_matl("1.2.3", temporary_directory)
+        matl.install_matl("1.2.3", tmp_path)
 
         assert zipper.called
         assert zipper.call_args[0][0].read() == content
-        assert zipper.call_args[0][1] == temporary_directory
+        assert zipper.call_args[0][1] == tmp_path
 
-    def test_invalid_version(self, tmpdir, mocker, app):
+    def test_invalid_version(
+        self,
+        tmp_path: pathlib.Path,
+        mocker: MockerFixture,
+        app: Flask,
+    ) -> None:
         """Try to install a version which does NOT exist on GitHub."""
         get = mocker.patch("matl_online.matl.requests.get")
         get.return_value.status_code = 404
 
         with pytest.raises(KeyError):
-            matl.install_matl("3.4.5", pathlib.Path(tmpdir))
+            matl.install_matl("3.4.5", tmp_path)
 
 
 class TestReleaseRefresh:
     """Tests for updating our local release database from GitHub."""
 
-    def test_all_new(self, mocker, app, db):
+    def test_all_new(self, mocker: MockerFixture, app: Flask, db: SQLAlchemy) -> None:
         """Completely populate the database (no previous entries)."""
         get = mocker.patch("matl_online.matl.requests.get")
 
-        with open(os.path.join(TEST_DATA_DIR, "releases.json")) as fid:
+        with open(TEST_DATA_DIR.joinpath("releases.json")) as fid:
             data = json.load(fid)
             get.return_value.json = lambda: data
 
@@ -388,12 +427,17 @@ class TestReleaseRefresh:
         for k, release in enumerate(releases):
             assert release.tag == data[k]["tag_name"]
 
-    def test_prerelease(self, mocker, app, db):
+    def test_prerelease(
+        self,
+        mocker: MockerFixture,
+        app: Flask,
+        db: SQLAlchemy,
+    ) -> None:
         """Ensure that pre-releases are ignored."""
         # Change one of the releases to a pre-release and hope it's ignored
         get = mocker.patch("matl_online.matl.requests.get")
 
-        with open(os.path.join(TEST_DATA_DIR, "releases.json")) as fid:
+        with open(TEST_DATA_DIR.joinpath("releases.json")) as fid:
             data = json.load(fid)
             data[-1]["prerelease"] = True
             get.return_value.json = lambda: data
@@ -408,11 +452,16 @@ class TestReleaseRefresh:
         for k, release in enumerate(releases):
             assert release.tag == data[k]["tag_name"]
 
-    def test_updated_release(self, mocker, app, db):
+    def test_updated_release(
+        self,
+        mocker: MockerFixture,
+        app: Flask,
+        db: SQLAlchemy,
+    ) -> None:
         """Updated releases should be updated in our database."""
         get = mocker.patch("matl_online.matl.requests.get")
 
-        with open(os.path.join(TEST_DATA_DIR, "releases.json")) as fid:
+        with open(TEST_DATA_DIR.joinpath("releases.json")) as fid:
             data = json.load(fid)
 
             # Make a release with the first one listed here but set the
@@ -444,28 +493,40 @@ class TestReleaseRefresh:
 
         assert updated.date == new_date
 
-    def test_updated_release_with_source(self, mocker, app, db, tmpdir):
+    def test_updated_release_with_source(
+        self,
+        mocker: MockerFixture,
+        app: Flask,
+        db: SQLAlchemy,
+        tmp_path: pathlib.Path,
+    ) -> None:
         """Updated releases should remove the old source code."""
         matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
-        matl_folder.return_value = tmpdir.strpath
+        matl_folder.return_value = tmp_path
 
-        assert os.path.isdir(tmpdir.strpath)
+        assert tmp_path.is_dir()
 
         self.test_updated_release(mocker, app, db)
 
-        assert not os.path.isdir(tmpdir.strpath)
+        assert not tmp_path.is_dir()
 
 
 class TestMATLInterface:
     """Some basic tests to check that the MATL interface is working."""
 
-    def test_empty_inputs(self, mocker, app, octave_mock):
+    def test_empty_inputs(
+        self,
+        mocker: MockerFixture,
+        app: Flask,
+        octave_mock: Mock,
+        tmp_path: pathlib.Path,
+    ) -> None:
         """If no inputs are provided, MATL shouldn't receive any."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         folder_name = "folder"
         get_matl_folder.return_value = pathlib.Path(folder_name)
 
-        matl.matl(octave_mock, "-ro")
+        matl.matl(octave_mock, "-ro", folder=tmp_path)
 
         # Make sure we only had eval calls (faster)
         assert len(octave_mock.method_calls) == 0
@@ -479,12 +540,18 @@ class TestMATLInterface:
         # Make sure we clean up at the end
         assert octave_mock.evals[-1].startswith("cd(")
 
-    def test_single_input(self, mocker, app, octave_mock):
+    def test_single_input(
+        self,
+        mocker: MockerFixture,
+        app: Flask,
+        octave_mock: Mock,
+        tmp_path: pathlib.Path,
+    ) -> None:
         """Single input parameter should be send to matl_runner."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         get_matl_folder.return_value = pathlib.Path("")
 
-        matl.matl(octave_mock, "-ro", code="D", inputs="12")
+        matl.matl(octave_mock, "-ro", folder=tmp_path, code="D", inputs="12")
 
         # Find the call to matl_runner
         call = [x for x in octave_mock.evals if x.startswith("matl_runner")]
@@ -492,12 +559,18 @@ class TestMATLInterface:
         assert len(call) == 1
         assert call[0].rstrip() == "matl_runner('-ro', {'D'}, '12');"
 
-    def test_multiple_inputs(self, mocker, app, octave_mock):
+    def test_multiple_inputs(
+        self,
+        mocker: MockerFixture,
+        app: Flask,
+        octave_mock: Mock,
+        tmp_path: pathlib.Path,
+    ) -> None:
         """Multiple input parameters should be sent to matl_runner."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         get_matl_folder.return_value = pathlib.Path("")
 
-        matl.matl(octave_mock, "-ro", code="D", inputs="12\n13")
+        matl.matl(octave_mock, "-ro", folder=tmp_path, code="D", inputs="12\n13")
 
         # Find the call to matl_runner
         call = [x for x in octave_mock.evals if x.startswith("matl_runner")]
@@ -505,12 +578,18 @@ class TestMATLInterface:
         assert len(call) == 1
         assert call[0].rstrip() == "matl_runner('-ro', {'D'}, '12','13');"
 
-    def test_string_escape(self, mocker, app, octave_mock):
+    def test_string_escape(
+        self,
+        mocker: MockerFixture,
+        app: Flask,
+        octave_mock: Mock,
+        tmp_path: pathlib.Path,
+    ) -> None:
         """All single quotes need to be escaped properly."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         get_matl_folder.return_value = pathlib.Path("")
 
-        matl.matl(octave_mock, "-ro", code="'abc'")
+        matl.matl(octave_mock, "-ro", folder=tmp_path, code="'abc'")
 
         # Find the call to matl_runner
         call = [x for x in octave_mock.evals if x.startswith("matl_runner")]

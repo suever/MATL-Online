@@ -1,14 +1,16 @@
 """The app module, containing the app factory function."""
+from typing import Optional, Type
+
 from flask import Flask
 
 from matl_online import public
 from matl_online.assets import assets
 from matl_online.commands import register_commands
 from matl_online.extensions import celery, csrf, db, migrate, socketio
-from matl_online.settings import get_config
+from matl_online.settings import Config, get_config
 
 
-def create_app(config_object=None):
+def create_app(config_object: Optional[Type[Config]] = None) -> Flask:
     """Application factory for creating flask apps."""
     app = Flask(__name__)
     app.config.from_object(config_object or get_config())
@@ -18,10 +20,10 @@ def create_app(config_object=None):
     return app
 
 
-def register_extensions(app):
+def register_extensions(app: Flask) -> None:
     """Register Flask extensions."""
     assets.init_app(app)
-    db.init_app(app)
+    db.init_app(app)  # type: ignore[no-untyped-call]
     migrate.init_app(app, db)
 
     # Make sure that the client manager isn't remembered
@@ -36,7 +38,7 @@ def register_extensions(app):
     csrf.init_app(app)
 
 
-def register_blueprints(app):
+def register_blueprints(app: Flask) -> None:
     """Register Flask blueprints."""
     app.register_blueprint(public.views.blueprint)
     return None

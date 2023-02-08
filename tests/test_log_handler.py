@@ -1,14 +1,19 @@
 """Unit tests for checking our realtime log handler."""
 
-from matl_online.tasks import OutputHandler
+from logging import Logger
+
+from pytest_mock.plugin import MockerFixture
+
+from matl_online.tasks import OctaveTask, OutputHandler
 
 
 class TestLogHandler:
     """Series of tests for the OutputHandler logging handler."""
 
-    def test_initialization(self, logger):
+    def test_initialization(self, logger: Logger) -> None:
         """Make sure that all necessary properties are set."""
-        task = type("task", (object,), {"session_id": "123"})
+        task = OctaveTask()
+        task.session_id = "123"
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
@@ -18,9 +23,10 @@ class TestLogHandler:
         assert len(handler.contents) == 0
         assert handler.messages() == ""
 
-    def test_stdout_log(self, logger):
+    def test_stdout_log(self, logger: Logger) -> None:
         """STDOUT events should create appropriate messages."""
-        task = type("task", (object,), {"session_id": "123"})
+        task = OctaveTask()
+        task.session_id = "123"
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
@@ -31,9 +37,10 @@ class TestLogHandler:
         assert len(handler.contents) == 1
         assert handler.messages() == msg
 
-    def test_clc_log(self, logger, mocker):
+    def test_clc_log(self, logger: Logger, mocker: MockerFixture) -> None:
         """CLC should flush the contents."""
-        task = type("task", (object,), {"session_id": "123"})
+        task = OctaveTask()
+        task.session_id = "123"
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
@@ -54,9 +61,10 @@ class TestLogHandler:
         # Make sure all messages were flushed
         assert len(handler.contents) == 0
 
-    def test_pause(self, logger, mocker):
+    def test_pause(self, logger: Logger, mocker: MockerFixture) -> None:
         """For a pause event, we should have data sent but NOT cleared."""
-        task = type("task", (object,), {"session_id": "123"})
+        task = OctaveTask()
+        task.session_id = "123"
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
@@ -80,9 +88,10 @@ class TestLogHandler:
         assert len(handler.contents) == 1
         assert handler.messages() == msg
 
-    def test_ignore_octave_warning(self, logger, mocker):
+    def test_ignore_octave_warning(self, logger: Logger, mocker: MockerFixture) -> None:
         """Occasionally octave will print warning: messages to be ignored."""
-        task = type("task", (object,), {"session_id": "123"})
+        task = OctaveTask()
+        task.session_id = "123"
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
@@ -94,9 +103,10 @@ class TestLogHandler:
         send_func.assert_not_called()
         assert len(handler.contents) == 0
 
-    def test_matl_error_handling(self, logger, mocker):
+    def test_matl_error_handling(self, logger: Logger, mocker: MockerFixture) -> None:
         """Error messages are prefaced with [STDERR]."""
-        task = type("task", (object,), {"session_id": "123"})
+        task = OctaveTask()
+        task.session_id = "123"
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
@@ -112,9 +122,10 @@ class TestLogHandler:
         assert handler.contents[1] == "[STDERR]line 1"
         assert handler.contents[2] == "[STDERR]line 2"
 
-    def test_filter(self, logger, mocker):
+    def test_filter(self, logger: Logger, mocker: MockerFixture) -> None:
         """Ensure that we ONLY get info events."""
-        task = type("task", (object,), {"session_id": "123"})
+        task = OctaveTask()
+        task.session_id = "123"
         handler = OutputHandler(task)
         logger.addHandler(handler)
 
@@ -127,10 +138,11 @@ class TestLogHandler:
         assert len(handler.contents) == 0
         send_func.assert_not_called()
 
-    def test_send(self, logger, mocker):
+    def test_send(self, logger: Logger, mocker: MockerFixture) -> None:
         """Make sure socket events are issued as expected."""
         identifier = "123"
-        task = type("task", (object,), {"session_id": identifier})
+        task = OctaveTask()
+        task.session_id = identifier
         handler = OutputHandler(task)
         logger.addHandler(handler)
 

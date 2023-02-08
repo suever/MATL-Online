@@ -3,10 +3,15 @@
 import logging
 import os
 import uuid
+from typing import Annotated, Any, Generator
+from unittest.mock import Mock
 
 import pytest
-from flask_socketio import SocketIOTestClient
-from webtest import TestApp
+from flask import Flask
+from flask_socketio import SocketIOTestClient  # type: ignore
+from flask_sqlalchemy import SQLAlchemy
+from pytest_mock.plugin import MockerFixture
+from webtest import TestApp  # type: ignore
 
 os.environ["MATL_ONLINE_ENV"] = "test"
 
@@ -18,31 +23,31 @@ from matl_online.tasks import OutputHandler  # noqa: E402
 
 
 @pytest.fixture(scope="function")
-def testapp(app):
+def testapp(app: Flask) -> TestApp:
     """A Webtest app."""
     return TestApp(app)
 
 
 @pytest.fixture(scope="function")
-def socketio_client(app):
+def socketio_client(app: Flask) -> SocketIOTestClient:
     """Fake socketio client."""
-    yield SocketIOTestClient(app, socketio)
+    return SocketIOTestClient(app, socketio)
 
 
 @pytest.fixture(scope="function")
-def app():
+def app() -> Generator[Flask, None, None]:
     """Flask app instance."""
-    _app = create_app(TestConfig)
-    ctx = _app.test_request_context()
-    ctx.push()
+    app_instance = create_app(TestConfig)
+    context = app_instance.test_request_context()
+    context.push()  # type: ignore[attr-defined]
 
-    yield _app
+    yield app_instance
 
-    ctx.pop()
+    context.pop()  # type: ignore[attr-defined]
 
 
 @pytest.fixture(scope="function")
-def logger():
+def logger() -> Generator[logging.Logger, None, None]:
     """Logger which can be used to monitor logging calls."""
     # Create a new random log
     logger = logging.getLogger(str(uuid.uuid4()))
@@ -60,12 +65,15 @@ def logger():
 
 
 @pytest.fixture
-def octave_mock(mocker, logger):
+def octave_mock(
+    mocker: MockerFixture,
+    logger: Annotated[logging.Logger, pytest.fixture],
+) -> Mock:
     """Mock version of OctaveEngine to monitor calls to octave."""
     octave = mocker.patch("matl_online.tasks.octave")
     octave.evals = list()
 
-    def octave_eval(*args, **kwargs):
+    def octave_eval(*args: Any, **kwargs: Any) -> None:
         octave.evals.append(*args)
 
     octave.eval = octave_eval
@@ -74,7 +82,7 @@ def octave_mock(mocker, logger):
 
 
 @pytest.fixture(scope="function")
-def db(app):
+def db(app: Flask) -> Generator[SQLAlchemy, None, None]:
     """Database instance."""
     _db.app = app
     with app.app_context():

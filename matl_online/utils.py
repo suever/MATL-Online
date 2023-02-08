@@ -5,7 +5,7 @@ import os
 import pathlib
 import string
 import zipfile
-from typing import BinaryIO
+from typing import BinaryIO, Generator
 
 from matl_online.errors import InvalidVersion
 from matl_online.public.models import Release
@@ -13,13 +13,13 @@ from matl_online.public.models import Release
 COMMIT_HASH_LENGTH = 8
 
 
-def base64_encode_file(filename):
+def base64_encode_file(filename: pathlib.Path) -> str:
     """Load a file and return the base64-encoded version of the contents."""
     with open(filename, "rb") as fid:
         return "base64," + base64.b64encode(fid.read()).decode()
 
 
-def get_members(zip_file):
+def get_members(zip_file: zipfile.ZipFile) -> Generator[zipfile.ZipInfo, None, None]:
     """Remove leading directory from all contents of the zip file."""
     prefix = os.path.commonprefix(zip_file.namelist())
 
@@ -32,7 +32,9 @@ def get_members(zip_file):
             yield zip_info
 
 
-def unzip(file_handle: BinaryIO, destination: pathlib.Path, flatten: bool = True):
+def unzip(
+    file_handle: BinaryIO, destination: pathlib.Path, flatten: bool = True
+) -> None:
     """Unzip an archive to a specific directory and flatten the shared prefix."""
     archive = zipfile.ZipFile(file_handle)
 
@@ -40,12 +42,10 @@ def unzip(file_handle: BinaryIO, destination: pathlib.Path, flatten: bool = True
     if not destination.is_dir():
         destination.mkdir()
 
-    inputs = ()
-
     if flatten:
-        inputs = (get_members(archive),)
-
-    archive.extractall(destination, *inputs)
+        archive.extractall(destination, get_members(archive))
+    else:
+        archive.extractall(destination)
 
 
 def is_hexadecimal_string(value: str) -> bool:

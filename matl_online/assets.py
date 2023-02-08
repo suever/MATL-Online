@@ -1,6 +1,6 @@
 """Javascript and CSS assets for the application."""
 
-from flask_assets import Bundle, Environment
+from flask_assets import Bundle, Environment  # type: ignore
 
 css = Bundle("css/style.css", filters="cleancss", output="public/css/common.css")
 

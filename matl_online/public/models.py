@@ -1,4 +1,6 @@
 """SQLAlchemy models."""
+import operator
+from typing import Any, List, Optional, Tuple
 from urllib.parse import urljoin
 
 import requests
@@ -19,29 +21,30 @@ class Release(Model):
     tag = Column(db.String, unique=True, nullable=False)
     date = Column(db.DateTime, unique=True, nullable=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Create a custom string representation."""
         return "<Release %r>" % self.tag
 
     @hybrid_property
-    def version(self):
+    def version(self) -> Tuple[int, ...]:
         """Convert release number to tuple for comparisons."""
         return tuple(int(x) for x in self.tag.split("."))
 
     @classmethod
-    def latest(cls):
+    def latest(cls) -> Optional["Release"]:
         """Get the latest release from GitHub."""
-        releases = cls.query.all()
+        releases: List[Release] = cls.query.all()
         if len(releases) == 0:
             return None
 
-        releases.sort(key=lambda x: x.version)
+        releases = sorted(releases, key=operator.attrgetter("version"))
         return releases[-1]
 
     @classmethod
     def exists(cls, tag: str) -> bool:
         """Checks if the specified release exists."""
-        return cls.query.filter_by(tag=tag).count() > 0
+        match = cls.query.filter_by(tag=tag).one_or_none()
+        return match is not None
 
 
 class DocumentationLink(Model):
@@ -54,7 +57,7 @@ class DocumentationLink(Model):
     link = Column(db.String, nullable=False)
 
     @classmethod
-    def refresh(cls):
+    def refresh(cls) -> Any:
         """Fetch updated documentation from the Mathworks."""
         # Flip the order of the links so that the first URL listed is the
         # highest priority and will take precedence

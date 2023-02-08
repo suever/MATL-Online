@@ -1,15 +1,19 @@
 """Some factories for quickly generating model instances."""
 
 from datetime import datetime
+from typing import TypeVar
 
 from factory import LazyAttribute, LazyFunction, Sequence
 from factory.alchemy import SQLAlchemyModelFactory
+from factory.builder import Resolver
 
 from matl_online.database import db
 from matl_online.public.models import DocumentationLink, Release
 
+T = TypeVar("T")
 
-class BaseFactory(SQLAlchemyModelFactory):
+
+class BaseFactory(SQLAlchemyModelFactory):  # type: ignore
     """Base factory for SQLAlchemy Model generation."""
 
     class Meta:
@@ -31,11 +35,15 @@ class ReleaseFactory(BaseFactory):
         model = Release
 
 
+def link_generator(link: "Resolver[None]") -> str:
+    return str(link.name) + ".html"
+
+
 class DocumentationLinkFactory(BaseFactory):
     """Factory for creating DocumentationLink objects on demand."""
 
     # The default link will simply append .html to the end of the name
-    link = LazyAttribute(lambda o: o.name + ".html")
+    link = LazyAttribute(link_generator)
 
     class Meta:
         """Meta information for the factory."""

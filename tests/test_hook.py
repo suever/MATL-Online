@@ -3,11 +3,14 @@
 import hmac
 import json
 from hashlib import sha1
+from typing import Dict
 
-from flask import url_for
+from flask import Flask, url_for
+from pytest_mock.plugin import MockerFixture
+from webtest import TestApp  # type: ignore
 
 
-def get_signature(app, data):
+def get_signature(app: Flask, data: str) -> Dict[str, str]:
     """Create a signature header from the secret and payload."""
     secret = str.encode(app.config["GITHUB_HOOK_SECRET"] or "")
     sign = hmac.new(secret, msg=data.encode(), digestmod=sha1).hexdigest()
@@ -17,7 +20,7 @@ def get_signature(app, data):
 class TestReleaseHook:
     """Tests for interacting with the /hook route."""
 
-    def test_ping(self, app, testapp):
+    def test_ping(self, app: Flask, testapp: TestApp) -> None:
         """Send a valid ping event and check the response."""
         # Get a valid header
         headers = get_signature(app, "")
@@ -33,13 +36,13 @@ class TestReleaseHook:
         assert resp.status_code == 200
         assert resp.json.get("msg", "") == "pong"
 
-    def test_no_signature(self, testapp):
+    def test_no_signature(self, testapp: TestApp) -> None:
         """No signature header at all - Should return a 403."""
         url = url_for("public.github_hook")
         resp = testapp.post(url, expect_errors=True)
         assert resp.status_code == 403
 
-    def test_invalid_signature_type(self, testapp):
+    def test_invalid_signature_type(self, testapp: TestApp) -> None:
         """Invalid type of signature (not sha1)."""
         signatures = ["fake_signature", "fake=signature"]
         url = url_for("public.github_hook")
@@ -52,7 +55,7 @@ class TestReleaseHook:
             # Should return a 501 error in this case
             assert resp.status_code == 501
 
-    def test_invalid_signature(self, testapp):
+    def test_invalid_signature(self, testapp: TestApp) -> None:
         """sha1 signature that doesn't use the right secret."""
         url = url_for("public.github_hook")
         headers = {"X-Hub-Signature": "sha1=fake"}
@@ -62,7 +65,9 @@ class TestReleaseHook:
         # Should return a 403
         assert resp.status_code == 403
 
-    def test_release_event(self, app, testapp, mocker):
+    def test_release_event(
+        self, app: Flask, testapp: TestApp, mocker: MockerFixture
+    ) -> None:
         """Create a valid release GitHub event."""
         url = url_for("public.github_hook")
 
@@ -86,7 +91,9 @@ class TestReleaseHook:
         # Make sure that we would have called the refresh_releases method
         assert refresh.call_count == 1
 
-    def test_non_release_event(self, app, testapp, mocker):
+    def test_non_release_event(
+        self, app: Flask, testapp: TestApp, mocker: MockerFixture
+    ) -> None:
         """Create a valid POST that isn't a release event."""
         url = url_for("public.github_hook")
         data = {"not_a_release": "true"}

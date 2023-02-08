@@ -1,6 +1,10 @@
 """Unit tests for checking database model for links to external documentation."""
 
+from typing import List, Tuple
+
 import pytest
+from pytest_mock.plugin import MockerFixture
+from webtest import TestApp  # type: ignore
 
 from matl_online.public.models import DocumentationLink
 
@@ -11,13 +15,13 @@ from .factories import DocumentationLinkFactory as DocLink
 class TestDocumentationLink:
     """Series of tests for the DocumentationLink database model."""
 
-    def test_refresh_single(self, mocker, testapp):
+    def test_refresh_single(self, mocker: MockerFixture, testapp: TestApp) -> None:
         """Handle parsing a single doc entry."""
         req = mocker.patch("matl_online.matl.requests.get")
         testapp.app.config["MATLAB_DOC_LINKS"] = ["https://mathworks.com"]
 
         function_name = "func"
-        function_link = "http://link.html"
+        function_link = "https://link.html"
 
         req.return_value.text = _create_html([(function_name, function_link)])
 
@@ -30,7 +34,7 @@ class TestDocumentationLink:
         assert link.link == function_link
         assert req.call_count == 1
 
-    def test_refresh_multiple(self, mocker, testapp):
+    def test_refresh_multiple(self, mocker: MockerFixture, testapp: TestApp) -> None:
         """Parse out multiple functions at the same time."""
         req = mocker.patch("matl_online.matl.requests.get")
         testapp.app.config["MATLAB_DOC_LINKS"] = ["https://mathworks.com"]
@@ -52,7 +56,7 @@ class TestDocumentationLink:
         for name, link in funcs:
             assert name in names and link in links
 
-    def test_refresh_duplicates(self, mocker, testapp):
+    def test_refresh_duplicates(self, mocker: MockerFixture, testapp: TestApp) -> None:
         """Handle two entries for the same function."""
         req = mocker.patch("matl_online.matl.requests.get")
         testapp.app.config["MATLAB_DOC_LINKS"] = ["https://mathworks.com"]
@@ -75,7 +79,7 @@ class TestDocumentationLink:
         for name, link in funcs:
             assert name in names and link in links
 
-    def test_remove_ij(self, mocker, testapp):
+    def test_remove_ij(self, mocker: MockerFixture, testapp: TestApp) -> None:
         """Variables i and j should be removed by default if they are present."""
         req = mocker.patch("matl_online.matl.requests.get")
         testapp.app.config["MATLAB_DOC_LINKS"] = ["https://mathworks.com"]
@@ -90,7 +94,7 @@ class TestDocumentationLink:
 
         # Now pass a single function in
         function_name = "func"
-        function_link = "http://link.html"
+        function_link = "https://link.html"
 
         req.return_value.text = _create_html([(function_name, function_link)])
 
@@ -103,7 +107,7 @@ class TestDocumentationLink:
         assert DocumentationLink.query.filter_by(name="j").count() == 0
 
 
-def _create_html(data):
+def _create_html(data: List[Tuple[str, str]]) -> str:
     """Create fake HTML for the mock object to return."""
     out = "<table>"
     template = '<tr><td class="term"><a href="%s">%s</a></td></tr>'

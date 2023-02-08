@@ -1,15 +1,18 @@
 """Celery tasks for running MATL programs."""
+from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import shutil
 import tempfile
-from logging import StreamHandler
+from logging import LogRecord, StreamHandler
+from typing import Any, Dict, List, Optional, ParamSpec, TypeVar
 
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import worker_process_init
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO  # type: ignore
 
 from matl_online.extensions import celery
 from matl_online.matl import matl, parse_matl_results
@@ -20,32 +23,42 @@ octave = None
 
 socket = SocketIO(message_queue=config.SOCKETIO_MESSAGE_QUEUE)
 
+Task.__class_getitem__ = classmethod(lambda cls, *args, **kwargs: cls)  # type: ignore[attr-defined]
 
-class OutputHandler(StreamHandler):
+
+class OutputHandler(StreamHandler):  # type: ignore
     """Custom handler for converting logged data to socket events."""
 
-    def __init__(self, task, *args, **kwargs):
+    contents: List[str]
+    task: "OctaveTask"
+
+    def __init__(
+        self,
+        task: "OctaveTask",
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """Initialize the handler with the task we are handling."""
         StreamHandler.__init__(self, *args, **kwargs)
         self.task = task
         self.contents = []
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all messages that have been logged so far."""
         self.contents = []
 
-    def messages(self):
+    def messages(self) -> str:
         """Concatenate all messages into a long stream."""
         return "\n".join([x for x in self.contents])
 
-    def send(self):
+    def send(self) -> Dict[str, Any]:
         """Send a message out to the specified rooms."""
         output = parse_matl_results(self.messages())
         result = {"data": output, "session": self.task.session_id}
         socket.emit("status", result, room=self.task.session_id)
         return result
 
-    def emit(self, record):
+    def emit(self, record: LogRecord) -> None:
         """Overloaded emit method to receive LogRecord instances."""
         # Look to see if there are any special commands in here. These
         # commands will clear the output:
@@ -57,12 +70,12 @@ class OutputHandler(StreamHandler):
         if record.levelno == logging.INFO:
             self.process_message(record.msg)
 
-    def process_message(self, message):
-        """Append a message to be send back to the user."""
+    def process_message(self, message: str) -> None:
+        """Append a message to be sent back to the user."""
         print(message)
 
         if message == "[PAUSE]":
-            # For now we send the entire message again. Consider a better
+            # For now, we send the entire message again. Consider a better
             # approach (i.e. adding a field to the result that says to
             # flush prior to display)
             self.send()
@@ -82,22 +95,30 @@ class OutputHandler(StreamHandler):
         self.contents.append(message)
 
 
-class OctaveTask(Task):
+P = ParamSpec("P")
+T = TypeVar("T")
+
+"""
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    BaseTask = Task[P, T]
+else:
+    BaseTask = Task
+"""
+
+
+class OctaveTask(Task[[str, str, str, str, Optional[str]], None]):
     """Custom Task type for interacting with octave."""
 
-    abstract = True
-    _octave = None
-    _tempfolder = None
-    session_id = None
-    _handler = None
-
-    def __init__(self, *args, **kwargs):
-        """Initialize task."""
-        global octave
-        super(OctaveTask, self).__init__(*args, **kwargs)
+    abstract: bool = True
+    _octave: Optional[OctaveSession] = None
+    _tempfolder: Optional[pathlib.Path] = None
+    session_id: Optional[str] = None
+    _handler: Optional[OutputHandler] = None
 
     @property
-    def octave(self):
+    def octave(self) -> Optional[OctaveSession]:
         """Dependent property which automatically spawns octave if needed."""
         if self._octave is None:
             global octave
@@ -106,7 +127,7 @@ class OctaveTask(Task):
         return self._octave
 
     @property
-    def handler(self):
+    def handler(self) -> OutputHandler:
         """Dependent property that creates an OutputHandler instance."""
         if self._handler is None:
             self._handler = OutputHandler(self)
@@ -114,104 +135,121 @@ class OctaveTask(Task):
         return self._handler
 
     @property
-    def folder(self):
+    def folder(self) -> pathlib.Path:
         """Dependent property that creates a session-specific folder if needed."""
         if self._tempfolder is None:
             # Generate the temporary folder
             if self.session_id:
-                self._tempfolder = os.path.join(tempfile.gettempdir(), self.session_id)
+                self._tempfolder = pathlib.Path(tempfile.gettempdir()).joinpath(
+                    self.session_id
+                )
             else:
-                self._tempfolder = tempfile.mkdtemp()
+                self._tempfolder = pathlib.Path(tempfile.mkdtemp())
 
         # Make directory if it doesn't exist
-        if not os.path.isdir(self._tempfolder):
-            os.makedirs(self._tempfolder)
+        if not self._tempfolder.is_dir():
+            self._tempfolder.mkdir()
 
         return self._tempfolder
 
-    def emit(self, *args, **kwargs):
+    def emit(self, *args: Any, **kwargs: Any) -> None:
         """Send an event to any listening clients."""
         socket.emit(*args, room=self.session_id, **kwargs)
 
-    def on_term(self):
+    def on_term(self) -> None:
         """Clean up after termination event."""
         # Restart octave, so we're ready to go with future calls
-        self.octave.restart()
+        if self.octave:
+            self.octave.restart()
+
         _initialize_process()
 
-    def on_success(self, *args, **kwargs):
+    def on_success(self, *args: Any, **kwargs: Any) -> None:
         """Send a completion messages upon successful completion."""
         self.emit("complete", {"success": True, "message": ""})
 
-    def on_kill(self):
+    def on_kill(self) -> None:
         """Clean up after a task is killed.
 
         This is a hard kill by celery so this worker will be destroyed. No
         need to restart octave
         """
-        self.octave.terminate()
+        if self.octave:
+            self.octave.terminate()
+
         self.on_failure()
 
-    def send_results(self):
+    def send_results(self) -> None:
         """Local forwarder for all send events."""
-        return self.handler.send()
+        self.handler.send()
 
-    def after_return(self, *args, **kwargs):
+    def after_return(self, *args: Any, **kwargs: Any) -> None:
         """Fire after task completion."""
         self.handler.clear()
 
         if os.path.isdir(self.folder):
             shutil.rmtree(self.folder)
 
-    def on_failure(self, *args, **kwargs):
+    def on_failure(self, *args: Any, **kwargs: Any) -> None:
         """Send a message if the task failed for any reason."""
         self.send_results()
         self.emit("complete", {"success": False})
 
 
 @celery.task(base=OctaveTask, bind=True)
-def matl_task(self, *args, **kwargs):
+def matl_task(
+    task: OctaveTask,
+    flags: str,
+    code: str,
+    inputs: str,
+    version: str,
+    session: str = "",
+) -> None:
     """Celery task for processing a MATL command and returning the result."""
-    self.session_id = kwargs.pop("session", "")
-    self.handler.clear()
+    task.session_id = session
+    task.handler.clear()
 
     is_test = config.ENV == "test"
 
+    if task.octave is None:
+        raise Exception("Octave is not configured")
+
     try:
         matl(
-            self.octave,
-            *args,
-            folder=self.folder,
-            line_handler=self.handler.process_message,
-            **kwargs,
+            task.octave,
+            flags,
+            folder=task.folder,
+            code=code,
+            inputs=inputs,
+            version=version,
+            line_handler=task.handler.process_message,
         )
-        result = self.send_results()
+
+        task.send_results()
 
     # In the case of an interrupt (either through a time limit or a
     # revoke() event, we will still clean things up
     except (KeyboardInterrupt, SystemExit):
-        self.handler.process_message("[STDERR]Job cancelled")
-        self.on_kill()
+        task.handler.process_message("[STDERR]Job cancelled")
+        task.on_kill()
         raise
     except SoftTimeLimitExceeded:
         # Propagate the term event up the chain to actually kill the worker
-        self.handler.process_message("[STDERR]Operation timed out")
-        self.on_term()
+        task.handler.process_message("[STDERR]Operation timed out")
+        task.on_term()
 
         if is_test:
-            self.on_failure()
-            self.after_return()
+            task.on_failure()
+            task.after_return()
 
         raise
 
     if is_test:
-        self.on_success()
-        self.after_return()
-
-    return result
+        task.on_success()
+        task.after_return()
 
 
-def _initialize_process(**kwargs):
+def _initialize_process(**kwargs: Any) -> None:
     """Initialize the octave instance.
 
     Function to be called when a worker process is spawned. We use this to
