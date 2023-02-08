@@ -3,6 +3,7 @@
 import base64
 import json
 import os
+import pathlib
 import shutil
 from datetime import datetime
 
@@ -37,7 +38,7 @@ class TestSourceCache:
         version = "0.0.0"
 
         folder = matl.get_matl_folder(version)
-        expected = os.path.join(tmpdir.strpath, version)
+        expected = pathlib.Path(os.path.join(tmpdir.strpath, version))
 
         mock_install.assert_called_once_with(version, expected)
         assert folder == expected
@@ -48,11 +49,11 @@ class TestSourceCache:
 
         # Create the source folder
         version = "13.4.0"
-        version_directory = tmpdir.mkdir(version)
+        version_directory = pathlib.Path(tmpdir.mkdir(version))
         folder = matl.get_matl_folder(version, install=False)
 
         # Make sure that we only return the source folder
-        assert folder == version_directory.strpath
+        assert folder == version_directory
 
 
 class TestDocLinks:
@@ -268,7 +269,7 @@ class TestHelpParsing:
     def test_generate_help_json(self, tmpdir, mocker, db):
         """Check all reading / parsing of help .mat file."""
         folder = mocker.patch("matl_online.matl.get_matl_folder")
-        folder.return_value = tmpdir.strpath
+        folder.return_value = pathlib.Path(tmpdir.strpath)
 
         # Copy the test file into place
         shutil.copy(
@@ -278,7 +279,7 @@ class TestHelpParsing:
 
         outfile = matl.help_file("1.2.3")
 
-        assert outfile == os.path.join(folder.return_value, "help.json")
+        assert outfile == folder.return_value.joinpath("help.json")
 
         # Now actually check the file
         with open(outfile, "r") as fid:
@@ -321,7 +322,7 @@ class TestHelpParsing:
     def test_help_json_exists(self, tmpdir, mocker):
         """Verify correctness of output JSON."""
         folder = mocker.patch("matl_online.matl.get_matl_folder")
-        folder.return_value = tmpdir.strpath
+        folder.return_value = pathlib.Path(tmpdir.strpath)
 
         jsonfile = tmpdir.join("help.json")
         contents = "placeholder"
@@ -329,7 +330,7 @@ class TestHelpParsing:
 
         outfile = matl.help_file("1.2.3")
 
-        assert outfile == jsonfile.strpath
+        assert outfile == pathlib.Path(jsonfile.strpath)
 
         # Make sure the file wasn't updated
         with open(outfile, "r") as fid:
@@ -349,11 +350,13 @@ class TestInstall:
 
         zipper = mocker.patch("matl_online.matl.unzip")
 
-        matl.install_matl("1.2.3", tmpdir.strpath)
+        temporary_directory = pathlib.Path(tmpdir)
+
+        matl.install_matl("1.2.3", temporary_directory)
 
         assert zipper.called
         assert zipper.call_args[0][0].read() == content
-        assert zipper.call_args[0][1] == tmpdir.strpath
+        assert zipper.call_args[0][1] == temporary_directory
 
     def test_invalid_version(self, tmpdir, mocker, app):
         """Try to install a version which does NOT exist on GitHub."""
@@ -361,7 +364,7 @@ class TestInstall:
         get.return_value.status_code = 404
 
         with pytest.raises(KeyError):
-            matl.install_matl("3.4.5", tmpdir.strpath)
+            matl.install_matl("3.4.5", pathlib.Path(tmpdir))
 
 
 class TestReleaseRefresh:
@@ -460,7 +463,7 @@ class TestMATLInterface:
         """If no inputs are provided, MATL shouldn't receive any."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         folder_name = "folder"
-        get_matl_folder.return_value = folder_name
+        get_matl_folder.return_value = pathlib.Path(folder_name)
 
         matl.matl(octave_mock, "-ro")
 
@@ -479,7 +482,7 @@ class TestMATLInterface:
     def test_single_input(self, mocker, app, octave_mock):
         """Single input parameter should be send to matl_runner."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
-        get_matl_folder.return_value = ""
+        get_matl_folder.return_value = pathlib.Path("")
 
         matl.matl(octave_mock, "-ro", code="D", inputs="12")
 
@@ -492,7 +495,7 @@ class TestMATLInterface:
     def test_multiple_inputs(self, mocker, app, octave_mock):
         """Multiple input parameters should be sent to matl_runner."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
-        get_matl_folder.return_value = ""
+        get_matl_folder.return_value = pathlib.Path("")
 
         matl.matl(octave_mock, "-ro", code="D", inputs="12\n13")
 
@@ -505,7 +508,7 @@ class TestMATLInterface:
     def test_string_escape(self, mocker, app, octave_mock):
         """All single quotes need to be escaped properly."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
-        get_matl_folder.return_value = ""
+        get_matl_folder.return_value = pathlib.Path("")
 
         matl.matl(octave_mock, "-ro", code="'abc'")
 

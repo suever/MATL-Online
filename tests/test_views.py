@@ -1,6 +1,7 @@
 """Tests for checking user interaction with views."""
 
 import json
+import pathlib
 
 from flask import url_for
 
@@ -203,7 +204,7 @@ class TestExplain:
 def test_fetch_help(testapp, mocker, db, tmpdir):
     """Check that we get the expected JSON when requesting help."""
     folder = mocker.patch("matl_online.matl.get_matl_folder")
-    folder.return_value = tmpdir.strpath
+    folder.return_value = pathlib.Path(tmpdir.strpath)
 
     jsonfile = tmpdir.join("help.json")
     data = {"placeholder": "value"}

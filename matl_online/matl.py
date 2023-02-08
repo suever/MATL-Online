@@ -1,16 +1,18 @@
 """Module for interacting with MATL, and it's source code."""
-
 import html
 import json
 import os
+import pathlib
 import re
 import shutil
 from io import BytesIO
+from typing import Optional
 
 import requests
 from dateutil import parser as date_parser
 from flask import current_app
 from scipy.io import loadmat
+from werkzeug.utils import secure_filename
 
 from matl_online.public.models import DocumentationLink, Release
 from matl_online.utils import base64_encode_file, unzip
@@ -19,10 +21,10 @@ from matl_online.utils import base64_encode_file, unzip
 STRONG_RE = re.compile(r"<strong>.*?</strong>")
 
 
-def install_matl(version, folder):
+def install_matl(version: str, folder: pathlib.Path):
     """Download a specific version of MATL source code."""
     repo = current_app.config["MATL_REPO"]
-    url = "/".join(["https://github.com", repo, "zipball", version])
+    url = "/".join(["https://github.com", repo, "zipball", secure_filename(version)])
     response = requests.get(url, stream=True)
 
     if response.status_code == 404:
@@ -66,17 +68,22 @@ def add_doc_links(description):
     return description
 
 
-def help_file(version):
+def help_file(version: str) -> pathlib.Path:
     """Grab the help data for the specified version."""
     folder = get_matl_folder(version)
-    outfile = os.path.join(folder, "help.json")
+    outfile = folder.joinpath("help.json")
 
-    if os.path.isfile(outfile):
+    if outfile.is_file():
         return outfile
 
-    mat_file = os.path.join(folder, "help.mat")
+    mat_file = folder.joinpath("help.mat")
 
-    info = loadmat(mat_file, squeeze_me=True, mat_dtype=True, struct_as_record=False)
+    info = loadmat(
+        mat_file.as_posix(),
+        squeeze_me=True,
+        mat_dtype=True,
+        struct_as_record=False,
+    )
     info = info["H"]
 
     # Now create an array of dicts
@@ -122,11 +129,13 @@ def help_file(version):
     return outfile
 
 
-def get_matl_folder(version, install=True):
+def get_matl_folder(version: str, install=True) -> Optional[pathlib.Path]:
     """Check if folder exists and download the source code if necessary."""
-    matl_folder = os.path.join(current_app.config["MATL_FOLDER"], version)
+    matl_folder = pathlib.Path(current_app.config["MATL_FOLDER"]).joinpath(
+        secure_filename(version)
+    )
 
-    if not os.path.isdir(matl_folder):
+    if not matl_folder.is_dir():
         if install:
             install_matl(version, matl_folder)
         else:
@@ -202,7 +211,7 @@ def matl(octave, flags, code="", inputs="", version="", folder="", line_handler=
 
     # Add the folder for the appropriate MATL version
     matl_folder = get_matl_folder(version)
-    cmd = "addpath('%s')" % escape(matl_folder)
+    cmd = "addpath('%s')" % escape(matl_folder.as_posix())
     octave.eval(cmd)
 
     code = ["'%s'" % escape(item) for item in code.split("\n")]

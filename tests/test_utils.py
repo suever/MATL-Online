@@ -1,13 +1,15 @@
 """Unit tests for utils module."""
 
-import os
-import pytest
+import pathlib
 import shutil
+from io import BytesIO
+
+import pytest
+
+from matl_online.errors import InvalidVersion
+from matl_online.utils import sanitize_version, unzip
 
 from .factories import ReleaseFactory
-from matl_online.errors import InvalidVersion
-from matl_online.utils import unzip, sanitize_version
-
 from .mocks import MockZipFile
 
 
@@ -22,12 +24,14 @@ class TestUnzip:
         zipfile = mocker.patch("matl_online.utils.zipfile.ZipFile")
         zipfile.return_value = mock_zip
 
-        unzip("", tmpdir.strpath)
+        temporary_directory = pathlib.Path(tmpdir)
+
+        unzip(BytesIO(), temporary_directory)
 
         extract_args = mock_zip.extract_arguments
 
         assert len(extract_args) == 2
-        assert extract_args[0] == tmpdir.strpath
+        assert extract_args[0] == temporary_directory
 
         output_names = [obj.filename for obj in extract_args[1]]
 
@@ -43,18 +47,20 @@ class TestUnzip:
         zipfile = mocker.patch("matl_online.utils.zipfile.ZipFile")
         zipfile.return_value = mock_zip
 
-        unzip("", tmpdir.strpath, flatten=False)
+        temporary_directory = pathlib.Path(tmpdir)
+
+        unzip(BytesIO(), temporary_directory, flatten=False)
 
         extract_args = mock_zip.extract_arguments
 
         assert len(extract_args) == 1
-        assert extract_args[0] == tmpdir.strpath
+        assert extract_args[0] == temporary_directory
 
     def test_non_existent_dir(self, mocker, tmpdir):
         """If destination doesn't exist, make sure it's created."""
-        subdir = tmpdir.mkdir("sub")
-        sub_path = subdir.strpath
-        shutil.rmtree(sub_path)
+        subdir = pathlib.Path(tmpdir.mkdir("sub").strpath)
+
+        shutil.rmtree(subdir)
 
         mock_zip = MockZipFile()
         mock_zip.add_files("my_directory/abcde", "my_directory/funky")
@@ -62,14 +68,14 @@ class TestUnzip:
         zipfile = mocker.patch("matl_online.utils.zipfile.ZipFile")
         zipfile.return_value = mock_zip
 
-        assert not os.path.isdir(sub_path)
+        assert not subdir.is_dir()
 
-        unzip("", sub_path)
+        unzip(BytesIO(), subdir)
 
         extract_args = mock_zip.extract_arguments
 
-        assert os.path.isdir(sub_path)
-        assert extract_args[0] == sub_path
+        assert subdir.is_dir()
+        assert extract_args[0] == subdir
 
 
 class TestSanitizeVersion:
