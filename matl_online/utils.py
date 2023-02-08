@@ -2,8 +2,10 @@
 
 import base64
 import os
+import pathlib
 import string
 import zipfile
+from typing import BinaryIO
 
 from matl_online.errors import InvalidVersion
 from matl_online.public.models import Release
@@ -30,13 +32,13 @@ def get_members(zip_file):
             yield zip_info
 
 
-def unzip(file_handle, destination, flatten=True):
+def unzip(file_handle: BinaryIO, destination: pathlib.Path, flatten: bool = True):
     """Unzip an archive to a specific directory and flatten the shared prefix."""
     archive = zipfile.ZipFile(file_handle)
 
     # Ensure that the destination exists
-    if not os.path.isdir(destination):
-        os.makedirs(destination)
+    if not destination.is_dir():
+        destination.mkdir()
 
     inputs = ()
 
