@@ -8,10 +8,10 @@ from datetime import datetime
 
 import pytest
 from bs4 import BeautifulSoup
+from dateutil import parser as date_parser
 
 from matl_online import matl
 from matl_online.public.models import Release
-from matl_online.utils import ISO8601_FORMAT, parse_iso8601
 
 from .factories import DocumentationLinkFactory as DocLink
 
@@ -418,12 +418,13 @@ class TestReleaseRefresh:
             tag_of_interest = data[0]["tag_name"]
 
             Release.create(
-                date=parse_iso8601(data[0]["published_at"]), tag=tag_of_interest
+                date=date_parser.parse(data[0]["published_at"]),
+                tag=tag_of_interest,
             )
 
             # Now make the pub date something else
             new_date = datetime(2000, 1, 1)
-            data[0]["published_at"] = new_date.strftime(ISO8601_FORMAT)
+            data[0]["published_at"] = new_date.isoformat()
 
             get.return_value.json = lambda: data
 

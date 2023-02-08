@@ -209,9 +209,28 @@ def test_fetch_help(testapp, mocker, db, tmpdir):
     data = {"placeholder": "value"}
     jsonfile.write(json.dumps(data))
 
-    url = url_for("public.documentation", version="1.2.3")
+    version = "1.2.3"
+    ReleaseFactory(tag=version)
+
+    url = url_for("public.documentation", version=version)
 
     resp = testapp.get(url)
 
     assert resp.status_code == 200
     assert resp.json == data
+
+
+def test_fetch_help_invalid_version(testapp, mocker, db, tmpdir):
+    """Check that we get an error when we try to fetch help for a non-existent version."""
+    folder = mocker.patch("matl_online.matl.get_matl_folder")
+    folder.return_value = tmpdir.strpath
+
+    jsonfile = tmpdir.join("help.json")
+    data = {"placeholder": "value"}
+    jsonfile.write(json.dumps(data))
+
+    url = url_for("public.documentation", version="blah")
+
+    resp = testapp.get(url, expect_errors=True)
+
+    assert resp.status_code == 404

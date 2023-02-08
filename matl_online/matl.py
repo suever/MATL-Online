@@ -8,11 +8,12 @@ import shutil
 from io import BytesIO
 
 import requests
+from dateutil import parser as date_parser
 from flask import current_app
 from scipy.io import loadmat
 
 from matl_online.public.models import DocumentationLink, Release
-from matl_online.utils import base64_encode_file, parse_iso8601, unzip
+from matl_online.utils import base64_encode_file, unzip
 
 # Regular expression for pulling out content between <strong></strong> tags
 STRONG_RE = re.compile(r"<strong>.*?</strong>")
@@ -231,7 +232,7 @@ def refresh_releases():
         if item["prerelease"]:
             continue
 
-        pubdate = parse_iso8601(item["published_at"])
+        pubdate = date_parser.parse(item["published_at"])
 
         # Query the database for this release number
         release = Release.query.filter_by(tag=item["tag_name"]).first()
