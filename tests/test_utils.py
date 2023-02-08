@@ -1,6 +1,5 @@
 """Unit tests for utils module."""
 
-import os
 import pathlib
 import shutil
 from io import BytesIO
