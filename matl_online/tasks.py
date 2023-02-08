@@ -7,7 +7,7 @@ import pathlib
 import shutil
 import tempfile
 from logging import LogRecord, StreamHandler
-from typing import Any, Dict, List, Optional, ParamSpec, TypeVar
+from typing import Any, Dict, List, Optional
 
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
@@ -93,19 +93,6 @@ class OutputHandler(StreamHandler):  # type: ignore
             return
 
         self.contents.append(message)
-
-
-P = ParamSpec("P")
-T = TypeVar("T")
-
-"""
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    BaseTask = Task[P, T]
-else:
-    BaseTask = Task
-"""
 
 
 class OctaveTask(Task[[str, str, str, str, Optional[str]], None]):

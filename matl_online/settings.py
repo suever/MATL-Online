@@ -4,6 +4,15 @@ import uuid
 from typing import List, Optional, Type
 
 
+def _get_cors_allowed_origins() -> List[str]:
+    provided_value = os.getenv("CORS_ALLOWED_ORIGINS")
+
+    if provided_value is None or provided_value == "":
+        return []
+
+    return provided_value.split(";")
+
+
 class Config(object):
     """Base configuration."""
 
@@ -65,9 +74,7 @@ class Config(object):
     ROLLBAR_CLIENT_SIDE_TOKEN = os.environ.get("MATL_ONLINE_ROLLBAR_CLIENT_SIDE_TOKEN")
 
     # CORS Configuration for Flask SocketIO
-    CORS_ALLOWED_ORIGINS: List[str] = (
-        os.environ.get("CORS_ALLOWED_ORIGINS", "").split(";") or []
-    )
+    CORS_ALLOWED_ORIGINS: List[str] = _get_cors_allowed_origins()
 
 
 class ProdConfig(Config):
