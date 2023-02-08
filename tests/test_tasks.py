@@ -7,7 +7,7 @@ from unittest.mock import Mock
 
 import pytest
 from celery.exceptions import SoftTimeLimitExceeded
-from flask_socketio import Socket, SocketIOTestClient  # type: ignore[import]
+from flask_socketio import SocketIO, SocketIOTestClient  # type: ignore[import]
 from pytest_mock.plugin import MockerFixture
 
 from matl_online.tasks import OctaveTask, matl_task
@@ -116,7 +116,7 @@ class TestOctaveTask:
         assert initialize.call_count == 1
 
 
-def _get_socket_for_client(client: SocketIOTestClient) -> Callable[[], Socket]:
+def _get_socketio_for_client(client: SocketIOTestClient) -> Callable[[], SocketIO]:
     return lambda: client.socketio
 
 
@@ -137,7 +137,7 @@ class TestMATLTask:
         # socket instance in tasks.py
         mocker.patch(
             "matl_online.tasks.socket",
-            new_callable=_get_socket_for_client(socketio_client),
+            new_callable=_get_socketio_for_client(socketio_client),
         )
 
         matl_task(
@@ -162,7 +162,7 @@ class TestMATLTask:
 
         mocker.patch(
             "matl_online.tasks.socket",
-            new_callable=_get_socket_for_client(socketio_client),
+            new_callable=_get_socketio_for_client(socketio_client),
         )
 
         ev = mocker.patch("matl_online.tasks.matl_task.octave.eval")
@@ -199,7 +199,7 @@ class TestMATLTask:
 
         mocker.patch(
             "matl_online.tasks.socket",
-            new_callable=_get_socket_for_client(socketio_client),
+            new_callable=_get_socketio_for_client(socketio_client),
         )
 
         ev = mocker.patch("matl_online.tasks.matl_task.octave.eval")

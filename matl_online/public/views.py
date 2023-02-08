@@ -226,7 +226,7 @@ def explain() -> Tuple[Response, int]:
     code = request.values.get("code", "")
     version = _parse_version(request.values.get("version", ""))
 
-    result = matl_task.delay("-eo", code, "", version, "").wait()  # type: ignore
+    result = matl_task.delay("-eo", code, "", version=version, session="").wait()  # type: ignore
     return jsonify(result), 200
 
 
