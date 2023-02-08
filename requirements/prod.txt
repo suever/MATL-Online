@@ -33,7 +33,7 @@ sympy==1.11.1
 # Database
 alembic==1.9.2
 SQLAlchemy==2.0.2
-Flask-SQLAlchemy==3.0.2
+Flask-SQLAlchemy==3.0.3
 psycopg2-binary==2.9.5
 
 # App management
