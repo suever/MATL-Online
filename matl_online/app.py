@@ -7,7 +7,7 @@ from matl_online import public
 from matl_online.assets import assets
 from matl_online.commands import register_commands
 from matl_online.extensions import celery, csrf, db, migrate, socketio
-from matl_online.settings import Config, get_config
+from matl_online.settings import Config, get_celery_configuration, get_config
 
 
 def create_app(config_object: Optional[Type[Config]] = None) -> Flask:
@@ -34,7 +34,7 @@ def register_extensions(app: Flask) -> None:
         cors_allowed_origins=app.config.get("CORS_ALLOWED_ORIGINS"),
     )
 
-    celery.conf.update(app.config)
+    celery.conf.update(get_celery_configuration(app.config))
     csrf.init_app(app)
 
 
