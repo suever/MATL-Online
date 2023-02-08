@@ -166,9 +166,9 @@ class OctaveTask(Task[[str, str, str, str, Optional[str]], None]):
 
         self.on_failure()
 
-    def send_results(self) -> None:
+    def send_results(self) -> Dict[str, Any]:
         """Local forwarder for all send events."""
-        self.handler.send()
+        return self.handler.send()
 
     def after_return(self, *args: Any, **kwargs: Any) -> None:
         """Fire after task completion."""
@@ -191,7 +191,7 @@ def matl_task(
     inputs: str,
     version: str,
     session: str = "",
-) -> None:
+) -> Dict[str, Any]:
     """Celery task for processing a MATL command and returning the result."""
     task.session_id = session
     task.handler.clear()
@@ -212,7 +212,7 @@ def matl_task(
             line_handler=task.handler.process_message,
         )
 
-        task.send_results()
+        result = task.send_results()
 
     # In the case of an interrupt (either through a time limit or a
     # revoke() event, we will still clean things up
@@ -234,6 +234,8 @@ def matl_task(
     if is_test:
         task.on_success()
         task.after_return()
+
+    return result
 
 
 def _initialize_process(**kwargs: Any) -> None:
