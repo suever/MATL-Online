@@ -1,7 +1,9 @@
 """Application configuration."""
 import os
 import uuid
-from typing import List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
+
+from flask.config import Config as FlaskConfig
 
 
 def _get_cors_allowed_origins() -> List[str]:
@@ -17,13 +19,6 @@ class Config(object):
     """Base configuration."""
 
     ENV: str = "NONE"
-
-    CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
-    CELERY_RESULT_BACKEND = os.environ.get(
-        "CELERY_RESULT_BACKEND", "redis://localhost:6379/0"
-    )
-    CELERYD_TASK_SOFT_TIME_LIMIT = 30
-    CELERYD_TASK_TIME_LIMIT = 60
 
     # Custom timeout for celery process initialization
     CELERY_PROCESS_INIT_TIMEOUT = 10
@@ -111,9 +106,6 @@ class TestConfig(Config):
 
     WTF_CSRF_ENABLED = False
 
-    # Ensure that celery tasks are executed locally
-    CELERY_ALWAYS_EAGER = True
-
     PRESERVE_CONTEXT_ON_EXCEPTION = False
 
     # Create a bogus GA Universal ID for testing
@@ -130,3 +122,16 @@ def get_config() -> Type[Config]:
 
 
 config = get_config()
+
+
+def get_celery_configuration(configuration: FlaskConfig) -> Dict[str, Any]:
+    return {
+        "broker_url": os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0"),
+        "result_backend": os.environ.get(
+            "CELERY_RESULT_BACKEND", "redis://localhost:6379/0"
+        ),
+        "task_soft_time_limit": 30,
+        "task_time_limit": 60,
+        # Ensure that celery tasks are executed locally when in a test environment
+        "task_always_eager": configuration.get("ENV") == "test",
+    }
