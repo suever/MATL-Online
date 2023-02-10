@@ -18,7 +18,8 @@ from wtforms import ValidationError  # type: ignore
 
 from matl_online.errors import InvalidVersion
 from matl_online.extensions import celery, csrf, socketio
-from matl_online.matl import help_file, refresh_releases
+from matl_online.matl.documentation import help_file
+from matl_online.matl.releases import refresh_releases
 from matl_online.public.models import Release
 from matl_online.settings import Config
 from matl_online.tasks import matl_task
