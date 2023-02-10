@@ -1,5 +1,6 @@
 """Application configuration."""
 import os
+import pathlib
 import uuid
 from typing import Any, Dict, List, Optional, Type
 
@@ -26,25 +27,25 @@ class Config(object):
     IMGUR_CLIENT_ID = os.environ.get("MATL_ONLINE_IMGUR_CLIENT_ID")
 
     SECRET_KEY = str(uuid.uuid4())
-    APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
-    PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
+    APP_DIR = pathlib.Path(os.path.dirname(__file__)).absolute()  # This directory
+    PROJECT_ROOT = APP_DIR.parent
 
     # Database settings
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DB_NAME = "database.db"
-    DB_PATH = os.path.join(PROJECT_ROOT, DB_NAME)
+    DB_PATH = PROJECT_ROOT.joinpath(DB_NAME)
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "SQLALCHEMY_DATABASE_URI", "sqlite:///{0}".format(DB_PATH)
+        "SQLALCHEMY_DATABASE_URI", f"sqlite:///{DB_PATH.as_posix()}"
     )
 
     # Directories
-    MATL_FOLDER = os.path.join(PROJECT_ROOT, "MATL")
-    MATL_WRAP_DIR = os.path.join(MATL_FOLDER, "wrappers")
+    MATL_FOLDER = PROJECT_ROOT.joinpath("MATL")
+    MATL_WRAP_DIR = MATL_FOLDER.joinpath("wrappers")
 
     # Octave settings
     OCTAVE_CLI_OPTIONS = "--norc --no-history"
     OCTAVE_EXECUTABLE = "octave-cli"
-    OCTAVERC = os.path.join(MATL_WRAP_DIR, ".octaverc")
+    OCTAVERC = MATL_WRAP_DIR.joinpath(".octaverc")
 
     # GitHub / Repo settings
     MATL_REPO = "lmendo/MATL"
@@ -134,4 +135,9 @@ def get_celery_configuration(configuration: FlaskConfig) -> Dict[str, Any]:
         "task_time_limit": 60,
         # Ensure that celery tasks are executed locally when in a test environment
         "task_always_eager": configuration.get("ENV") == "test",
+        # Use pickling for serialization to allow first-class objects rather than dicts.
+        # The source is also trusted therefore it should be secure enough
+        "accept_content": ["application/json", "application/x-python-serialize"],
+        "task_serializer": "pickle",
+        "result_serializer": "pickle",
     }

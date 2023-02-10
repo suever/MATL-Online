@@ -22,6 +22,7 @@ from matl_online.matl import help_file, refresh_releases
 from matl_online.public.models import Release
 from matl_online.settings import Config
 from matl_online.tasks import matl_task
+from matl_online.types import MATLExplainTaskParameters, MATLRunTaskParameters
 from matl_online.utils import sanitize_version
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
@@ -214,7 +215,14 @@ def submit_job(data: Dict[str, Any]) -> None:
     if code == "":
         return
 
-    task = matl_task.delay("-ro", code, inputs, version, uid)
+    task = matl_task.delay(
+        MATLRunTaskParameters(
+            code=code,
+            inputs=inputs,
+            version=version,
+            session_id=uid,
+        )
+    )
 
     # Store the currently executing task ID in the session
     session["taskid"] = task.id
@@ -226,7 +234,14 @@ def explain() -> Tuple[Response, int]:
     code = request.values.get("code", "")
     version = _parse_version(request.values.get("version", ""))
 
-    result = matl_task.delay("-eo", code, "", version=version, session="").wait()  # type: ignore
+    task = matl_task.delay(
+        MATLExplainTaskParameters(
+            code=code,
+            version=version,
+        )
+    )
+
+    result = task.wait()  # type: ignore
     return jsonify(result), 200
 
 
