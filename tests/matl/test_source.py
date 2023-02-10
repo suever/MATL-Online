@@ -1,5 +1,4 @@
 import pathlib
-from io import BytesIO
 from unittest.mock import MagicMock
 
 import pytest
@@ -56,7 +55,7 @@ def test_github_repository(mocker: MockerFixture) -> None:
     github_mock = mocker.patch("matl_online.matl.source.github")
 
     # When retrieving the PyGithub repository object for this repository
-    repo = github_repository(repository)
+    github_repository(repository)
 
     # It queries the expected repository
     github_mock.get_repo.assert_called_once_with(repository)
@@ -67,10 +66,10 @@ class TestInstallMATL:
         self, mocker: MockerFixture, tmp_path: pathlib.Path
     ) -> None:
         # Given a MATL version to install
-        version = "0.0.0"
+        version = "4.5.6"
 
         # And a repository to install it from
-        repository = "suever/matl-online"
+        repository = "suever/matl-online2"
 
         download_link = "https://example.com"
 

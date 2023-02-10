@@ -2,7 +2,7 @@
 
 from flask import Flask
 
-from matl_online import matl
+from matl_online.matl import releases
 
 
 def register_commands(app: Flask) -> None:
@@ -11,4 +11,4 @@ def register_commands(app: Flask) -> None:
     @app.cli.command(name="refresh_releases", help="Update MATL releases from GitHub")  # type: ignore[misc]
     def refresh_releases() -> None:
         """Command for updating all release information."""
-        matl.refresh_releases()
+        releases.refresh_releases()

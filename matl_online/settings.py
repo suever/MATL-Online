@@ -41,7 +41,7 @@ class Config(object):
     # Directories
     MATL_DIRECTORY = PROJECT_ROOT.joinpath("MATL")
     MATL_SOURCE_DIRECTORY = MATL_DIRECTORY.joinpath("source")
-    MATL_WRAP_DIR = MATL_SOURCE_DIRECTORY.joinpath("wrappers")
+    MATL_WRAP_DIR = MATL_DIRECTORY.joinpath("wrappers")
 
     # Octave settings
     OCTAVE_CLI_OPTIONS = "--norc --no-history"
