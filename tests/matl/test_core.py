@@ -18,7 +18,6 @@ from pytest_mock.plugin import MockerFixture
 from matl_online import matl
 from matl_online.public.models import Release
 from matl_online.types import MATLRunTaskParameters
-from tests.factories import DocumentationLinkFactory as DocLink
 
 TEST_DATA_DIR = pathlib.Path(os.path.dirname(__file__)).joinpath("../data")
 
@@ -65,97 +64,6 @@ class TestSourceCache:
 
         # Make sure that we only return the source folder
         assert folder == version_directory
-
-
-class TestDocLinks:
-    """Ensure that documentation hyperlinks are added appropriately."""
-
-    def test_basic_doclink(self, db: SQLAlchemy) -> None:
-        """Use a straightforward single function name."""
-        link: DocLink = DocLink(name="ans")
-        template = "This is a doc string for <strong>%s</strong>"
-
-        output = matl.add_doc_links(template % link.name)
-
-        soup = BeautifulSoup(output, "html.parser")
-
-        assert soup.strong and soup.strong.a
-
-        assert soup.strong.a["href"] == link.link
-        assert soup.strong.a.text == link.name
-
-    def test_multiple_doclink(self, db: SQLAlchemy) -> None:
-        """Include two functions in the same docstring."""
-        links = (DocLink(name="func1"), DocLink(name="func2"))
-        template = "This is a doc for <strong>%s</strong>"
-
-        docstring = (template % links[0].name) + (template % links[1].name)
-
-        output = matl.add_doc_links(docstring)
-
-        soup = BeautifulSoup(output, "html.parser")
-
-        strong_tags = soup.findAll("strong")
-
-        assert len(strong_tags) == len(links)
-
-        for k, strong in enumerate(strong_tags):
-            assert strong.a["href"] == links[k].link
-            assert strong.a.text == links[k].name
-
-    def test_single_quoted(self, db: SQLAlchemy) -> None:
-        """Single quoted function names should be ignored."""
-        double: DocLink = DocLink(name="double")
-        links = (DocLink(name="func1"), DocLink(name="func2"))
-
-        docstring = (
-            "doc string for <strong>'%s'</strong>, "
-            "<strong>%s</strong> and <strong>%s</strong>"
-        ) % (double.name, links[0].name, links[1].name)
-
-        output = matl.add_doc_links(docstring)
-
-        soup = BeautifulSoup(output, "html.parser")
-        strong_tags = soup.findAll("strong")
-
-        # Make sure the first one wasn't converted to a link
-        first_tag = strong_tags.pop(0)
-        assert first_tag.a is None
-
-        # Make sure everything else is golden
-        assert len(strong_tags) == len(links)
-
-        for k, strong in enumerate(strong_tags):
-            assert strong.a["href"] == links[k].link
-            assert strong.a.text == links[k].name
-
-    def test_complex_function(self, db: SQLAlchemy) -> None:
-        """Test when there is a multi-function example."""
-        mat2cell: DocLink = DocLink(name="mat2cell")
-        ones = DocLink(name="ones")
-        size = DocLink(name="size")
-        ndims = DocLink(name="ndims")
-
-        expected = [mat2cell, ones, size, size, size, ndims]
-
-        ex = "mat2cell(x, ones(size(x,1),1), size(x,2),...,size(x,ndims(x)))"
-        docstring = "Doc for: <strong>%s</strong>" % ex
-
-        output = matl.add_doc_links(docstring)
-
-        soup = BeautifulSoup(output, "html.parser")
-
-        assert len(soup.findAll("strong")) == 1
-
-        assert soup.strong
-
-        links = soup.strong.findAll("a")
-
-        assert len(links) == len(expected)
-
-        for k, link in enumerate(links):
-            assert link.text == expected[k].name
-            assert link["href"] == expected[k].link
 
 
 class TestResults:

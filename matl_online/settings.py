@@ -52,14 +52,6 @@ class Config(object):
     GITHUB_API = "https://api.github.com"
     GITHUB_HOOK_SECRET = os.environ.get("MATL_ONLINE_GITHUB_HOOK_SECRET")
 
-    # MATLAB Online Documentation links
-    MATLAB_DOC_LINKS = [
-        "https://www.mathworks.com/help/matlab/functionlist.html",
-        "https://www.mathworks.com/help/images/functionlist.html",
-        "https://www.mathworks.com/help/stats/functionlist.html",
-        "https://www.mathworks.com/help/symbolic/functionlist.html",
-    ]
-
     # Don't use Google Analytics unless we are on production
     GOOGLE_ANALYTICS_UNIVERSAL_ID: Optional[str] = None
 
