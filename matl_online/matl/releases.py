@@ -1,40 +1,41 @@
-import shutil
-
-import requests
-from dateutil import parser as date_parser
-from flask import current_app
+import pathlib
 
 from matl_online.public.models import Release
 
-from .source import get_matl_folder
+from .source import (
+    DEFAULT_REPOSITORY,
+    DEFAULT_SOURCE_DIRECTORY,
+    github_repository,
+    remove_source_directory,
+)
 
 
-def refresh_releases() -> None:
+def refresh_releases(
+    repository: str = DEFAULT_REPOSITORY,
+    source_root: pathlib.Path = DEFAULT_SOURCE_DIRECTORY,
+) -> None:
     """Fetch new release information from GitHub and update local database."""
-    repo = current_app.config["MATL_REPO"]
-    resp = requests.get("https://api.github.com/repos/%s/releases" % repo)
+    repo = github_repository(repository)
 
-    for item in resp.json():
-        # Skip any pre-releases since they aren't ready for prime-time
-        if item["prerelease"]:
+    for release in repo.get_releases():
+        # Skip any pre-releases
+        if release.prerelease:
             continue
 
-        pubdate = date_parser.parse(item["published_at"])
+        version = release.tag_name
 
-        # Query the database for this release number
-        release = Release.query.filter_by(tag=item["tag_name"]).first()
+        # Check if we already have this release in the database
+        release_record = Release.query.filter_by(tag=version).first()
 
-        if release is None:
-            # This is a new release, and we don't need to do much
-            Release.create(tag=item["tag_name"], date=pubdate)
+        # If there is no existing record, create it
+        if release_record is None:
+            Release.create(tag=version, date=release.published_at)
+            continue
 
-        elif release.date != pubdate:
-            # We have an updated release, and we need to clean up
-            source_dir = get_matl_folder(item["tag_name"], install=False)
-
-            # If we had previously downloaded this code, then delete it
-            if source_dir is not None:
-                shutil.rmtree(source_dir)
+        # Check if our local release is stale
+        if release.published_at > release_record.date:
+            # Clear our cache of the source code
+            remove_source_directory(version, source_root=source_root)
 
             # Now update the database entry
-            release.update(date=pubdate)
+            release_record.update(date=release.published_at)
