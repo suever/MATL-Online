@@ -1,18 +1,14 @@
 import pathlib
 
 from matl_online.public.models import Release
+from matl_online.settings import Config
 
-from .source import (
-    DEFAULT_REPOSITORY,
-    DEFAULT_SOURCE_DIRECTORY,
-    github_repository,
-    remove_source_directory,
-)
+from .source import github_repository, remove_source_directory
 
 
 def refresh_releases(
-    repository: str = DEFAULT_REPOSITORY,
-    source_root: pathlib.Path = DEFAULT_SOURCE_DIRECTORY,
+    repository: str = Config.MATL_REPOSITORY,
+    source_root: pathlib.Path = Config.MATL_SOURCE_DIRECTORY,
 ) -> None:
     """Fetch new release information from GitHub and update local database."""
     repo = github_repository(repository)

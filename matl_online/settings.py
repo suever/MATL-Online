@@ -39,8 +39,9 @@ class Config(object):
     )
 
     # Directories
-    MATL_FOLDER = PROJECT_ROOT.joinpath("MATL")
-    MATL_WRAP_DIR = MATL_FOLDER.joinpath("wrappers")
+    MATL_DIRECTORY = PROJECT_ROOT.joinpath("MATL")
+    MATL_SOURCE_DIRECTORY = MATL_DIRECTORY.joinpath("source")
+    MATL_WRAP_DIR = MATL_SOURCE_DIRECTORY.joinpath("wrappers")
 
     # Octave settings
     OCTAVE_CLI_OPTIONS = "--norc --no-history"
@@ -48,8 +49,7 @@ class Config(object):
     OCTAVERC = MATL_WRAP_DIR.joinpath(".octaverc")
 
     # GitHub / Repo settings
-    MATL_REPO = "lmendo/MATL"
-    GITHUB_API = "https://api.github.com"
+    MATL_REPOSITORY = os.environ.get("MATL_REPO", "lmendo/MATL")
     GITHUB_HOOK_SECRET = os.environ.get("MATL_ONLINE_GITHUB_HOOK_SECRET")
 
     # Don't use Google Analytics unless we are on production
