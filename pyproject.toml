@@ -26,6 +26,11 @@ files = [
     "tests",
 ]
 
+plugins = [
+    "numpy.typing.mypy_plugin",
+    "pydantic.mypy",
+]
+
 [tool.isort]
 profile = "black"
 

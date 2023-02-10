@@ -1,7 +1,6 @@
 import logging
 import pathlib
 import shutil
-from functools import cache
 from io import BytesIO
 
 import requests
@@ -18,7 +17,6 @@ DEFAULT_SOURCE_DIRECTORY = (
 )
 
 
-@cache
 def github_repository(name: str = DEFAULT_REPOSITORY) -> Repository:
     return Github().get_repo(name)
 

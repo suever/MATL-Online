@@ -1,15 +1,77 @@
+import json
 import pathlib
 import re
-from typing import Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
+from pydantic import BaseModel, Field, parse_obj_as, root_validator, validator
 from scipy.io import loadmat  # type: ignore[import]
 
+from matl_online.matl.source import get_matl_folder
 from matl_online.public.models import DocumentationLink
-
-from .core import get_matl_folder
 
 # Regular expression for pulling out content between <strong></strong> tags
 STRONG_RE = re.compile(r"<strong>.*?</strong>")
+
+
+class FunctionDocumentation(BaseModel):
+    source: str = Field(alias="sourcePlain")
+    brief: str = Field(alias="comm")
+    description: str = Field(alias="descr")
+
+    arguments: Optional[str] = None
+
+    @validator(
+        "source",
+        "brief",
+        "description",
+        pre=True,
+    )
+    def remove_newlines(cls, value: str) -> str:
+        return value.replace("\n", "")
+
+    # Workaround for https://github.com/pydantic/pydantic/issues/935
+    @root_validator(pre=True)
+    def set_arguments(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if values["inOutTogether"] == 0 or len(values["out"]) == 0:
+            arguments = ""
+        else:
+            arguments = f"{values['in']}; {values['out']}"
+
+        values["arguments"] = arguments
+        return values
+
+
+def struct_of_arrays_to_array_of_dicts(value: Any) -> List[Dict[str, Any]]:
+    """Converts a numpy struct or arrays to an array of dictionaries."""
+    names: Tuple[str] = value.dtype.names
+
+    values_lists = [value[name].item() for name in names]
+
+    return [dict(zip(names, values)) for values in zip(*values_lists)]
+
+
+def documentation_from_file(mat_file: pathlib.Path) -> List[FunctionDocumentation]:
+    file_contents = loadmat(mat_file.as_posix(), squeeze_me=True, variable_names="H")
+    functions = struct_of_arrays_to_array_of_dicts(file_contents["H"])
+
+    return parse_obj_as(List[FunctionDocumentation], functions)
+
+
+def generate_documentation_json(
+    help_filename: pathlib.Path,
+    json_filename: pathlib.Path,
+) -> pathlib.Path:
+    print(f"Generating new documentation at {json_filename.as_posix()}")
+    docs = documentation_from_file(help_filename)
+
+    # TODO: Add documentation links
+
+    contents = {"data": [doc.dict() for doc in docs]}
+
+    with open(json_filename, "w") as fid:
+        json.dump(contents, fid)
+
+    return json_filename
 
 
 def add_doc_links(description: str) -> str:
@@ -51,59 +113,11 @@ def help_file(version: str) -> pathlib.Path:
     """Grab the help data for the specified version."""
     folder = get_matl_folder(version)
 
-    outfile = folder.joinpath("help.json")
+    help_json = folder.joinpath("help.json")
 
-    if outfile.is_file():
-        return outfile
+    # If the file already exists, simply return it
+    if help_json.is_file():
+        return help_json
 
-    mat_file = folder.joinpath("help.mat")
-
-    info = loadmat(
-        mat_file.as_posix(),
-        squeeze_me=True,
-        mat_dtype=True,
-        struct_as_record=False,
-    )
-    info = info["H"]
-
-    # Now create an array of dicts
-    result = []
-
-    # Sort everything by the plain source
-    src: Tuple[str, str] = info.sourcePlain
-    sorted_indices = [
-        x[0] for x in sorted(enumerate(src), key=lambda x: x[1].swapcase())
-    ]
-
-    for k in sorted_indices:
-        if not info.inOutTogether[k] or len(info.out[k]) == 0:
-            arguments = ""
-        else:
-            values = (info.__getattribute__("in")[k], info.out[k])
-            arguments = "%s;  %s" % values
-
-        # Put hyperlinks to the MATLAB documentation in the description
-        info.descr[k] = add_doc_links(info.descr[k])
-
-        # Replace all newlines in description
-        info.descr[k] = info.descr[k].replace("\n", "")
-
-        # Scipy loads empty char arrays as numeric arrays
-        if not isinstance(info.comm[k], str):
-            info.comm[k] = ""
-
-        item = {
-            "source": html.escape(info.sourcePlain[k]),
-            "brief": info.comm[k],
-            "description": info.descr[k],
-            "arguments": arguments,
-        }
-
-        result.append(item)
-
-    output = {"data": result}
-
-    with open(outfile, "w") as fid:
-        json.dump(output, fid)
-
-    return outfile
+    # Otherwise we need to generate it from the help.mat file
+    return generate_documentation_json(folder.joinpath("help.mat"), help_json)
