@@ -31,13 +31,23 @@ services:
     build:
       context: .
       dockerfile: ops/Dockerfile
-    command: celery --app worker.celery worker --purge -Ofair --loglevel INFO
+    command: celery --app worker.celery worker --purge --autoscale=4,2 -Ofair --loglevel INFO
     environment:
       CELERY_BROKER_URL: redis://redis:6379
       CELERY_RESULT_BACKEND: redis://redis:6379
       SOCKETIO_MESSAGE_QUEUE: redis://redis:6379
       EVENTLET_NO_GREENDNS: "yes"
       MATL_ONLINE_ENV: prod
+    depends_on:
+      - redis
+
+  flower:
+    image: mher/flower
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379
+      CELERY_RESULT_BACKEND: redis://redis:6379
+    ports:
+      - "5555:5555"
     depends_on:
       - redis
 
