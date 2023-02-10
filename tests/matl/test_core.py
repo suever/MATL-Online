@@ -18,10 +18,9 @@ from pytest_mock.plugin import MockerFixture
 from matl_online import matl
 from matl_online.public.models import Release
 from matl_online.types import MATLRunTaskParameters
+from tests.factories import DocumentationLinkFactory as DocLink
 
-from .factories import DocumentationLinkFactory as DocLink
-
-TEST_DATA_DIR = pathlib.Path(os.path.dirname(__file__)).joinpath("data")
+TEST_DATA_DIR = pathlib.Path(os.path.dirname(__file__)).joinpath("../data")
 
 
 class TestSourceCache:
@@ -42,7 +41,7 @@ class TestSourceCache:
         mocker: MockerFixture,
     ) -> None:
         """The source folder does not exist, but we'll fetch the source."""
-        mock_install = mocker.patch("matl_online.matl.install_matl")
+        mock_install = mocker.patch("matl_online.matl.core.install_matl")
         app.config["MATL_FOLDER"] = tmp_path.as_posix()
 
         version = "0.0.0"
@@ -294,7 +293,7 @@ class TestHelpParsing:
         db: SQLAlchemy,
     ) -> None:
         """Check all reading / parsing of help .mat file."""
-        folder = mocker.patch("matl_online.matl.get_matl_folder")
+        folder = mocker.patch("matl_online.matl.core.get_matl_folder")
         folder.return_value = tmp_path
 
         # Copy the test file into place
@@ -351,7 +350,7 @@ class TestHelpParsing:
         mocker: MockerFixture,
     ) -> None:
         """Verify correctness of output JSON."""
-        folder = mocker.patch("matl_online.matl.get_matl_folder")
+        folder = mocker.patch("matl_online.matl.core.get_matl_folder")
         folder.return_value = tmp_path
 
         json_file = tmp_path.joinpath("help.json")
@@ -379,13 +378,13 @@ class TestInstall:
         app: Flask,
     ) -> None:
         """Test using a version which we know to exist on GitHub."""
-        get = mocker.patch("matl_online.matl.requests.get")
+        get = mocker.patch("matl_online.matl.core.requests.get")
         get.return_value.status_code = 200
         get.return_value.json = lambda: {"zipball_url": "zipball"}
         content = b"zipball_content"
         get.return_value.content = content
 
-        zipper = mocker.patch("matl_online.matl.unzip")
+        zipper = mocker.patch("matl_online.matl.core.unzip")
 
         matl.install_matl("1.2.3", tmp_path)
 
@@ -412,7 +411,7 @@ class TestReleaseRefresh:
 
     def test_all_new(self, mocker: MockerFixture, app: Flask, db: SQLAlchemy) -> None:
         """Completely populate the database (no previous entries)."""
-        get = mocker.patch("matl_online.matl.requests.get")
+        get = mocker.patch("matl_online.matl.core.requests.get")
 
         with open(TEST_DATA_DIR.joinpath("releases.json")) as fid:
             data = json.load(fid)
@@ -436,7 +435,7 @@ class TestReleaseRefresh:
     ) -> None:
         """Ensure that pre-releases are ignored."""
         # Change one of the releases to a pre-release and hope it's ignored
-        get = mocker.patch("matl_online.matl.requests.get")
+        get = mocker.patch("matl_online.matl.core.requests.get")
 
         with open(TEST_DATA_DIR.joinpath("releases.json")) as fid:
             data = json.load(fid)
@@ -460,7 +459,7 @@ class TestReleaseRefresh:
         db: SQLAlchemy,
     ) -> None:
         """Updated releases should be updated in our database."""
-        get = mocker.patch("matl_online.matl.requests.get")
+        get = mocker.patch("matl_online.matl.core.requests.get")
 
         with open(TEST_DATA_DIR.joinpath("releases.json")) as fid:
             data = json.load(fid)
@@ -502,7 +501,7 @@ class TestReleaseRefresh:
         tmp_path: pathlib.Path,
     ) -> None:
         """Updated releases should remove the old source code."""
-        matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
+        matl_folder = mocker.patch("matl_online.matl.core.get_matl_folder")
         matl_folder.return_value = tmp_path
 
         assert tmp_path.is_dir()
@@ -523,7 +522,7 @@ class TestMATLInterface:
         tmp_path: pathlib.Path,
     ) -> None:
         """If no inputs are provided, MATL shouldn't receive any."""
-        get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
+        get_matl_folder = mocker.patch("matl_online.matl.core.get_matl_folder")
         matl_folder = pathlib.Path("matl_folder")
         get_matl_folder.return_value = pathlib.Path(matl_folder)
 
@@ -547,7 +546,7 @@ class TestMATLInterface:
         tmp_path: pathlib.Path,
     ) -> None:
         """Single input parameter should be send to matl_runner."""
-        get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
+        get_matl_folder = mocker.patch("matl_online.matl.core.get_matl_folder")
         get_matl_folder.return_value = pathlib.Path("")
 
         matl.matl(
@@ -568,7 +567,7 @@ class TestMATLInterface:
         tmp_path: pathlib.Path,
     ) -> None:
         """Multiple input parameters should be sent to matl_runner."""
-        get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
+        get_matl_folder = mocker.patch("matl_online.matl.core.get_matl_folder")
         get_matl_folder.return_value = pathlib.Path("")
 
         matl.matl(
@@ -589,7 +588,7 @@ class TestMATLInterface:
         tmp_path: pathlib.Path,
     ) -> None:
         """All single quotes need to be escaped properly."""
-        get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
+        get_matl_folder = mocker.patch("matl_online.matl.core.get_matl_folder")
         get_matl_folder.return_value = pathlib.Path("")
 
         matl.matl(

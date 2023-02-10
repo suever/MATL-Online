@@ -249,7 +249,7 @@ def test_fetch_help(
     tmp_path: pathlib.Path,
 ) -> None:
     """Check that we get the expected JSON when requesting help."""
-    folder = mocker.patch("matl_online.matl.get_matl_folder")
+    folder = mocker.patch("matl_online.matl.core.get_matl_folder")
     folder.return_value = tmp_path
 
     jsonfile = tmp_path.joinpath("help.json")
