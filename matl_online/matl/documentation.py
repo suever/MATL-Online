@@ -51,8 +51,6 @@ def help_file(version: str) -> pathlib.Path:
     """Grab the help data for the specified version."""
     folder = get_matl_folder(version)
 
-    assert folder, "MATL folder does not exist"
-
     outfile = folder.joinpath("help.json")
 
     if outfile.is_file():
