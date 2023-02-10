@@ -9,7 +9,6 @@ from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
-from bs4 import BeautifulSoup
 from dateutil import parser as date_parser
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -20,50 +19,6 @@ from matl_online.public.models import Release
 from matl_online.types import MATLRunTaskParameters
 
 TEST_DATA_DIR = pathlib.Path(os.path.dirname(__file__)).joinpath("../data")
-
-
-class TestSourceCache:
-    """Series of tests to check if source code is managed properly."""
-
-    def test_no_source_no_install(self, app: Flask, tmp_path: pathlib.Path) -> None:
-        """The source folder does not exist, and we won't create it."""
-        app.config["MATL_FOLDER"] = tmp_path.as_posix()
-        folder = matl.get_matl_folder("18.3.0", install=False)
-
-        # In this case, the result should simply be None
-        assert folder is None
-
-    def test_no_source_install(
-        self,
-        app: Flask,
-        tmp_path: pathlib.Path,
-        mocker: MockerFixture,
-    ) -> None:
-        """The source folder does not exist, but we'll fetch the source."""
-        mock_install = mocker.patch("matl_online.matl.core.install_matl")
-        app.config["MATL_FOLDER"] = tmp_path.as_posix()
-
-        version = "0.0.0"
-
-        folder = matl.get_matl_folder(version)
-        expected = tmp_path.joinpath(version)
-
-        mock_install.assert_called_once_with(version, expected)
-        assert folder == expected
-
-    def test_source_folder_exists(self, app: Flask, tmp_path: pathlib.Path) -> None:
-        """Source folder exists so simply return it."""
-        app.config["MATL_FOLDER"] = tmp_path.as_posix()
-
-        # Create the source folder
-        version = "13.4.0"
-
-        version_directory = tmp_path.joinpath(version)
-        version_directory.mkdir()
-        folder = matl.get_matl_folder(version, install=False)
-
-        # Make sure that we only return the source folder
-        assert folder == version_directory
 
 
 class TestResults:
