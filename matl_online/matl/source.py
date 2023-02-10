@@ -12,9 +12,11 @@ from matl_online.errors import MissingDirectory
 from matl_online.settings import Config
 from matl_online.utils import unzip
 
+github = Github()
+
 
 def github_repository(name: str) -> Repository:
-    return Github().get_repo(name)
+    return github.get_repo(name)
 
 
 def remove_source_directory(ref: str, source_root: pathlib.Path) -> None:
