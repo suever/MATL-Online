@@ -45,3 +45,7 @@ wtforms==3.0.1
 
 # GitHub interaction
 pygithub==1.57
+
+# Error Tracking
+blinker==1.5
+rollbar==0.16.3

@@ -1,7 +1,9 @@
 """The app module, containing the app factory function."""
 from typing import Optional, Type
 
-from flask import Flask
+import rollbar  # type: ignore[import]
+from flask import Flask, got_request_exception
+from rollbar.contrib.flask import report_exception  # type: ignore[import]
 
 from matl_online import public
 from matl_online.assets import assets
@@ -34,8 +36,21 @@ def register_extensions(app: Flask) -> None:
         cors_allowed_origins=app.config.get("CORS_ALLOWED_ORIGINS"),
     )
 
+    register_rollbar(app)
+
     celery.conf.update(get_celery_configuration(app.config))
     csrf.init_app(app)
+
+
+def register_rollbar(app: Flask) -> None:
+    rollbar.init(
+        app.config.get("ROLLBAR_SERVER_SIDE_TOKEN"),
+        environment=app.config.get("ROLLBAR_ENV"),
+        root=app.config.get("PROJECT_ROOT"),
+        allow_logging_basic_config=False,
+    )
+
+    got_request_exception.connect(report_exception, app)
 
 
 def register_blueprints(app: Flask) -> None:
