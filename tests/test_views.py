@@ -276,7 +276,7 @@ def test_fetch_help_invalid_version(
     tmp_path: pathlib.Path,
 ) -> None:
     """Check that we get an error when we try to fetch help for a non-existent version."""
-    folder = mocker.patch("matl_online.matl.get_matl_folder")
+    folder = mocker.patch("matl_online.matl.documentation.get_matl_folder")
     folder.return_value = tmp_path
 
     jsonfile = tmp_path.joinpath("help.json")

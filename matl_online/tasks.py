@@ -14,7 +14,8 @@ from celery.signals import worker_process_init
 from flask_socketio import SocketIO  # type: ignore
 
 from matl_online.extensions import celery
-from matl_online.matl import matl, parse_matl_results
+from matl_online.matl.core import matl
+from matl_online.matl.io import parse_matl_results
 from matl_online.octave import OctaveSession
 from matl_online.settings import config
 from matl_online.types import MATLTaskParameters
