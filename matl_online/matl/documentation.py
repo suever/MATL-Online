@@ -1,16 +1,11 @@
 import json
 import pathlib
-import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field, parse_obj_as, root_validator, validator
 from scipy.io import loadmat  # type: ignore[import]
 
 from matl_online.matl.source import get_matl_folder
-from matl_online.public.models import DocumentationLink
-
-# Regular expression for pulling out content between <strong></strong> tags
-STRONG_RE = re.compile(r"<strong>.*?</strong>")
 
 
 class FunctionDocumentation(BaseModel):
@@ -72,41 +67,6 @@ def generate_documentation_json(
         json.dump(contents, fid)
 
     return json_filename
-
-
-def add_doc_links(description: str) -> str:
-    """Add hyperlinks to MATLAB's online documentation for built-ins."""
-    # We want to find all bold parts
-    values = re.findall(STRONG_RE, description)
-
-    # These could be functions themselves, other MATL statements, or
-    # complex function call examples:
-    # mat2cell(x, ones(size(x,1),1), size(x,2),...,size(x,ndims(x)))
-
-    def add_link(name: str) -> str:
-        """Retrieve function documentation hyperlinks."""
-        link = DocumentationLink.query.filter_by(name=name).first()
-
-        if link:
-            return '<a class="matdoc" href="%s" target="_blank">%s</a>' % (
-                link.link,
-                name,
-            )
-
-        return name
-
-    for value in values:
-        # Don't worry about anything that's enclosed in single-quotes '' as
-        # these are typically flags that are passed to a given function or
-        # pre-defined literal strings
-        if not (value.startswith("<strong>'") or value.endswith("'</strong>")):
-            # Replace all valid function names with links
-            tmp = re.sub("[A-Za-z0-9]+", lambda x: add_link(x.group()), value)
-
-            # Replace the original string with the link version
-            description = description.replace(value, tmp)
-
-    return description
 
 
 def help_file(version: str) -> pathlib.Path:
