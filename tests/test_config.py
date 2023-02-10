@@ -3,7 +3,12 @@
 import os
 
 from matl_online.app import create_app
-from matl_online.settings import DevConfig, ProdConfig, get_config
+from matl_online.settings import (
+    DevConfig,
+    ProdConfig,
+    _get_cors_allowed_origins,
+    get_config,
+)
 
 
 def test_production_config() -> None:
@@ -34,3 +39,29 @@ def test_dev_config_lookup() -> None:
     os.environ["MATL_ONLINE_ENV"] = "dev"
 
     assert get_config() == DevConfig
+
+
+class TestGetCORSAllowedOrigins:
+    def test_not_provided(self) -> None:
+        # Unset the environment variable
+        os.unsetenv("CORS_ALLOWED_ORIGINS")
+
+        assert _get_cors_allowed_origins() == []
+
+    def test_empty_string(self) -> None:
+        # Set the CORS allowed origins to an empty string
+        os.environ["CORS_ALLOWED_ORIGINS"] = ""
+
+        assert _get_cors_allowed_origins() == []
+
+    def test_single_value(self) -> None:
+        # Set the CORS allowed origin to a single origin
+        os.environ["CORS_ALLOWED_ORIGINS"] = "matl.io"
+
+        assert _get_cors_allowed_origins() == ["matl.io"]
+
+    def test_multiple_values(self) -> None:
+        # Set the CORS allowed origin to multiple origins
+        os.environ["CORS_ALLOWED_ORIGINS"] = "matl.io;localhost:5000"
+
+        assert _get_cors_allowed_origins() == ["matl.io", "localhost:5000"]

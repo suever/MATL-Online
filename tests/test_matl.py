@@ -17,6 +17,7 @@ from pytest_mock.plugin import MockerFixture
 
 from matl_online import matl
 from matl_online.public.models import Release
+from matl_online.types import MATLRunTaskParameters
 
 from .factories import DocumentationLinkFactory as DocLink
 
@@ -523,22 +524,20 @@ class TestMATLInterface:
     ) -> None:
         """If no inputs are provided, MATL shouldn't receive any."""
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
-        folder_name = "folder"
-        get_matl_folder.return_value = pathlib.Path(folder_name)
+        matl_folder = pathlib.Path("matl_folder")
+        get_matl_folder.return_value = pathlib.Path(matl_folder)
 
-        matl.matl(octave_mock, "-ro", folder=tmp_path)
+        matl.matl(
+            octave_mock,
+            MATLRunTaskParameters(code="", version=""),
+            directory=tmp_path,
+        )
 
-        # Make sure we only had eval calls (faster)
-        assert len(octave_mock.method_calls) == 0
+        # Ensure we use the temporary folder
+        assert octave_mock.current_directory.called_once_with(tmp_path)
 
-        # Make sure we move to the temp directory at the beginning
-        assert octave_mock.evals[0].startswith("cd(")
-
-        # Ensure the MATL code gets added to the path
-        assert octave_mock.evals[1] == "addpath('%s')" % folder_name
-
-        # Make sure we clean up at the end
-        assert octave_mock.evals[-1].startswith("cd(")
+        # Ensure we added the MATL code directory to the path
+        assert octave_mock.paths.called_once_with(matl_folder)
 
     def test_single_input(
         self,
@@ -551,13 +550,15 @@ class TestMATLInterface:
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         get_matl_folder.return_value = pathlib.Path("")
 
-        matl.matl(octave_mock, "-ro", folder=tmp_path, code="D", inputs="12")
+        matl.matl(
+            octave_mock,
+            MATLRunTaskParameters(code="D", inputs="12", version=""),
+            directory=tmp_path,
+        )
 
-        # Find the call to matl_runner
-        call = [x for x in octave_mock.evals if x.startswith("matl_runner")]
-
-        assert len(call) == 1
-        assert call[0].rstrip() == "matl_runner('-ro', {'D'}, '12');"
+        octave_mock.run.assert_called_once_with(
+            "matl_runner", '"-or"', '{"D"}', '"12"', line_handler=None
+        )
 
     def test_multiple_inputs(
         self,
@@ -570,13 +571,15 @@ class TestMATLInterface:
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         get_matl_folder.return_value = pathlib.Path("")
 
-        matl.matl(octave_mock, "-ro", folder=tmp_path, code="D", inputs="12\n13")
+        matl.matl(
+            octave_mock,
+            MATLRunTaskParameters(code="D", inputs="12\n13", version=""),
+            directory=tmp_path,
+        )
 
-        # Find the call to matl_runner
-        call = [x for x in octave_mock.evals if x.startswith("matl_runner")]
-
-        assert len(call) == 1
-        assert call[0].rstrip() == "matl_runner('-ro', {'D'}, '12','13');"
+        octave_mock.run.assert_called_once_with(
+            "matl_runner", '"-or"', '{"D"}', '"12"', '"13"', line_handler=None
+        )
 
     def test_string_escape(
         self,
@@ -589,10 +592,12 @@ class TestMATLInterface:
         get_matl_folder = mocker.patch("matl_online.matl.get_matl_folder")
         get_matl_folder.return_value = pathlib.Path("")
 
-        matl.matl(octave_mock, "-ro", folder=tmp_path, code="'abc'")
+        matl.matl(
+            octave_mock,
+            MATLRunTaskParameters(code="'abc'", version=""),
+            directory=tmp_path,
+        )
 
-        # Find the call to matl_runner
-        call = [x for x in octave_mock.evals if x.startswith("matl_runner")]
-
-        assert len(call) == 1
-        assert call[0].rstrip() == "matl_runner('-ro', {'''abc'''});"
+        octave_mock.run.assert_called_once_with(
+            "matl_runner", '"-or"', "{\"'abc'\"}", line_handler=None
+        )

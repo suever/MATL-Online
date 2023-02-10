@@ -1,7 +1,9 @@
 """Module for creating an octave instance."""
+import logging
 import os
 import pathlib
-from typing import Any, Callable, Dict, List, Optional, Union
+from contextlib import contextmanager
+from typing import Any, Callable, Dict, Generator, List, Optional
 
 from octave_kernel.kernel import OctaveEngine  # type: ignore
 
@@ -12,21 +14,35 @@ from matl_online.settings import Config
 os.environ["OCTAVE_CLI_OPTIONS"] = Config.OCTAVE_CLI_OPTIONS
 os.environ["OCTAVE_EXECUTABLE"] = Config.OCTAVE_EXECUTABLE
 
+OutputCallback = Callable[[str], None]
 
-# Initialize an octave session with the desired executable
+
+def string(value: str) -> str:
+    # Takes the input and ensure it is wrapped in double quotes and then any double quotes in it are escaped
+    value = value.replace('"', '\\"')
+    return f'"{value}"'
+
+
 class OctaveSession:
     """Class for communicating with Octave."""
 
     _engine: Optional[OctaveEngine]
+    default_paths: List[pathlib.Path]
+    octaverc: Optional[pathlib.Path]
+    logger: logging.Logger
 
     def __init__(
         self,
-        octaverc: Optional[Union[str, pathlib.Path]] = None,
-        paths: Optional[List[str]] = None,
+        logger: Optional[logging.Logger] = None,
+        octaverc: Optional[pathlib.Path] = None,
+        default_paths: Optional[List[pathlib.Path]] = None,
     ) -> None:
         """Build the Octave interface with the specified config and PATH."""
         self.octaverc = octaverc
-        self.paths = paths if paths else []
+        self.default_paths = default_paths if default_paths else []
+
+        self.logger = logger or logging.Logger(__name__)
+
         self.launch()
 
     def launch(self) -> None:
@@ -34,32 +50,80 @@ class OctaveSession:
         self._engine = OctaveEngine()
 
         if self.octaverc:
-            self.eval('source("' "%s" '")' % self.octaverc)
+            self.run("source", string(self.octaverc.as_posix()))
 
-        for path in self.paths:
-            self.eval('addpath("' "%s" '")' % path)
+        self.add_paths(*self.default_paths)
+
+    def add_paths(self, *paths: pathlib.Path) -> str:
+        path_strings = [string(path.as_posix()) for path in paths]
+
+        if len(paths) == 0:
+            return ""
+
+        return self.run("addpath", *path_strings)
+
+    def remove_paths(self, *paths: pathlib.Path) -> str:
+        path_strings = [string(path.as_posix()) for path in paths]
+
+        if len(paths) == 0:
+            return ""
+
+        return self.run("rmpath", *path_strings)
+
+    @contextmanager
+    def paths(self, *paths: pathlib.Path) -> Generator[None, None, None]:
+        self.add_paths(*paths)
+
+        yield
+
+        self.remove_paths(*paths)
+
+    @contextmanager
+    def current_directory(self, directory: pathlib.Path) -> Generator[None, None, None]:
+        """Allow the caller to execute"""
+        # Get the original directory
+        original_directory = self.pwd()
+
+        self.cd(directory)
+
+        yield
+
+        self.cd(original_directory)
+
+    def pwd(self) -> pathlib.Path:
+        return pathlib.Path(self.run("disp", "pwd").rstrip()).absolute()
+
+    def cd(self, path: pathlib.Path) -> None:
+        self.run("cd", string(path.as_posix()))
+
+    def run(
+        self,
+        command: str,
+        *args: str,
+        line_handler: Optional[OutputCallback] = None,
+    ) -> str:
+        command_string = f"{command}({','.join(args)});\n"
+        self.logger.info(command_string)
+        return self.eval(command_string, line_handler=line_handler)
 
     def eval(
         self,
         code: str,
-        line_handler: Optional[Callable[[str], None]] = None,
+        line_handler: Optional[OutputCallback] = None,
         **kwargs: Dict[str, Any],
-    ) -> Any:
+    ) -> str:
         """Evaluate some code in Octave."""
 
-        if self._engine is None:
-            raise Exception("Engine not defined")
+        assert self._engine, "Engine is not defined"
 
-        if line_handler:
-            self._engine.line_handler = line_handler
+        self._engine.line_handler = line_handler
 
-        return self._engine.eval(code, **kwargs)
+        output: str = self._engine.eval(code, **kwargs)
+        return output
 
     def restart(self) -> None:
         """Terminate and re-launch the Octave instance."""
-        if self._engine:
-            self.terminate()
-
+        self.terminate()
         self.launch()
 
     def terminate_repl(self) -> None:

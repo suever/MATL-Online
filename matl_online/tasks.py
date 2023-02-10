@@ -2,10 +2,9 @@
 from __future__ import annotations
 
 import logging
-import os
 import pathlib
-import shutil
 import tempfile
+from functools import cached_property
 from logging import LogRecord, StreamHandler
 from typing import Any, Dict, List, Optional
 
@@ -18,6 +17,7 @@ from matl_online.extensions import celery
 from matl_online.matl import matl, parse_matl_results
 from matl_online.octave import OctaveSession
 from matl_online.settings import config
+from matl_online.types import MATLTaskParameters
 
 octave = None
 
@@ -80,13 +80,16 @@ class OutputHandler(StreamHandler):  # type: ignore
             # flush prior to display)
             self.send()
             return
-        elif message == "[CLC]":
+
+        if message == "[CLC]":
             self.send()
             self.clear()
             return
-        elif message.startswith("warning:"):
+
+        if message.startswith("warning:"):
             return
-        elif message.startswith("MATL run-time error:"):
+
+        if message.startswith("MATL run-time error:"):
             for item in message.split("\n"):
                 self.contents.append("[STDERR]" + item)
 
@@ -95,49 +98,24 @@ class OutputHandler(StreamHandler):  # type: ignore
         self.contents.append(message)
 
 
-class OctaveTask(Task[[str, str, str, str, Optional[str]], None]):
+class OctaveTask(Task[[MATLTaskParameters], None]):
     """Custom Task type for interacting with octave."""
 
     abstract: bool = True
-    _octave: Optional[OctaveSession] = None
-    _tempfolder: Optional[pathlib.Path] = None
     session_id: Optional[str] = None
-    _handler: Optional[OutputHandler] = None
+
+    throws = (SoftTimeLimitExceeded,)
 
     @property
     def octave(self) -> Optional[OctaveSession]:
         """Dependent property which automatically spawns octave if needed."""
-        if self._octave is None:
-            global octave
-            self._octave = octave
+        global octave
+        return octave
 
-        return self._octave
-
-    @property
+    @cached_property
     def handler(self) -> OutputHandler:
         """Dependent property that creates an OutputHandler instance."""
-        if self._handler is None:
-            self._handler = OutputHandler(self)
-
-        return self._handler
-
-    @property
-    def folder(self) -> pathlib.Path:
-        """Dependent property that creates a session-specific folder if needed."""
-        if self._tempfolder is None:
-            # Generate the temporary folder
-            if self.session_id:
-                self._tempfolder = pathlib.Path(tempfile.gettempdir()).joinpath(
-                    self.session_id
-                )
-            else:
-                self._tempfolder = pathlib.Path(tempfile.mkdtemp())
-
-        # Make directory if it doesn't exist
-        if not self._tempfolder.is_dir():
-            self._tempfolder.mkdir()
-
-        return self._tempfolder
+        return OutputHandler(self)
 
     def emit(self, *args: Any, **kwargs: Any) -> None:
         """Send an event to any listening clients."""
@@ -148,8 +126,6 @@ class OctaveTask(Task[[str, str, str, str, Optional[str]], None]):
         # Restart octave, so we're ready to go with future calls
         if self.octave:
             self.octave.restart()
-
-        _initialize_process()
 
     def on_success(self, *args: Any, **kwargs: Any) -> None:
         """Send a completion messages upon successful completion."""
@@ -170,13 +146,6 @@ class OctaveTask(Task[[str, str, str, str, Optional[str]], None]):
         """Local forwarder for all send events."""
         return self.handler.send()
 
-    def after_return(self, *args: Any, **kwargs: Any) -> None:
-        """Fire after task completion."""
-        self.handler.clear()
-
-        if os.path.isdir(self.folder):
-            shutil.rmtree(self.folder)
-
     def on_failure(self, *args: Any, **kwargs: Any) -> None:
         """Send a message if the task failed for any reason."""
         self.send_results()
@@ -186,54 +155,36 @@ class OctaveTask(Task[[str, str, str, str, Optional[str]], None]):
 @celery.task(base=OctaveTask, bind=True)
 def matl_task(
     task: OctaveTask,
-    flags: str,
-    code: str,
-    inputs: str,
-    version: str,
-    session: str = "",
+    params: MATLTaskParameters,
 ) -> Dict[str, Any]:
     """Celery task for processing a MATL command and returning the result."""
-    task.session_id = session
+    task.session_id = params.session_id
     task.handler.clear()
 
-    is_test = config.ENV == "test"
+    assert task.octave, "Octave is not configured properly"
 
-    if task.octave is None:
-        raise Exception("Octave is not configured")
+    with tempfile.TemporaryDirectory() as folder:
+        try:
+            matl(
+                task.octave,
+                params,
+                directory=pathlib.Path(folder),
+                line_handler=task.handler.process_message,
+            )
 
-    try:
-        matl(
-            task.octave,
-            flags,
-            folder=task.folder,
-            code=code,
-            inputs=inputs,
-            version=version,
-            line_handler=task.handler.process_message,
-        )
+            result = task.send_results()
 
-        result = task.send_results()
-
-    # In the case of an interrupt (either through a time limit or a
-    # revoke() event, we will still clean things up
-    except (KeyboardInterrupt, SystemExit):
-        task.handler.process_message("[STDERR]Job cancelled")
-        task.on_kill()
-        raise
-    except SoftTimeLimitExceeded:
-        # Propagate the term event up the chain to actually kill the worker
-        task.handler.process_message("[STDERR]Operation timed out")
-        task.on_term()
-
-        if is_test:
-            task.on_failure()
-            task.after_return()
-
-        raise
-
-    if is_test:
-        task.on_success()
-        task.after_return()
+        # In the case of an interrupt (either through a time limit or a
+        # revoke() event, we will still clean things up
+        except (KeyboardInterrupt, SystemExit):
+            task.handler.process_message("[STDERR]Job cancelled")
+            task.on_kill()
+            raise
+        except SoftTimeLimitExceeded:
+            # Propagate the term event up the chain to actually kill the worker
+            task.handler.process_message("[STDERR]Operation timed out")
+            task.on_term()
+            raise
 
     return result
 
@@ -244,9 +195,17 @@ def _initialize_process(**kwargs: Any) -> None:
     Function to be called when a worker process is spawned. We use this to
     opportunity to actually launch octave and execute a quick MATL program
     """
+
+    # Create a global reference to octave that is unique to this worker process
     global octave
 
-    octave = OctaveSession(octaverc=config.OCTAVERC, paths=[config.MATL_WRAP_DIR])
+    octave = OctaveSession(
+        octaverc=config.OCTAVERC,
+        default_paths=[
+            config.MATL_WRAP_DIR,
+        ],
+        logger=logging.Logger(__name__),
+    )
 
 
 # When a worker process is spawned, initialize octave

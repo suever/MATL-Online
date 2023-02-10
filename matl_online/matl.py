@@ -1,11 +1,12 @@
 """Module for interacting with MATL, and it's source code."""
 import html
 import json
+import logging
 import pathlib
 import re
 import shutil
 from io import BytesIO
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import requests
 from dateutil import parser as date_parser
@@ -13,8 +14,10 @@ from flask import current_app
 from scipy.io import loadmat  # type: ignore
 from werkzeug.utils import secure_filename
 
-from matl_online.octave import OctaveSession
+from matl_online.octave import OctaveSession, OutputCallback
+from matl_online.octave import string as octave_string
 from matl_online.public.models import DocumentationLink, Release
+from matl_online.types import MATLTaskParameters
 from matl_online.utils import base64_encode_file, unzip
 
 # Regular expression for pulling out content between <strong></strong> tags
@@ -23,6 +26,7 @@ STRONG_RE = re.compile(r"<strong>.*?</strong>")
 
 def install_matl(version: str, folder: pathlib.Path) -> None:
     """Download a specific version of MATL source code."""
+    logging.info(f"Downloading MATL version {version}...")
     repo = current_app.config["MATL_REPO"]
     url = "/".join(["https://github.com", repo, "zipball", secure_filename(version)])
     response = requests.get(url, stream=True)
@@ -71,8 +75,8 @@ def add_doc_links(description: str) -> str:
 def help_file(version: str) -> pathlib.Path:
     """Grab the help data for the specified version."""
     folder = get_matl_folder(version)
-    if folder is None:
-        raise Exception("MATL folder not found")
+
+    assert folder, "MATL folder does not exist"
 
     outfile = folder.joinpath("help.json")
 
@@ -210,48 +214,32 @@ def parse_matl_results(output: str) -> List[Dict[str, str]]:
 
 def matl(
     octave: OctaveSession,
-    flags: str,
-    folder: pathlib.Path,
-    code: str = "",
-    inputs: str = "",
-    version: str = "",
-    line_handler: Optional[Callable[[str], None]] = None,
+    matl_params: MATLTaskParameters,
+    directory: pathlib.Path,
+    line_handler: Optional[OutputCallback] = None,
 ) -> None:
     """Open a session with Octave and manages input/output as well as errors."""
 
-    # Remember what directory octave is current in
-    def escape(x: str) -> str:
-        return x.replace("'", "''")
+    # Add the folder for the appropriate MATL version
+    matl_folder = get_matl_folder(matl_params.version)
+
+    # Ensure the matl folder exists
+    assert matl_folder, "MATL folder does not exist"
 
     # Change directories to the temporary folder so that all temporary
     # files are placed in here and won't interfere with other requests
-    octave.eval("cd('%s');" % escape(folder.as_posix()))
+    with octave.current_directory(directory):
+        with octave.paths(matl_folder):
+            # Convert the code to a cell array element-per-line
+            code = f"{{{','.join([octave_string(x) for x in matl_params.code_lines])}}}"
 
-    # Add the folder for the appropriate MATL version
-    matl_folder = get_matl_folder(version)
-
-    # Ensure the matl folder exists
-    if matl_folder is None:
-        raise Exception("MATL folder does not exist")
-
-    cmd = "addpath('%s')" % escape(matl_folder.as_posix())
-    octave.eval(cmd)
-
-    code_lines = ["'%s'" % escape(item) for item in code.split("\n")]
-    code = "{" + ",".join(code_lines) + "}"
-
-    if len(inputs):
-        discrete_inputs = ["'%s'" % escape(item) for item in inputs.split("\n")]
-        cmd = "matl_runner('%s', %s, %s);\n" % (flags, code, ",".join(discrete_inputs))
-    else:
-        cmd = "matl_runner('%s', %s);\n" % (flags, code)
-
-    # Actually run the MATL code
-    octave.eval(cmd, line_handler=line_handler)
-
-    # Change back to the original directory
-    cmd = "cd('%s')" % escape(current_app.config["PROJECT_ROOT"])
-    octave.eval(cmd)
+            octave.run(
+                "matl_runner",
+                octave_string(matl_params.flags),
+                code,
+                *[octave_string(x) for x in matl_params.input_lines],
+                line_handler=line_handler,
+            )
 
 
 def refresh_releases() -> None:

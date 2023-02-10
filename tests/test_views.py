@@ -239,7 +239,7 @@ class TestExplain:
         resp = testapp.get(url_for("public.explain"))
 
         assert resp.status_code == 200
-        assert task.call_args[1].get("version") == releases[-1].tag
+        assert task.call_args[0][0].version == releases[-1].tag
 
 
 def test_fetch_help(
