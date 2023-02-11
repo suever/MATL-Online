@@ -21,9 +21,6 @@ class Config(object):
 
     ENV: str = "NONE"
 
-    # Custom timeout for celery process initialization
-    CELERY_PROCESS_INIT_TIMEOUT = 10
-
     IMGUR_CLIENT_ID = os.environ.get("MATL_ONLINE_IMGUR_CLIENT_ID")
 
     SECRET_KEY = str(uuid.uuid4())
@@ -125,6 +122,8 @@ def get_celery_configuration(configuration: FlaskConfig) -> Dict[str, Any]:
         ),
         "task_soft_time_limit": 30,
         "task_time_limit": 60,
+        # Custom timeout for celery process initialization
+        "worker_proc_alive_timeout": 30,
         # Ensure that celery tasks are executed locally when in a test environment
         "task_always_eager": configuration.get("ENV") == "test",
         # Use pickling for serialization to allow first-class objects rather than dicts.
