@@ -18,9 +18,10 @@ spec:
     spec:
       containers:
         - name: web
-          image: "mher/flower:1.2"
+          image: "suever/matl-online:{{ .Values.CommitHash }}"
           command:
             - celery
+            - --app=worker.celery
             - flower
             - --auth-provider=flower.views.auth.GithubLoginHandler
           ports:
@@ -30,6 +31,10 @@ spec:
               value: "admin"
             - name: FLOWER_PORT
               value: "5555"
+            - name: FLOWER_DB
+              value: "/data/flower"
+            - name: FLOWER_PERSISTENT
+              value: "True"
             - name: FLOWER_AUTH
               valueFrom:
                 secretKeyRef:
@@ -57,6 +62,11 @@ spec:
                 secretKeyRef:
                   key: REDIS_URL
                   name: secrets
+            - name: MATL_ONLINE_ENV
+              value: prod
+          volumeMounts:
+            - name: data
+              mountPath: "/data"
           securityContext:
             runAsNonRoot: true
             runAsUser: 8877
@@ -73,3 +83,9 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
+      securityContext:
+        fsGroup: 8877
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: flower-pvc
