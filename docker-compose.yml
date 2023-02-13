@@ -42,10 +42,14 @@ services:
       - redis
 
   flower:
-    image: mher/flower
+    build:
+      context: .
+      dockerfile: ops/Dockerfile
     environment:
       CELERY_BROKER_URL: redis://redis:6379
       CELERY_RESULT_BACKEND: redis://redis:6379
+      MATL_ONLINE_ENV: prod
+    command: celery --app worker.celery flower
     ports:
       - "5555:5555"
     depends_on:
