@@ -1,6 +1,6 @@
 # MATL Online
 
-[![Build Status](https://circleci.com/gh/suever/MATL-Online.svg?style=svg)](https://circleci.com/gh/suever/MATL-Online)
+[![tests](https://github.com/suever/MATL-Online/actions/workflows/tests.yml/badge.svg)](https://github.com/suever/MATL-Online/actions/workflows/tests.yml)
 [![Coverage Status](https://coveralls.io/repos/github/suever/MATL-Online/badge.svg?branch=main)](https://coveralls.io/github/suever/MATL-Online?branch=main)
 [![Code Climate](https://codeclimate.com/github/suever/MATL-Online/badges/gpa.svg)](https://codeclimate.com/github/suever/MATL-Online)
 
