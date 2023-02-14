@@ -10,10 +10,10 @@ from typing import Any, Dict, List, Optional
 
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
-from celery.signals import worker_process_init
+from celery.signals import task_failure, worker_process_init
 from flask_socketio import SocketIO  # type: ignore
 
-from matl_online.extensions import celery
+from matl_online.extensions import celery, rollbar
 from matl_online.matl.core import matl
 from matl_online.matl.io import parse_matl_results
 from matl_online.octave import OctaveSession
@@ -186,6 +186,10 @@ def matl_task(
             task.handler.process_message("[STDERR]Operation timed out")
             task.on_term()
             raise
+        except Exception:
+            task.handler.process_message("[STDERR]Unknown error")
+            task.on_term()
+            raise
 
     return result
 
@@ -207,6 +211,11 @@ def _initialize_process(**kwargs: Any) -> None:
         ],
         logger=logging.Logger(__name__),
     )
+
+
+@task_failure.connect
+def handle_task_failure(**kwargs: Any) -> None:
+    rollbar.report_exc_info(extra_data=kwargs)
 
 
 # When a worker process is spawned, initialize octave

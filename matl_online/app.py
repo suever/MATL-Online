@@ -1,14 +1,13 @@
 """The app module, containing the app factory function."""
 from typing import Optional, Type
 
-import rollbar  # type: ignore[import]
 from flask import Flask, got_request_exception
 from rollbar.contrib.flask import report_exception  # type: ignore[import]
 
 from matl_online import public
 from matl_online.assets import assets
 from matl_online.commands import register_commands
-from matl_online.extensions import celery, csrf, db, migrate, socketio
+from matl_online.extensions import celery, csrf, db, migrate, rollbar, socketio
 from matl_online.settings import Config, get_celery_configuration, get_config
 
 
