@@ -81,6 +81,44 @@ class TestMATLTask:
         received = socketio_client.get_received()
         assert received[-1]["args"][0] == {"message": "", "success": True}
 
+    def test_exception(
+        self,
+        mocker: MockerFixture,
+        octave_mock: Mock,
+        socketio_client: SocketIOTestClient,
+    ) -> None:
+        """Ensure proper handling of keyboard interrupt events."""
+        socketio_client.get_received()
+
+        mocker.patch(
+            "matl_online.tasks.socket",
+            new_callable=_get_socketio_for_client(socketio_client),
+        )
+
+        ev = mocker.patch("matl_online.tasks.matl_task.octave.run")
+        ev.side_effect = Exception("Test")
+
+        matl_task.apply(
+            args=(
+                MATLRunTaskParameters(
+                    code="1D",
+                    version="20.0.0",
+                    session_id=session_id_for_client(socketio_client),
+                ),
+            ),
+        )
+
+        received = socketio_client.get_received()
+
+        payload = received[0]["args"][0]
+
+        assert payload.get("session") == session_id_for_client(socketio_client)
+        assert payload["data"][0]["type"] == "stderr"
+        assert payload["data"][0]["value"] == "Unknown error"
+
+        # Ultimately we alert the user that it failed
+        assert received[-1]["args"][0] == {"success": False}
+
     def test_keyboard_interrupt(
         self,
         mocker: MockerFixture,
