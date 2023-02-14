@@ -2,19 +2,21 @@ name: tests
 on: push
 
 jobs:
-  # integration:
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - uses: actions/checkout@v3
-  #    - name: run tests
-  #      run: make integration-tests
-  unit:
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: run tests
+        run: make integration-tests
+
+  unit-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version:
           - "3.8"
           - "3.9"
+          - "3.10"
 
     steps:
       - uses: actions/checkout@v3
@@ -46,3 +48,9 @@ jobs:
         run: |
           export PATH="$(yarn bin):$PATH"
           make test
+
+      - name: Report Coverage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          coveralls --service=github
