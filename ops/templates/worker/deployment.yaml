@@ -50,6 +50,11 @@ spec:
                 secretKeyRef:
                   key: REDIS_URL
                   name: secrets
+            - name: MATL_ONLINE_ROLLBAR_SERVER_SIDE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: MATL_ONLINE_ROLLBAR_SERVER_SIDE_TOKEN
+                  name: secrets
             - name: MATL_ONLINE_ENV
               value: prod
           securityContext:
