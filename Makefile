@@ -26,7 +26,7 @@ test:
 		tests
 
 integration-tests:
-	docker-compose \
+	docker compose \
 		-f docker-compose.yml \
 		-f docker-compose.test.yml \
 		run tests

@@ -4,10 +4,12 @@ services:
     build:
       context: .
       dockerfile: ops/Dockerfile
+      cache_from:
+        - type=local,src=/tmp/.buildx-cache-new,mode=max
     command: |
-      bash -c "flask db upgrade \
-        && flask refresh_releases \
-        && gunicorn --worker-class eventlet --bind 0.0.0.0:5000 --workers 1 wsgi:app"
+      bash -c "flask db upgrade
+      flask refresh_releases
+      gunicorn --worker-class eventlet --bind 0.0.0.0:5000 --workers 1 wsgi:app"
     ports:
       - "5000:5000"
     environment:
@@ -31,6 +33,8 @@ services:
     build:
       context: .
       dockerfile: ops/Dockerfile
+      cache_from:
+        - type=local,src=/tmp/.buildx-cache-new,mode=max
     command: celery --app worker.celery worker --purge --autoscale=4,2 -Ofair --loglevel INFO
     environment:
       CELERY_BROKER_URL: redis://redis:6379
@@ -45,6 +49,8 @@ services:
     build:
       context: .
       dockerfile: ops/Dockerfile
+      cache_from:
+        - type=local,src=/tmp/.buildx-cache-new,mode=max
     environment:
       CELERY_BROKER_URL: redis://redis:6379
       CELERY_RESULT_BACKEND: redis://redis:6379
