@@ -1,5 +1,6 @@
 """Unit tests for basic celery task functionality."""
 
+import pathlib
 from typing import Callable
 from unittest.mock import Mock
 
@@ -56,6 +57,7 @@ class TestMATLTask:
         mocker: MockerFixture,
         octave_mock: Mock,
         socketio_client: SocketIOTestClient,
+        tmp_path: pathlib.Path,
     ) -> None:
         """Test that messages are received as expected in normal case."""
         # Clear out the socket client's messages so far
@@ -68,6 +70,7 @@ class TestMATLTask:
             new_callable=_get_socketio_for_client(socketio_client),
         )
 
+        mocker.patch("matl_online.matl.core.get_matl_folder", return_value=tmp_path)
         matl_task.apply(
             args=(
                 MATLRunTaskParameters(
@@ -86,6 +89,7 @@ class TestMATLTask:
         mocker: MockerFixture,
         octave_mock: Mock,
         socketio_client: SocketIOTestClient,
+        tmp_path: pathlib.Path,
     ) -> None:
         """Ensure proper handling of keyboard interrupt events."""
         socketio_client.get_received()
@@ -94,6 +98,8 @@ class TestMATLTask:
             "matl_online.tasks.socket",
             new_callable=_get_socketio_for_client(socketio_client),
         )
+
+        mocker.patch("matl_online.matl.core.get_matl_folder", return_value=tmp_path)
 
         ev = mocker.patch("matl_online.tasks.matl_task.octave.run")
         ev.side_effect = Exception("Test")
@@ -124,6 +130,7 @@ class TestMATLTask:
         mocker: MockerFixture,
         octave_mock: Mock,
         socketio_client: SocketIOTestClient,
+        tmp_path: pathlib.Path,
     ) -> None:
         """Ensure proper handling of keyboard interrupt events."""
         socketio_client.get_received()
@@ -132,6 +139,8 @@ class TestMATLTask:
             "matl_online.tasks.socket",
             new_callable=_get_socketio_for_client(socketio_client),
         )
+
+        mocker.patch("matl_online.matl.core.get_matl_folder", return_value=tmp_path)
 
         ev = mocker.patch("matl_online.tasks.matl_task.octave.run")
         ev.side_effect = KeyboardInterrupt
@@ -163,6 +172,7 @@ class TestMATLTask:
         mocker: MockerFixture,
         octave_mock: Mock,
         socketio_client: SocketIOTestClient,
+        tmp_path: pathlib.Path,
     ) -> None:
         """Ensure tasks exceeding the time limit are dealt with properly."""
         socketio_client.get_received()
@@ -174,6 +184,8 @@ class TestMATLTask:
 
         ev = mocker.patch("matl_online.tasks.matl_task.octave.run")
         ev.side_effect = SoftTimeLimitExceeded
+
+        mocker.patch("matl_online.matl.core.get_matl_folder", return_value=tmp_path)
 
         matl_task.apply(
             args=(
