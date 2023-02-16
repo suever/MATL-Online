@@ -25,7 +25,7 @@ pep8-naming==0.13.3
 mypy==1.0.0
 celery-types==0.14.0
 types-flask==1.1.6
-types-requests==2.28.11.12
+types-requests==2.28.11.13
 types-flask-migrate==4.0.0.1
 types-flask-sqlalchemy==2.5.9.1
 types-sqlalchemy==1.4.53.28
