@@ -65,6 +65,18 @@ spec:
           securityContext:
             runAsNonRoot: true
             runAsUser: 8877
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - test -e /tmp/worker_ready
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - test -e /tmp/worker_heartbeat
           resources:
             requests:
               cpu: 50m
