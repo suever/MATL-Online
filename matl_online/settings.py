@@ -61,6 +61,13 @@ class Config(object):
     # CORS Configuration for Flask SocketIO
     CORS_ALLOWED_ORIGINS: List[str] = _get_cors_allowed_origins()
 
+    CELERY_WORKER_HEARTBEAT_FILE = os.environ.get(
+        "CELERY_WORKER_HEARTBEAT_FILE", "/tmp/worker_heartbeat"
+    )
+    CELERY_WORKER_READINESS_FILE = os.environ.get(
+        "CELERY_WORKER_READINESS_FILE", "/tmp/worker_ready"
+    )
+
 
 class ProdConfig(Config):
     """Production configuration."""
