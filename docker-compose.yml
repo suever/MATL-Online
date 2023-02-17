@@ -3,7 +3,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ops/Dockerfile
+      dockerfile: Dockerfile
       cache_from:
         - type=local,src=/tmp/.buildx-cache-new,mode=max
     command: |
@@ -32,7 +32,7 @@ services:
   worker:
     build:
       context: .
-      dockerfile: ops/Dockerfile
+      dockerfile: Dockerfile
       cache_from:
         - type=local,src=/tmp/.buildx-cache-new,mode=max
     command: celery --app worker.celery worker --purge --autoscale=4,2 -Ofair --loglevel INFO
@@ -48,7 +48,7 @@ services:
   flower:
     build:
       context: .
-      dockerfile: ops/Dockerfile
+      dockerfile: Dockerfile
       cache_from:
         - type=local,src=/tmp/.buildx-cache-new,mode=max
     environment:

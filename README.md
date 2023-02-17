@@ -38,8 +38,7 @@ instance, and postgres database. Prior to running `docker-compose`, be sure to
 build the local docker image:
 
 ```bash
-make docker
-docker-compose up
+docker-compose up --build
 ```
 
 You will then be able to access the application at http://localhost:5000.
