@@ -92,8 +92,9 @@ spec:
             runAsNonRoot: true
             runAsUser: 8877
           readinessProbe:
-            tcpSocket:
+            httpGet:
               port: 5000
+              path: /
           livenessProbe:
             tcpSocket:
               port: 5000
