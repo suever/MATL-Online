@@ -38,7 +38,6 @@ psycopg2-binary==2.9.5
 
 # App management
 Flask-Migrate==4.0.4
-honcho==1.1.0
 
 # Forms
 flask_wtf==1.1.1
