@@ -2,29 +2,32 @@
 
 import os
 
-from matl_online.app import create_app
+from matl_online import app
 from matl_online.settings import (
     DevConfig,
     ProdConfig,
     _get_cors_allowed_origins,
     get_config,
 )
+from prometheus_flask_exporter import PrometheusMetrics  # type: ignore[import]
 
 
-def test_production_config() -> None:
+def test_production_config(metrics: PrometheusMetrics) -> None:
     """Production config."""
-    app = create_app(ProdConfig)
-    assert app.config["ENV"] == "prod"
-    assert app.config["DEBUG"] is False
-    assert app.config["ASSETS_DEBUG"] is False
+    app.metrics = metrics
+    flask_app = app.create_app(ProdConfig)
+    assert flask_app.config["ENV"] == "prod"
+    assert flask_app.config["DEBUG"] is False
+    assert flask_app.config["ASSETS_DEBUG"] is False
 
 
-def test_dev_config() -> None:
+def test_dev_config(metrics: PrometheusMetrics) -> None:
     """Development config."""
-    app = create_app(DevConfig)
-    assert app.config["ENV"] == "dev"
-    assert app.config["DEBUG"] is True
-    assert app.config["ASSETS_DEBUG"] is True
+    app.metrics = metrics
+    flask_app = app.create_app(DevConfig)
+    assert flask_app.config["ENV"] == "dev"
+    assert flask_app.config["DEBUG"] is True
+    assert flask_app.config["ASSETS_DEBUG"] is True
 
 
 def test_prod_config_lookup() -> None:
