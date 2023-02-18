@@ -7,7 +7,7 @@ from rollbar.contrib.flask import report_exception  # type: ignore[import]
 from matl_online import public
 from matl_online.assets import assets
 from matl_online.commands import register_commands
-from matl_online.extensions import celery, csrf, db, migrate, rollbar, socketio
+from matl_online.extensions import celery, csrf, db, migrate, rollbar, socketio, metrics
 from matl_online.settings import Config, get_celery_configuration, get_config
 
 
@@ -40,6 +40,9 @@ def register_extensions(app: Flask) -> None:
     celery.conf.update(get_celery_configuration(app.config))
     csrf.init_app(app)
 
+    metrics.init_app(app)
+    metrics.info("app_info", "Application info", version=app.config.get("APP_VERSION"))
+
 
 def register_rollbar(app: Flask) -> None:
     rollbar.init(
@@ -56,3 +59,6 @@ def register_blueprints(app: Flask) -> None:
     """Register Flask blueprints."""
     app.register_blueprint(public.views.blueprint)
     return None
+
+
+__all__ = ["metrics"]

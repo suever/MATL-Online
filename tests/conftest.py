@@ -6,15 +6,19 @@ import uuid
 from typing import Any, Generator
 from unittest.mock import Mock
 
+import prometheus_client
 import pytest
 from flask import Flask
 from flask_socketio import SocketIOTestClient  # type: ignore
 from flask_sqlalchemy import SQLAlchemy
+from prometheus_flask_exporter import PrometheusMetrics  # type: ignore[import]
 from pytest_mock.plugin import MockerFixture
 from webtest import TestApp  # type: ignore
 
 os.environ["MATL_ONLINE_ENV"] = "test"
 
+from matl_online import app as matl_online_app  # noqa: E402
+from matl_online import extensions  # noqa: E402
 from matl_online.app import create_app  # noqa: E402
 from matl_online.database import db as _db  # noqa: E402
 from matl_online.extensions import socketio  # noqa: E402
@@ -35,8 +39,16 @@ def socketio_client(app: Flask) -> SocketIOTestClient:
 
 
 @pytest.fixture(scope="function")
-def app() -> Generator[Flask, None, None]:
+def metrics() -> PrometheusMetrics:
+    registry = prometheus_client.CollectorRegistry(auto_describe=True)
+    return PrometheusMetrics.for_app_factory(registry=registry)
+
+
+@pytest.fixture(scope="function")
+def app(metrics: PrometheusMetrics) -> Generator[Flask, None, None]:
     """Flask app instance."""
+    matl_online_app.metrics = metrics
+    extensions.metrics = metrics
     app_instance = create_app(TestConfig)
     context = app_instance.test_request_context()
     context.push()  # type: ignore[attr-defined]

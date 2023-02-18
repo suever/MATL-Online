@@ -17,7 +17,7 @@ from flask_wtf.csrf import validate_csrf  # type: ignore
 from wtforms import ValidationError  # type: ignore
 
 from matl_online.errors import InvalidVersion
-from matl_online.extensions import celery, csrf, socketio
+from matl_online.extensions import celery, csrf, socketio, metrics
 from matl_online.matl.documentation import help_file
 from matl_online.matl.releases import refresh_releases
 from matl_online.public.models import Release
@@ -180,6 +180,7 @@ def share() -> Tuple[Response, int]:
 
 
 @socketio.on("connect")  # type: ignore[misc]
+@metrics.counter("socketio_connections", "SocketIO Events")  # type: ignore[misc]
 def connected() -> None:
     """Send an event to the client with the ID of their session."""
     session_id = rooms()[0]
@@ -187,6 +188,7 @@ def connected() -> None:
 
 
 @socketio.on("kill")  # type: ignore[misc]
+@metrics.counter("socketio_kill_events", "SocketIO Kill Events")  # type: ignore[misc]
 def kill_task(data: Any) -> None:
     """Triggered when a kill message is sent to kill a task."""
     taskid = session.get("taskid", None)
@@ -201,6 +203,7 @@ def kill_task(data: Any) -> None:
 
 
 @socketio.on("submit")  # type: ignore[misc]
+@metrics.counter("socketio_submit_events", "SocketIO Submit Events")  # type: ignore[misc]
 def submit_job(data: Dict[str, Any]) -> None:
     """Submit some code and inputs for interpretation."""
     # If we already have a task disable submitting

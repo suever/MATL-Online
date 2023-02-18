@@ -21,6 +21,8 @@ class Config(object):
 
     ENV: str = "NONE"
 
+    APP_VERSION = os.environ.get("APP_VERSION", "")
+
     IMGUR_CLIENT_ID = os.environ.get("MATL_ONLINE_IMGUR_CLIENT_ID")
 
     SECRET_KEY = str(uuid.uuid4())
