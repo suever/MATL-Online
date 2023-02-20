@@ -7,7 +7,7 @@ from rollbar.contrib.flask import report_exception  # type: ignore[import]
 from matl_online import public
 from matl_online.assets import assets
 from matl_online.commands import register_commands
-from matl_online.extensions import celery, csrf, db, migrate, rollbar, socketio, metrics
+from matl_online.extensions import celery, csrf, db, metrics, migrate, rollbar, socketio
 from matl_online.settings import Config, get_celery_configuration, get_config
 
 
@@ -50,6 +50,7 @@ def register_rollbar(app: Flask) -> None:
         environment=app.config.get("ROLLBAR_ENV"),
         root=app.config.get("PROJECT_ROOT"),
         allow_logging_basic_config=False,
+        code_version=app.config.get("APP_VERSION"),
     )
 
     got_request_exception.connect(report_exception, app)
@@ -61,4 +62,8 @@ def register_blueprints(app: Flask) -> None:
     return None
 
 
-__all__ = ["metrics"]
+__all__ = [
+    "celery",
+    "create_app",
+    "metrics",
+]
