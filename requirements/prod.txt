@@ -28,7 +28,7 @@ octave-kernel==0.35.1
 ipython==8.10.0
 
 # Octave packages
-sympy==1.5.1
+sympy==1.11.1
 
 # Database
 alembic==1.9.4
