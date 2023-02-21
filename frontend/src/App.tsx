@@ -39,6 +39,94 @@ import SchoolIcon from '@mui/icons-material/School'
 import HelpIcon from '@mui/icons-material/Help'
 import ContentPasteIcon from '@mui/icons-material/ContentPaste'
 import TroubleshootIcon from '@mui/icons-material/Troubleshoot'
+import SearchIcon from '@mui/icons-material/Search'
+import ClearIcon from '@mui/icons-material/Clear'
+import MUIDataTable from "mui-datatables"
+
+interface SearchBarProps {
+  value: string
+  onChange: (newValue: string) => void
+}
+
+function SearchBar(props: SearchBarProps) {
+
+  const icon = props.value.length == 0 ? <SearchIcon/> : (
+    <IconButton onClick={() => props.onChange("")}><ClearIcon/></IconButton>
+  )
+
+  return (
+    <Stack direction="column" sx={{ p: 1}}>
+      <TextField
+        value={props.value}
+        onChange={(el) => {
+          const value = el.target.value
+          props.onChange(value)
+        }}
+        InputProps={{ endAdornment: icon}}
+      />
+    </Stack>
+  )
+}
+
+interface DocumentationTableProps {
+  version: string
+}
+
+interface documentation {
+  source: string,
+  description: string,
+}
+
+function DocumentationTable(props: DocumentationTableProps) {
+  const [value, setValue] = useState<string>("")
+  const [data, setData] = useState<string[][]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  
+  const columns = ["Source", "Description"]
+
+  const fetchData = async (version: string) => {
+    if (loading || data.length > 0) {
+      return
+    }
+
+    setLoading(true)
+    const response = await fetch(`http://localhost:5000/help/${version}`)
+    const json = await response.json()
+    setData(json.data)
+
+    const newData = json.data.map((element: documentation) => [element.source, element.description])
+    setData(newData)
+    setLoading(false)
+
+  }
+
+  fetchData(props.version)
+
+  return (
+    <Box>
+      <SearchBar value={value} onChange={setValue}/>
+
+      <MUIDataTable
+        title={"Employee List"}
+        data={data}
+        columns={columns}
+        options={{
+          download: false,
+          print: false,
+          viewColumns: false,
+          filter: false,
+          pagination: false,
+          searchAlwaysOpen: true,
+          selectableRows: undefined,
+          searchProps: {
+            style: { float: "right" }
+          }
+        }}
+      />
+
+    </Box>
+  )
+}
 
 const drawerWidth = 240
 const socket = io("http://localhost:5000")
@@ -101,7 +189,8 @@ function ButtonAppBar() {
         </Toolbar>
       </AppBar>
       <Drawer
-        variant='permanent'
+        variant='persistent'
+        open={true}
         sx={{
           width: drawerWidth,
           flexShrink: 0
@@ -339,11 +428,12 @@ function Interpreter() {
           </Stack>
         </Grid>
       </Grid>
-      <InterpreterOutput running={running} output={output} errors={errors}/>
+      { showDocumentation && <DocumentationTable version={version}/>}
     </Box>
   )
 }
 
+// <InterpreterOutput running={running} output={output} errors={errors}/>
 function App() {
   return (
     <Box sx={{display: 'flex'}}>

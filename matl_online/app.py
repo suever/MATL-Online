@@ -2,6 +2,7 @@
 from typing import Optional, Type
 
 from flask import Flask, got_request_exception
+from flask_cors import CORS
 from rollbar.contrib.flask import report_exception  # type: ignore[import]
 
 from matl_online import public
@@ -34,6 +35,7 @@ def register_extensions(app: Flask) -> None:
         message_queue=app.config.get("SOCKETIO_MESSAGE_QUEUE"),
         cors_allowed_origins="*",
     )
+    CORS(app, send_wildcard=True)
 
     register_rollbar(app)
 

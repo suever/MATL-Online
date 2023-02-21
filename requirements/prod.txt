@@ -6,6 +6,7 @@ eventlet==0.33.3
 git+https://github.com/benoitc/gunicorn.git@1299ea9e967a61ae2edebe191082fd169b864c64#egg=gunicorn[eventlet]==20.1.0
 werkzeug==2.2.3
 pydantic==1.10.5
+flask_cors
 
 # CSS/JS Assets
 flask_assets==2.0
