@@ -2,9 +2,14 @@ import React from 'react'
 import {useState, useEffect } from 'react'
 import io from 'socket.io-client'
 import AppBar from '@mui/material/AppBar'
+import Alert from '@mui/material/Alert'
 import Paper from '@mui/material/Paper'
 import Box from '@mui/material/Box'
+import Switch from '@mui/material/Switch'
+import FormGroup from '@mui/material/FormGroup'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import Toolbar from '@mui/material/Toolbar'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -32,9 +37,16 @@ import CircularProgress from '@mui/material/CircularProgress'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import SchoolIcon from '@mui/icons-material/School'
 import HelpIcon from '@mui/icons-material/Help'
+import ContentPasteIcon from '@mui/icons-material/ContentPaste'
+import TroubleshootIcon from '@mui/icons-material/Troubleshoot'
 
 const drawerWidth = 240
 const socket = io("http://localhost:5000")
+
+interface Version {
+  label: string
+  releaseDate: Date
+}
 
 const navigationOptions = [
   {
@@ -125,6 +137,7 @@ function ButtonAppBar() {
 interface InterpreterOutputProps {
     running: boolean;
     output: string[];
+    errors: string[];
 }
 
 function InterpreterOutput(props: InterpreterOutputProps) {
@@ -132,6 +145,11 @@ function InterpreterOutput(props: InterpreterOutputProps) {
   return (
     <Paper variant="outlined" sx={{p: 2, whiteSpace: "pre", fontFamily:" monospace", fontSize: 14, overflow: "auto", flexGrow: 1, marginTop: 2, marginLeft: 0}} >
       {props.output.join("\n")}
+      { props.errors.length > 0 &&
+      <Alert severity="error">
+        { props.errors.join("\n")}
+      </Alert>
+      }
     </Paper>
   )
 }
@@ -139,7 +157,7 @@ function InterpreterOutput(props: InterpreterOutputProps) {
 interface VersionSelectProps {
   onChange: (value: string) => void;
   value: string;
-  versions: string[];
+  versions: Version[];
 }
 
 function VersionSelect(props: VersionSelectProps) {
@@ -156,7 +174,7 @@ function VersionSelect(props: VersionSelectProps) {
         {
           props.versions.map((version) => {
             return (
-              <MenuItem value={version}>{version}</MenuItem>
+              <MenuItem value={version.label}>{version.label}</MenuItem>
             )
           })
 
@@ -171,20 +189,41 @@ interface StatusMessage {
   value: string;
 }
 
+function ExplainIconButton() {
+  return (
+    <Tooltip title="Explain the code">
+      <IconButton size="small" sx={{m: -1}}>
+        <TroubleshootIcon/>
+      </IconButton>
+    </Tooltip>
+  )
+}
+
+function PasteIconButton () {
+  return (
+    <Tooltip title="Paste formatted input">
+      <IconButton size="small" sx={{m: -1}}>
+        <ContentPasteIcon/>
+      </IconButton>
+    </Tooltip>
+  )
+}
+
 function Interpreter() {
   const versions = [
-    "22.7.4",
-    "1.2.3",
-    "4.5.6",
+    { "label": "22.7.4", "releaseDate": new Date()},
+    { "label": "22.7.3", "releaseDate": new Date()}
   ]
 
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected)
   const [code, setCode] = useState<string>(":")
   const [running, setRunning] = useState<boolean>(false)
   const [output, setOutput] = useState<string[]>([])
-  const [version, setVersion] = useState<string>(versions[0])
+  const [errors, setErrors] = useState<string[]>([])
+  const [version, setVersion] = useState<string>(versions[0].label)
   const [session, setSession] = useState<string|null>(null)
   const [inputs, setInputs] = useState<string>("12")
+  const [showDocumentation, setShowDocumentation] = useState<boolean>(false)
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -203,7 +242,19 @@ function Interpreter() {
 
     socket.on('status', (data) => {
       const messages = data.data as StatusMessage[]
-      setOutput(messages.map((message) => message.value))
+      const errors = []
+      const outputs = []
+
+      for (const message of messages) {
+        if (message.type == "stderr") {
+          errors.push(message.value)
+        } else if (message.type == "stdout") {
+          outputs.push(message.value)
+        }
+      }
+
+      setOutput(outputs)
+      setErrors(errors)
     })
   })
 
@@ -218,14 +269,25 @@ function Interpreter() {
 
   return (
     <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column"}}>
-      <Typography variant="h5" component="div" sx={{flexGrow: 0, marginBottom: 3}}>
-        MATL Interpreter
-      </Typography>
+      <Stack direction="row">
+        <Typography variant="h5" component="div" sx={{flexGrow: 0, marginBottom: 3}}>
+          MATL Interpreter
+        </Typography>
+        <Box sx={{ flexGrow: 1 }}></Box>
+        <Box sx={{ flexGrow: 0}}>
+          <FormControlLabel
+            sx={{ marginRight: 0 }}
+            labelPlacement="start"
+            control={<Switch size="medium" checked={showDocumentation} onChange={(el) => setShowDocumentation(el.target.checked)}/>}
+            label={<MenuBookIcon/>}
+          />
+        </Box>
+      </Stack>
       <Grid container spacing={2} sx={{flexGrow: 0, display: "flex"}}>
         <Grid item xs={10}>
           <TextField
             id="code"
-            label={`Code ${code.length ? `(${code.length} bytes)` : ''}`}
+            label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
             multiline
             autoFocus={true}
             value={code}
@@ -233,7 +295,7 @@ function Interpreter() {
             maxRows={Infinity}
             variant="outlined"
             sx={{display: "flex"}}
-            InputProps={{style: {fontFamily: "monospace"}}}
+            InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
           />
         </Grid>
         <Grid item xs={2}>
@@ -249,7 +311,7 @@ function Interpreter() {
             onChange={(el) => setInputs(el.target.value)}
             maxRows={Infinity}
             sx={{display: "flex"}}
-            InputProps={{style: {fontFamily: "monospace"}}}
+            InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
           />
         </Grid>
         <Grid item xs={2}>
@@ -263,6 +325,7 @@ function Interpreter() {
 
                 if (!running && session) {
                   setOutput([])
+                  setErrors([])
                   await onRun(code, inputs, version, session)
                 }
               }}
@@ -276,7 +339,7 @@ function Interpreter() {
           </Stack>
         </Grid>
       </Grid>
-      <InterpreterOutput running={running} output={output}/>
+      <InterpreterOutput running={running} output={output} errors={errors}/>
     </Box>
   )
 }
