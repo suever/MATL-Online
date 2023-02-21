@@ -42,7 +42,8 @@ const socket = io("http://localhost:5000")
 const navigationOptions = [
   {
     label: "Interpreter",
-    icon: <CodeIcon/>
+    icon: <CodeIcon/>,
+    selected: true
   },
   {
     label: "Documentation",
@@ -66,6 +67,10 @@ const navigationOptions = [
   }
 
 ]
+
+function noOp(value: string) {
+  return
+}
 
 function ButtonAppBar() {
   const [open, setOpen] = useState<boolean>(true)
@@ -103,7 +108,7 @@ function ButtonAppBar() {
             {
               navigationOptions.map((option) => {
                 return (
-                  <ListItem key={option.label} disablePadding>
+                  <ListItem key={option.label} disablePadding selected={option.selected == true}>
                     <ListItemButton>
                       <ListItemIcon>
                         {option.icon}
@@ -118,7 +123,6 @@ function ButtonAppBar() {
 
             }
           </List>
-          <Divider/>
         </Box>
       </Drawer>
     </>
@@ -133,9 +137,39 @@ interface InterpreterOutputProps {
 function InterpreterOutput(props: InterpreterOutputProps) {
 
   return (
-    <Paper variant="outlined" sx={{p: 2, whiteSpace: "pre", fontFamily:" monospace", fontSize: 14, overflow: "auto", flexGrow: 1, m: 1}}>
+    <Paper variant="outlined" sx={{p: 2, whiteSpace: "pre", fontFamily:" monospace", fontSize: 14, overflow: "auto", flexGrow: 1, marginTop: 2, marginLeft: 0}} >
       {props.output.join("\n")}
     </Paper>
+  )
+}
+
+interface VersionSelectProps {
+  onChange: (value: string) => void;
+  value: string;
+  versions: string[];
+}
+
+function VersionSelect(props: VersionSelectProps) {
+  return (
+    <FormControl fullWidth>
+      <InputLabel id="version">Version</InputLabel>
+      <Select
+        labelId="version"
+        id="version"
+        label="Version"
+        onChange={(el) => props.onChange(el.target.value)}
+        value={props.value}
+      >
+        {
+          props.versions.map((version) => {
+            return (
+              <MenuItem value={version}>{version}</MenuItem>
+            )
+          })
+
+        }
+      </Select>
+    </FormControl>
   )
 }
 
@@ -147,12 +181,12 @@ function Interpreter() {
   ]
 
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected)
-  const [lastPong, setLastPong] = useState<null|string>(null)
-  const [code, setCode] = useState<string>("12:")
+  const [code, setCode] = useState<string>(":")
   const [running, setRunning] = useState<boolean>(false)
   const [output, setOutput] = useState<string[]>([])
   const [version, setVersion] = useState<string>(versions[0])
   const [session, setSession] = useState<string|null>(null)
+  const [inputs, setInputs] = useState<string>("12")
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -161,10 +195,6 @@ function Interpreter() {
 
     socket.on('disconnect', () => {
       setIsConnected(false)
-    })
-
-    socket.on('pong', () => {
-      setLastPong(new Date().toISOString())
     })
 
     socket.on('complete', () => {
@@ -189,12 +219,16 @@ function Interpreter() {
 
   return (
     <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column"}}>
+      <Typography variant="h5" component="div" sx={{flexGrow: 0, marginBottom: 3}}>
+        MATL Interpreter
+      </Typography>
       <Grid container spacing={2} sx={{flexGrow: 0, display: "flex"}}>
         <Grid item xs={10}>
           <TextField
             id="code"
             label={`Code ${code.length ? `(${code.length} bytes)` : ''}`}
             multiline
+            autoFocus={true}
             value={code}
             onChange={(el) => setCode(el.target.value)}
             maxRows={Infinity}
@@ -204,25 +238,7 @@ function Interpreter() {
           />
         </Grid>
         <Grid item xs={2}>
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Version</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              label="Version"
-              onChange={(el) => setVersion(el.target.value)}
-              value={version}
-            >
-              {
-                versions.map((version) => {
-                  return (
-                    <MenuItem value={version}>{version}</MenuItem>
-                  )
-                })
-
-              }
-            </Select>
-          </FormControl>
+          <VersionSelect onChange={setVersion} value={version} versions={versions}/>
         </Grid>
         <Grid item xs={12}>
           <TextField
@@ -230,23 +246,25 @@ function Interpreter() {
             label="Input Arguments"
             variant="outlined"
             multiline
+            value={inputs}
+            onChange={(el) => setInputs(el.target.value)}
             maxRows={Infinity}
             sx={{display: "flex"}}
             InputProps={{style: {fontFamily: "monospace"}}}
           />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={2}>
           <Stack direction="row" spacing={1}>
             <Button
+              fullWidth
               variant='contained'
-              sx={{ minWidth: 120}}
               disabled={!isConnected}
               onClick={() => {
                 setRunning(!running)
 
                 if (!running && session) {
                   setOutput([])
-                  onRun(code, "", version, session)
+                  onRun(code, inputs, version, session)
                 }
               }}
               startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
@@ -255,7 +273,7 @@ function Interpreter() {
                 running ? "Cancel" : "Run"
               }
             </Button>
-            <Button variant='outlined' startIcon={<ShareIcon/>}>Share</Button>
+            <Button variant='outlined' fullWidth startIcon={<ShareIcon/>}>Share</Button>
           </Stack>
         </Grid>
       </Grid>
@@ -268,7 +286,7 @@ function App() {
   return (
     <Box sx={{display: 'flex'}}>
       <ButtonAppBar/>
-      <Box component="main" sx={{p: 2, display: "flex", flexDirection: "column", height: "100vh", flexGrow: 1 }}>
+      <Box component="main" sx={{p: 2, display: "flex", flexDirection: "column", height: "100vh", flexGrow: 1, width: 2 }}>
         <Toolbar/>
         <Interpreter/>
       </Box>
