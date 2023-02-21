@@ -19,6 +19,7 @@ services:
       EVENTLET_NO_GREENDNS: "yes"
       MATL_ONLINE_ENV: prod
       SQLALCHEMY_DATABASE_URI: postgresql://postgres:password@postgres
+      CORS_ALLOWED_ORIGINS: "*"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000"]
       interval: 5s

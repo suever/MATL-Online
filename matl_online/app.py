@@ -32,7 +32,7 @@ def register_extensions(app: Flask) -> None:
     socketio.init_app(
         app,
         message_queue=app.config.get("SOCKETIO_MESSAGE_QUEUE"),
-        cors_allowed_origins=app.config.get("CORS_ALLOWED_ORIGINS"),
+        cors_allowed_origins="*",
     )
 
     register_rollbar(app)

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 4.0.3 (Python 3.8.5 on linux)" generated="20210525 22:16:55.444" rpa="false" schemaversion="2">
+<suite id="s1" name="Integration Tests" source="/home/suever/projects/matl-online/integration_tests">
+<suite id="s1-s1" name="Test" source="/home/suever/projects/matl-online/integration_tests/test.robot">
+<test id="s1-s1-t1" name="Successful Load">
+<kw name="Open Browser To Main Page" library="resource">
+<kw name="Open Browser" library="SeleniumLibrary">
+<arg>${MAIN_URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<msg timestamp="20210525 22:16:55.537" level="INFO">Opening browser 'chrome' to base url 'http://localhost:5000/'.</msg>
+<status status="PASS" starttime="20210525 22:16:55.537" endtime="20210525 22:16:57.150"/>
+</kw>
+<kw name="Maximize Browser Window" library="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" starttime="20210525 22:16:57.151" endtime="20210525 22:16:57.262"/>
+</kw>
+<kw name="Set Selenium Speed" library="SeleniumLibrary">
+<arg>${DELAY}</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" starttime="20210525 22:16:57.263" endtime="20210525 22:16:57.264"/>
+</kw>
+<kw name="Main Page Should Load" library="resource">
+<kw name="Wait Until Element Is Visible" library="SeleniumLibrary">
+<arg>code</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" starttime="20210525 22:16:57.265" endtime="20210525 22:16:57.341"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:57.264" endtime="20210525 22:16:57.341"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:55.536" endtime="20210525 22:16:57.341"/>
+</kw>
+<kw name="Close Browser" library="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" starttime="20210525 22:16:57.342" endtime="20210525 22:16:57.397"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:55.536" endtime="20210525 22:16:57.397"/>
+</test>
+<test id="s1-s1-t2" name="Successful Run">
+<kw name="Open Browser To Main Page" library="resource">
+<kw name="Open Browser" library="SeleniumLibrary">
+<arg>${MAIN_URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<msg timestamp="20210525 22:16:57.398" level="INFO">Opening browser 'chrome' to base url 'http://localhost:5000/'.</msg>
+<status status="PASS" starttime="20210525 22:16:57.398" endtime="20210525 22:16:58.833"/>
+</kw>
+<kw name="Maximize Browser Window" library="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" starttime="20210525 22:16:58.834" endtime="20210525 22:16:58.943"/>
+</kw>
+<kw name="Set Selenium Speed" library="SeleniumLibrary">
+<arg>${DELAY}</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" starttime="20210525 22:16:58.943" endtime="20210525 22:16:58.945"/>
+</kw>
+<kw name="Main Page Should Load" library="resource">
+<kw name="Wait Until Element Is Visible" library="SeleniumLibrary">
+<arg>code</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" starttime="20210525 22:16:58.946" endtime="20210525 22:16:59.022"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:58.945" endtime="20210525 22:16:59.022"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:57.398" endtime="20210525 22:16:59.022"/>
+</kw>
+<kw name="Run Code" library="resource">
+<arg>1 2+</arg>
+<kw name="Input Code" library="resource">
+<arg>${code}</arg>
+<kw name="Input Text" library="SeleniumLibrary">
+<arg>code</arg>
+<arg>${code}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<msg timestamp="20210525 22:16:59.025" level="INFO">Typing text '1 2+' into text field 'code'.</msg>
+<status status="PASS" starttime="20210525 22:16:59.025" endtime="20210525 22:16:59.147"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:59.024" endtime="20210525 22:16:59.147"/>
+</kw>
+<kw name="Click Element" library="SeleniumLibrary">
+<arg>run</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<msg timestamp="20210525 22:16:59.148" level="INFO">Clicking element 'run'.</msg>
+<status status="PASS" starttime="20210525 22:16:59.148" endtime="20210525 22:16:59.200"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:59.023" endtime="20210525 22:16:59.200"/>
+</kw>
+<kw name="Has Successful Output" library="resource">
+<arg>3</arg>
+<kw name="Click Link" library="SeleniumLibrary">
+<arg>Output</arg>
+<doc>Clicks a link identified by ``locator``.</doc>
+<msg timestamp="20210525 22:16:59.201" level="INFO">Clicking link 'Output'.</msg>
+<status status="PASS" starttime="20210525 22:16:59.201" endtime="20210525 22:16:59.239"/>
+</kw>
+<kw name="Wait Until Element Contains" library="SeleniumLibrary">
+<arg>output</arg>
+<arg>${output}</arg>
+<doc>Waits until the element ``locator`` contains ``text``.</doc>
+<status status="PASS" starttime="20210525 22:16:59.239" endtime="20210525 22:16:59.493"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:59.200" endtime="20210525 22:16:59.494"/>
+</kw>
+<kw name="Close Browser" library="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" starttime="20210525 22:16:59.494" endtime="20210525 22:16:59.552"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:57.397" endtime="20210525 22:16:59.552"/>
+</test>
+<test id="s1-s1-t3" name="Cancelled Run">
+<kw name="Open Browser To Main Page" library="resource">
+<kw name="Open Browser" library="SeleniumLibrary">
+<arg>${MAIN_URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<msg timestamp="20210525 22:16:59.554" level="INFO">Opening browser 'chrome' to base url 'http://localhost:5000/'.</msg>
+<status status="PASS" starttime="20210525 22:16:59.554" endtime="20210525 22:17:01.010"/>
+</kw>
+<kw name="Maximize Browser Window" library="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" starttime="20210525 22:17:01.010" endtime="20210525 22:17:01.118"/>
+</kw>
+<kw name="Set Selenium Speed" library="SeleniumLibrary">
+<arg>${DELAY}</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" starttime="20210525 22:17:01.119" endtime="20210525 22:17:01.120"/>
+</kw>
+<kw name="Main Page Should Load" library="resource">
+<kw name="Wait Until Element Is Visible" library="SeleniumLibrary">
+<arg>code</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" starttime="20210525 22:17:01.122" endtime="20210525 22:17:01.197"/>
+</kw>
+<status status="PASS" starttime="20210525 22:17:01.121" endtime="20210525 22:17:01.198"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:59.553" endtime="20210525 22:17:01.198"/>
+</kw>
+<kw name="Run Code" library="resource">
+<arg>l`T</arg>
+<kw name="Input Code" library="resource">
+<arg>${code}</arg>
+<kw name="Input Text" library="SeleniumLibrary">
+<arg>code</arg>
+<arg>${code}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<msg timestamp="20210525 22:17:01.202" level="INFO">Typing text 'l`T' into text field 'code'.</msg>
+<status status="PASS" starttime="20210525 22:17:01.201" endtime="20210525 22:17:01.327"/>
+</kw>
+<status status="PASS" starttime="20210525 22:17:01.200" endtime="20210525 22:17:01.327"/>
+</kw>
+<kw name="Click Element" library="SeleniumLibrary">
+<arg>run</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<msg timestamp="20210525 22:17:01.328" level="INFO">Clicking element 'run'.</msg>
+<status status="PASS" starttime="20210525 22:17:01.328" endtime="20210525 22:17:01.361"/>
+</kw>
+<status status="PASS" starttime="20210525 22:17:01.199" endtime="20210525 22:17:01.361"/>
+</kw>
+<kw name="Kill Run" library="resource">
+<kw name="Wait Until Element Contains" library="SeleniumLibrary">
+<arg>run</arg>
+<arg>Kill</arg>
+<doc>Waits until the element ``locator`` contains ``text``.</doc>
+<status status="PASS" starttime="20210525 22:17:01.362" endtime="20210525 22:17:01.374"/>
+</kw>
+<kw name="Click Element" library="SeleniumLibrary">
+<arg>run</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<msg timestamp="20210525 22:17:01.374" level="INFO">Clicking element 'run'.</msg>
+<status status="PASS" starttime="20210525 22:17:01.374" endtime="20210525 22:17:01.389"/>
+</kw>
+<kw name="Wait Until Element Contains" library="SeleniumLibrary">
+<arg>run</arg>
+<arg>Run</arg>
+<doc>Waits until the element ``locator`` contains ``text``.</doc>
+<status status="PASS" starttime="20210525 22:17:01.389" endtime="20210525 22:17:01.398"/>
+</kw>
+<status status="PASS" starttime="20210525 22:17:01.362" endtime="20210525 22:17:01.398"/>
+</kw>
+<kw name="Has Error" library="resource">
+<arg>Job cancelled</arg>
+<kw name="Click Link" library="SeleniumLibrary">
+<arg>Error Console</arg>
+<doc>Clicks a link identified by ``locator``.</doc>
+<msg timestamp="20210525 22:17:01.398" level="INFO">Clicking link 'Error Console'.</msg>
+<status status="PASS" starttime="20210525 22:17:01.398" endtime="20210525 22:17:01.427"/>
+</kw>
+<kw name="Wait Until Element Contains" library="SeleniumLibrary">
+<arg>errors</arg>
+<arg>${error}</arg>
+<doc>Waits until the element ``locator`` contains ``text``.</doc>
+<status status="PASS" starttime="20210525 22:17:01.427" endtime="20210525 22:17:01.650"/>
+</kw>
+<status status="PASS" starttime="20210525 22:17:01.398" endtime="20210525 22:17:01.650"/>
+</kw>
+<kw name="Close Browser" library="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" starttime="20210525 22:17:01.650" endtime="20210525 22:17:01.705"/>
+</kw>
+<status status="PASS" starttime="20210525 22:16:59.553" endtime="20210525 22:17:01.705"/>
+</test>
+<status status="PASS" starttime="20210525 22:16:55.457" endtime="20210525 22:17:01.706"/>
+</suite>
+<status status="PASS" starttime="20210525 22:16:55.445" endtime="20210525 22:17:01.708"/>
+</suite>
+<statistics>
+<total>
+<stat pass="3" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat pass="3" fail="0" skip="0" id="s1" name="Integration Tests">Integration Tests</stat>
+<stat pass="3" fail="0" skip="0" id="s1-s1" name="Test">Integration Tests.Test</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
