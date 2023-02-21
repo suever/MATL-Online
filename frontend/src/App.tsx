@@ -15,6 +15,10 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
 import CssBaseline from '@mui/material/CssBaseline'
+import FormControl from '@mui/material/FormControl'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import InputLabel from '@mui/material/InputLabel'
 import CodeIcon from '@mui/icons-material/Code'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import BarChartIcon from '@mui/icons-material/BarChart'
@@ -30,6 +34,34 @@ import SchoolIcon from '@mui/icons-material/School'
 import HelpIcon from '@mui/icons-material/Help'
 
 const drawerWidth = 240
+
+const navigationOptions = [
+  {
+    label: "Interpreter",
+    icon: <CodeIcon/>
+  },
+  {
+    label: "Documentation",
+    icon: <MenuBookIcon/>
+  },
+  {
+    label: "Examples",
+    icon: <SchoolIcon/>,
+  },
+  {
+    label: "History",
+    icon: <HistoryIcon/>
+  },
+  {
+    label: "Analytics",
+    icon: <BarChartIcon/>
+  },
+  {
+    label: "Help",
+    icon: <HelpIcon/>
+  }
+
+]
 
 function ButtonAppBar() {
   const [open, setOpen] = useState<boolean>(true)
@@ -64,66 +96,23 @@ function ButtonAppBar() {
         <Toolbar/>
         <Box sx={{overflow: 'auto', width: drawerWidth}}>
           <List>
-            <ListItem key={'Interpreter'} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <CodeIcon/>
-                </ListItemIcon>
-                <ListItemText primary={'Interpreter'}>
-                                    Interpreter
-                </ListItemText>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={'Documentation'} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <MenuBookIcon/>
-                </ListItemIcon>
-                <ListItemText primary={'Documentation'}>
-                                    Documentation
-                </ListItemText>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={'Examples'} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <SchoolIcon/>
-                </ListItemIcon>
-                <ListItemText primary={'Examples'}>
-                                    Examples
-                </ListItemText>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={'History'} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <HistoryIcon/>
-                </ListItemIcon>
-                <ListItemText primary={'History'}>
-                                    History
-                </ListItemText>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={'Analytics'} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <BarChartIcon/>
-                </ListItemIcon>
-                <ListItemText primary={'Analytics'}>
-                                    Analytics
-                </ListItemText>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={'Help'} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <HelpIcon/>
-                </ListItemIcon>
-                <ListItemText primary={'Help'}>
-                                    Help
-                </ListItemText>
-              </ListItemButton>
-            </ListItem>
+            {
+              navigationOptions.map((option) => {
+                return (
+                  <ListItem key={option.label} disablePadding>
+                    <ListItemButton>
+                      <ListItemIcon>
+                        {option.icon}
+                      </ListItemIcon>
+                      <ListItemText primary={option.label}>
+                        {option.label}
+                      </ListItemText>
+                    </ListItemButton>
+                  </ListItem>
+                )
+              })
+
+            }
           </List>
           <Divider/>
         </Box>
@@ -152,13 +141,19 @@ function InterpreterOutput(props: InterpreterOutputProps) {
 }
 
 function Interpreter() {
+  const versions = [
+    "1.2.3",
+    "4.5.6",
+  ]
+
   const [code, setCode] = useState<string>("")
   const [running, setRunning] = useState<boolean>(false)
   const [output, setOutput] = useState<string[]>([])
+  const [version, setVersion] = useState<string>(versions[0])
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12}>
+      <Grid item xs={10}>
         <TextField
           id="code"
           label={`Code ${code.length ? `(${code.length} bytes)` : ''}`}
@@ -170,6 +165,27 @@ function Interpreter() {
           sx={{display: "flex"}}
           InputProps={{style: {fontFamily: "monospace"}}}
         />
+      </Grid>
+      <Grid item xs={2}>
+        <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-label">Version</InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            label="Version"
+            onChange={(el) => setVersion(el.target.value)}
+            value={version}
+          >
+            {
+              versions.map((version) => {
+                return (
+                  <MenuItem value={version}>{version}</MenuItem>
+                )
+              })
+
+            }
+          </Select>
+        </FormControl>
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -192,7 +208,7 @@ function Interpreter() {
             if (!running) {
               setOutput([])
               setTimeout(() => {
-                setOutput(["OUTPUT"])
+                setOutput([`OUTPUT from ${version}` ])
                 setRunning(false)
               }, 1000)
             }
