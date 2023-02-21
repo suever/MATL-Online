@@ -2,7 +2,6 @@ import React from 'react'
 import {useState, useEffect } from 'react'
 import io from 'socket.io-client'
 import AppBar from '@mui/material/AppBar'
-import Card from '@mui/material/Card'
 import Paper from '@mui/material/Paper'
 import Box from '@mui/material/Box'
 import Toolbar from '@mui/material/Toolbar'
@@ -17,7 +16,6 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
-import Divider from '@mui/material/Divider'
 import CssBaseline from '@mui/material/CssBaseline'
 import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
@@ -32,7 +30,6 @@ import HistoryIcon from '@mui/icons-material/History'
 import ShareIcon from '@mui/icons-material/Share'
 import CircularProgress from '@mui/material/CircularProgress'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import StopIcon from '@mui/icons-material/Stop'
 import SchoolIcon from '@mui/icons-material/School'
 import HelpIcon from '@mui/icons-material/Help'
 
@@ -67,10 +64,6 @@ const navigationOptions = [
   }
 
 ]
-
-function noOp(value: string) {
-  return
-}
 
 function ButtonAppBar() {
   const [open, setOpen] = useState<boolean>(true)
@@ -173,6 +166,11 @@ function VersionSelect(props: VersionSelectProps) {
   )
 }
 
+interface StatusMessage {
+  type: string;
+  value: string;
+}
+
 function Interpreter() {
   const versions = [
     "22.7.4",
@@ -204,7 +202,8 @@ function Interpreter() {
     socket.on('connection', (data) => setSession(data.session_id))
 
     socket.on('status', (data) => {
-      setOutput(data.data.map((o: any) => o.value))
+      const messages = data.data as StatusMessage[]
+      setOutput(messages.map((message) => message.value))
     })
   })
 
@@ -259,12 +258,12 @@ function Interpreter() {
               fullWidth
               variant='contained'
               disabled={!isConnected}
-              onClick={() => {
+              onClick={async () => {
                 setRunning(!running)
 
                 if (!running && session) {
                   setOutput([])
-                  onRun(code, inputs, version, session)
+                  await onRun(code, inputs, version, session)
                 }
               }}
               startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
