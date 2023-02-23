@@ -42,6 +42,7 @@ import TroubleshootIcon from '@mui/icons-material/Troubleshoot'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import MUIDataTable from "mui-datatables"
+import ReactMarkdown from 'react-markdown'
 
 interface SearchBarProps {
   value: string
@@ -74,15 +75,67 @@ interface DocumentationTableProps {
 
 interface documentation {
   source: string,
+  brief: string,
+  arguments: string,
   description: string,
+  searchText: string
 }
 
 function DocumentationTable(props: DocumentationTableProps) {
   const [value, setValue] = useState<string>("")
-  const [data, setData] = useState<string[][]>([])
+  const [data, setData] = useState<documentation[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   
-  const columns = ["Source", "Description"]
+  const columns = [
+    {
+      name: "source",
+      label: "Source",
+      options: {
+        customBodyRenderLite: (dataIndex: number):  React.ReactNode =>  {
+          const value = data[dataIndex].source
+          return <span style={{ fontFamily: "monospace", verticalAlign: "top"}}><strong>{value}</strong></span>
+        }
+      }
+    },
+    {
+      name: "searchText",
+      label: "Description",
+      options: {
+        customBodyRenderLite: (dataIndex: number): React.ReactNode => {
+          const record = data[dataIndex]
+          // value.replace('<strong>', '**')
+          //value.replace('</strong>', '**')
+          //return <ReactMarkdown>{value}</ReactMarkdown>
+          return (
+            <div style={{ fontFamily: "monospace", fontSize: 12, whiteSpace: "pre-line"}}>
+              <strong>{record.brief}</strong>
+              {'\n' + record.arguments}
+              <div dangerouslySetInnerHTML={{__html: record.description}}/>
+            </div>
+          )
+
+          /*
+          const parser = new DOMParser()
+          const dom = parser.parseFromString(value, "text/html")
+
+          const tags = dom.getElementsByTagName("strong")
+          const tagCount = tags.length
+
+          for (let k = 0; k < tagCount; k++) {
+            const newElement = dom.createElement("pre")
+            newElement.innerHTML = tags[0].innerHTML
+            tags[0].replaceWith(newElement)
+          }
+
+          debugger //eslint-disable-line
+
+          value = value.replace("<strong>", "<pre>").replace("</strong>", "</pre>")
+          return <span>{value}</span>
+           */
+        }
+      }
+    }
+  ]
 
   const fetchData = async (version: string) => {
     if (loading || data.length > 0) {
@@ -92,10 +145,14 @@ function DocumentationTable(props: DocumentationTableProps) {
     setLoading(true)
     const response = await fetch(`http://localhost:5000/help/${version}`)
     const json = await response.json()
+
+    // Add an aggregate field that contains all of the searchable info
+    json.data.forEach((element: documentation) => { element.searchText = element.arguments + ' ' + element.brief + ' ' + element.description})
+
     setData(json.data)
 
-    const newData = json.data.map((element: documentation) => [element.source, element.description])
-    setData(newData)
+    // const newData = json.data.map((element: documentation) => [element.source, element.description])
+    // setData(newData)
     setLoading(false)
 
   }
@@ -103,28 +160,20 @@ function DocumentationTable(props: DocumentationTableProps) {
   fetchData(props.version)
 
   return (
-    <Box>
-      <SearchBar value={value} onChange={setValue}/>
-
-      <MUIDataTable
-        title={"Employee List"}
-        data={data}
-        columns={columns}
-        options={{
-          download: false,
-          print: false,
-          viewColumns: false,
-          filter: false,
-          pagination: false,
-          searchAlwaysOpen: true,
-          selectableRows: undefined,
-          searchProps: {
-            style: { float: "right" }
-          }
-        }}
-      />
-
-    </Box>
+    <MUIDataTable
+      title={"Employee List"}
+      data={data}
+      columns={columns}
+      options={{
+        download: false,
+        print: false,
+        viewColumns: false,
+        filter: false,
+        pagination: false,
+        searchAlwaysOpen: true,
+        selectableRows: undefined,
+      }}
+    />
   )
 }
 
@@ -360,7 +409,7 @@ function Interpreter() {
     <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column"}}>
       <Stack direction="row">
         <Typography variant="h5" component="div" sx={{flexGrow: 0, marginBottom: 3}}>
-          MATL Interpreter
+              MATL Interpreter
         </Typography>
         <Box sx={{ flexGrow: 1 }}></Box>
         <Box sx={{ flexGrow: 0}}>
@@ -372,63 +421,74 @@ function Interpreter() {
           />
         </Box>
       </Stack>
-      <Grid container spacing={2} sx={{flexGrow: 0, display: "flex"}}>
-        <Grid item xs={10}>
-          <TextField
-            id="code"
-            label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
-            multiline
-            autoFocus={true}
-            value={code}
-            onChange={(el) => setCode(el.target.value)}
-            maxRows={Infinity}
-            variant="outlined"
-            sx={{display: "flex"}}
-            InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <VersionSelect onChange={setVersion} value={version} versions={versions}/>
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            id="inputs"
-            label="Input Arguments"
-            variant="outlined"
-            multiline
-            value={inputs}
-            onChange={(el) => setInputs(el.target.value)}
-            maxRows={Infinity}
-            sx={{display: "flex"}}
-            InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <Stack direction="row" spacing={1}>
-            <Button
-              fullWidth
-              variant='contained'
-              disabled={!isConnected}
-              onClick={async () => {
-                setRunning(!running)
+      <Box sx={{flexGrow: 1, display: "flex", flexDirection: "row" }}>
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column"}}>
+          <Grid container spacing={2} sx={{flexGrow: 1, display: "flex"}}>
+            <Grid item xs={10} sx={{ flexGrow: 0}}>
+              <TextField
+                id="code"
+                label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
+                multiline
+                autoFocus={true}
+                value={code}
+                onChange={(el) => setCode(el.target.value)}
+                maxRows={Infinity}
+                variant="outlined"
+                sx={{display: "flex"}}
+                InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
+              />
+            </Grid>
+            <Grid item xs={2} sx={{flexGrow: 0}}>
+              <VersionSelect onChange={setVersion} value={version} versions={versions}/>
+            </Grid>
+            <Grid item xs={12} sx={{ flexGrow: 0}}>
+              <TextField
+                id="inputs"
+                label="Input Arguments"
+                variant="outlined"
+                multiline
+                value={inputs}
+                onChange={(el) => setInputs(el.target.value)}
+                maxRows={Infinity}
+                sx={{display: "flex"}}
+                InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
+              />
+            </Grid>
+            <Grid item xs={2} sx={{flexGrow: 0}}>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  fullWidth
+                  variant='contained'
+                  disabled={!isConnected}
+                  onClick={async () => {
+                    setRunning(!running)
 
-                if (!running && session) {
-                  setOutput([])
-                  setErrors([])
-                  await onRun(code, inputs, version, session)
-                }
-              }}
-              startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
-            >
-              {
-                running ? "Cancel" : "Run"
-              }
-            </Button>
-            <Button variant='outlined' fullWidth startIcon={<ShareIcon/>}>Share</Button>
-          </Stack>
-        </Grid>
-      </Grid>
-      { showDocumentation && <DocumentationTable version={version}/>}
+                    if (!running && session) {
+                      setOutput([])
+                      setErrors([])
+                      await onRun(code, inputs, version, session)
+                    }
+                  }}
+                  startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
+                >
+                  {
+                    running ? "Cancel" : "Run"
+                  }
+                </Button>
+                <Button variant='outlined' fullWidth startIcon={<ShareIcon/>}>Share</Button>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sx={{flexGrow: 1, display: "flex"}}>
+              <InterpreterOutput running={running} output={output} errors={errors}/>
+            </Grid>
+          </Grid>
+        </Box>
+        { showDocumentation &&
+        <Box sx={{flexGrow: 1, width: "50vw", display: "flex", flexDirection: "column", maxHeight: "100%", marginLeft: 2, overflow: "auto", height: "100%"}}>
+          { showDocumentation && <DocumentationTable version={version}/>}
+        </Box>
+        }
+      </Box>
     </Box>
   )
 }
