@@ -281,7 +281,7 @@ interface InterpreterOutputProps {
 function InterpreterOutput(props: InterpreterOutputProps) {
 
   return (
-    <Paper variant="outlined" sx={{p: 2, whiteSpace: "pre", fontFamily:" monospace", fontSize: 14, overflow: "auto", flexGrow: 1, marginTop: 2, marginLeft: 0}} >
+    <Paper variant="outlined" sx={{p: 2, whiteSpace: "pre", fontFamily:" monospace", fontSize: 14, overflow: "auto", flexGrow: 0, width: 1, height: 1, marginLeft: 0}} >
       {props.output.join("\n")}
       { props.errors.length > 0 &&
       <Alert severity="error">
@@ -308,6 +308,7 @@ function VersionSelect(props: VersionSelectProps) {
         label="Version"
         onChange={(el) => props.onChange(el.target.value)}
         value={props.value}
+        sx={{ flexGrow: 0}}
       >
         {
           props.versions.map((version) => {
@@ -406,7 +407,7 @@ function Interpreter() {
   }
 
   return (
-    <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column"}}>
+    <Box sx={{flexGrow:1, display: "flex", flexDirection: "column", overflow: "auto"}}>
       <Stack direction="row">
         <Typography variant="h5" component="div" sx={{flexGrow: 0, marginBottom: 3}}>
               MATL Interpreter
@@ -421,74 +422,57 @@ function Interpreter() {
           />
         </Box>
       </Stack>
-      <Box sx={{flexGrow: 1, display: "flex", flexDirection: "row" }}>
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column"}}>
-          <Grid container spacing={2} sx={{flexGrow: 1, display: "flex"}}>
-            <Grid item xs={10} sx={{ flexGrow: 0}}>
-              <TextField
-                id="code"
-                label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
-                multiline
-                autoFocus={true}
-                value={code}
-                onChange={(el) => setCode(el.target.value)}
-                maxRows={Infinity}
-                variant="outlined"
-                sx={{display: "flex"}}
-                InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
-              />
-            </Grid>
-            <Grid item xs={2} sx={{flexGrow: 0}}>
-              <VersionSelect onChange={setVersion} value={version} versions={versions}/>
-            </Grid>
-            <Grid item xs={12} sx={{ flexGrow: 0}}>
-              <TextField
-                id="inputs"
-                label="Input Arguments"
-                variant="outlined"
-                multiline
-                value={inputs}
-                onChange={(el) => setInputs(el.target.value)}
-                maxRows={Infinity}
-                sx={{display: "flex"}}
-                InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
-              />
-            </Grid>
-            <Grid item xs={2} sx={{flexGrow: 0}}>
-              <Stack direction="row" spacing={1}>
-                <Button
-                  fullWidth
-                  variant='contained'
-                  disabled={!isConnected}
-                  onClick={async () => {
-                    setRunning(!running)
+      <Stack direction="column" spacing={2} sx={{flexGrow: 1, overflow: "auto"}}>
+        <Stack direction="row" spacing={2} sx={{ mt: 1}}>
+          <TextField
+            id="code"
+            label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
+            multiline
+            autoFocus={true}
+            value={code}
+            onChange={(el) => setCode(el.target.value)}
+            maxRows={Infinity}
+            variant="outlined"
+            sx={{display: "flex", width: 7/8}}
+            InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
+          />
+          <VersionSelect onChange={setVersion} value={version} versions={versions}/>
+        </Stack>
+        <TextField
+          id="inputs"
+          label="Input Arguments"
+          variant="outlined"
+          multiline
+          value={inputs}
+          onChange={(el) => setInputs(el.target.value)}
+          maxRows={Infinity}
+          sx={{display: "flex"}}
+          InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
+        />
+        <Stack direction="row" spacing={1} sx={{ width: 1/4}}>
+          <Button
+            variant='contained'
+            disabled={!isConnected}
+            sx={{ width: 1/2}}
+            onClick={async () => {
+              setRunning(!running)
 
-                    if (!running && session) {
-                      setOutput([])
-                      setErrors([])
-                      await onRun(code, inputs, version, session)
-                    }
-                  }}
-                  startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
-                >
-                  {
-                    running ? "Cancel" : "Run"
-                  }
-                </Button>
-                <Button variant='outlined' fullWidth startIcon={<ShareIcon/>}>Share</Button>
-              </Stack>
-            </Grid>
-            <Grid item xs={12} sx={{flexGrow: 1, display: "flex"}}>
-              <InterpreterOutput running={running} output={output} errors={errors}/>
-            </Grid>
-          </Grid>
-        </Box>
-        { showDocumentation &&
-        <Box sx={{flexGrow: 1, width: "50vw", display: "flex", flexDirection: "column", maxHeight: "100%", marginLeft: 2, overflow: "auto", height: "100%"}}>
-          { showDocumentation && <DocumentationTable version={version}/>}
-        </Box>
-        }
-      </Box>
+              if (!running && session) {
+                setOutput([])
+                setErrors([])
+                await onRun(code, inputs, version, session)
+              }
+            }}
+            startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
+          >
+            {
+              running ? "Cancel" : "Run"
+            }
+          </Button>
+          <Button variant='outlined' sx={{ width: 1/2 }} startIcon={<ShareIcon/>}>Share</Button>
+        </Stack>
+        <InterpreterOutput running={running} output={output} errors={errors}/>
+      </Stack>
     </Box>
   )
 }
@@ -496,9 +480,9 @@ function Interpreter() {
 // <InterpreterOutput running={running} output={output} errors={errors}/>
 function App() {
   return (
-    <Box sx={{display: 'flex'}}>
+    <Box sx={{display: 'flex', flexDirection: "row"}}>
       <ButtonAppBar/>
-      <Box component="main" sx={{p: 2, display: "flex", flexDirection: "column", height: "100vh", flexGrow: 1, width: 2 }}>
+      <Box component="main" sx={{p: 2, display: "flex", flexDirection: "column", flexGrow: 1, width: 2, height: "100vh" }}>
         <Toolbar/>
         <Interpreter/>
       </Box>
