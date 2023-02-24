@@ -423,21 +423,25 @@ function Interpreter() {
         </Box>
       </Stack>
       <Stack direction="column" spacing={2} sx={{flexGrow: 1, overflow: "auto"}}>
-        <Stack direction="row" spacing={2} sx={{ mt: 1}}>
-          <TextField
-            id="code"
-            label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
-            multiline
-            autoFocus={true}
-            value={code}
-            onChange={(el) => setCode(el.target.value)}
-            maxRows={Infinity}
-            variant="outlined"
-            sx={{display: "flex", width: 7/8}}
-            InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
-          />
-          <VersionSelect onChange={setVersion} value={version} versions={versions}/>
-        </Stack>
+        <Grid container spacing={2} sx={{mt: 0}}>
+          <Grid item xs={10}>
+            <TextField
+              id="code"
+              label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
+              multiline
+              autoFocus={true}
+              value={code}
+              onChange={(el) => setCode(el.target.value)}
+              maxRows={Infinity}
+              variant="outlined"
+              sx={{flexGrow: 1, width: 1}}
+              InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
+            />
+          </Grid>
+          <Grid item xs={2}>
+            <VersionSelect onChange={setVersion} value={version} versions={versions}/>
+          </Grid>
+        </Grid>
         <TextField
           id="inputs"
           label="Input Arguments"
