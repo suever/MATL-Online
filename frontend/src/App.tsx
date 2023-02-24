@@ -43,6 +43,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import MUIDataTable from "mui-datatables"
 import ReactMarkdown from 'react-markdown'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 interface SearchBarProps {
   value: string
@@ -313,7 +314,7 @@ function VersionSelect(props: VersionSelectProps) {
         {
           props.versions.map((version) => {
             return (
-              <MenuItem value={version.label}>{version.label}</MenuItem>
+              <MenuItem key={version.label} value={version.label}>{version.label}</MenuItem>
             )
           })
 
@@ -355,14 +356,33 @@ function Interpreter() {
   ]
 
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected)
-  const [code, setCode] = useState<string>(":")
+  const [code, setCode] = useState<string>(":t!")
   const [running, setRunning] = useState<boolean>(false)
   const [output, setOutput] = useState<string[]>([])
   const [errors, setErrors] = useState<string[]>([])
   const [version, setVersion] = useState<string>(versions[0].label)
   const [session, setSession] = useState<string|null>(null)
-  const [inputs, setInputs] = useState<string>("12")
+  const [inputs, setInputs] = useState<string>("120")
   const [showDocumentation, setShowDocumentation] = useState<boolean>(false)
+
+  const runCode = async () => {
+    if (running) {
+      return
+    }
+
+    setRunning(true)
+    setOutput([])
+    setErrors([])
+
+    await socket.emitWithAck('submit', {
+      code,
+      inputs,
+      version,
+      uid: session
+    })
+  }
+
+  useHotkeys('ctrl+enter', runCode)
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -396,15 +416,6 @@ function Interpreter() {
       setErrors(errors)
     })
   })
-
-  const onRun = async (code: string, inputs: string, version: string, uuid: string) => {
-    await socket.emitWithAck('submit', {
-      code,
-      inputs,
-      version,
-      uid: uuid
-    })
-  }
 
   return (
     <Box sx={{flexGrow:1, display: "flex", flexDirection: "column", overflow: "auto"}}>
@@ -458,15 +469,7 @@ function Interpreter() {
             variant='contained'
             disabled={!isConnected}
             sx={{ width: 1/2}}
-            onClick={async () => {
-              setRunning(!running)
-
-              if (!running && session) {
-                setOutput([])
-                setErrors([])
-                await onRun(code, inputs, version, session)
-              }
-            }}
+            onClick={runCode}
             startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
           >
             {

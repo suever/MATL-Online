@@ -797,6 +797,11 @@ property-information@^6.0.0:
   resolved "https://registry.yarnpkg.com/property-information/-/property-information-6.2.0.tgz#b74f522c31c097b5149e3c3cb8d7f3defd986a1d"
   integrity sha512-kma4U7AFCTwpqq5twzC1YVIDXSqg6qQK6JN0smOw8fgRy1OkMi0CYSzFmsy6dnqSenamAtj0CyXMUJ1Mf6oROg==
 
+react-hotkeys-hook@^4.3.7:
+  version "4.3.7"
+  resolved "https://registry.yarnpkg.com/react-hotkeys-hook/-/react-hotkeys-hook-4.3.7.tgz#87d4c2c939d190643acb66de84cdf586a8743dce"
+  integrity sha512-qUcA5vl/liGWr9wLYI5/8oppHLa6nExFqOAMC6CyZhpj7C56PIzYZ76xAtJ+5lgxObgl4A4pQz8upy+nq7orSQ==
+
 react-is@^16.13.1:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
