@@ -464,7 +464,7 @@ function Interpreter() {
           sx={{display: "flex"}}
           InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
         />
-        <Stack direction="row" spacing={1} sx={{ width: 1/4}}>
+        <Stack direction="row" spacing={1} sx={{ width: showDocumentation ? 1/2 : 1/4}}>
           <Button
             variant='contained'
             disabled={!isConnected}
@@ -480,11 +480,15 @@ function Interpreter() {
         </Stack>
         <InterpreterOutput running={running} output={output} errors={errors}/>
       </Stack>
+      { showDocumentation &&
+                <Box sx={{flexGrow: 1, overflow: "auto", maxHeight: "80vh", width: 400, maxWidth: 600, marginLeft: 2}}>
+                  <DocumentationTable version={version}/>
+                </Box>
+      }
     </Box>
   )
 }
 
-// <InterpreterOutput running={running} output={output} errors={errors}/>
 function App() {
   return (
     <Box sx={{display: 'flex', flexDirection: "row"}}>

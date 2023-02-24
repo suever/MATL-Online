@@ -1,0 +1,205 @@
+import React from 'react'
+import {useState, useEffect } from 'react'
+import io from 'socket.io-client'
+import AppBar from '@mui/material/AppBar'
+import Alert from '@mui/material/Alert'
+import Paper from '@mui/material/Paper'
+import Box from '@mui/material/Box'
+import Switch from '@mui/material/Switch'
+import FormGroup from '@mui/material/FormGroup'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Toolbar from '@mui/material/Toolbar'
+import Tooltip from '@mui/material/Tooltip'
+import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
+import MenuIcon from '@mui/icons-material/Menu'
+import TextField from '@mui/material/TextField'
+import Drawer from '@mui/material/Drawer'
+import List from '@mui/material/List'
+import Stack from '@mui/material/Stack'
+import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import CssBaseline from '@mui/material/CssBaseline'
+import FormControl from '@mui/material/FormControl'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import InputLabel from '@mui/material/InputLabel'
+import CodeIcon from '@mui/icons-material/Code'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
+import BarChartIcon from '@mui/icons-material/BarChart'
+import Grid from '@mui/material/Grid'
+import Button from '@mui/material/Button'
+import HistoryIcon from '@mui/icons-material/History'
+import ShareIcon from '@mui/icons-material/Share'
+import CircularProgress from '@mui/material/CircularProgress'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import SchoolIcon from '@mui/icons-material/School'
+import HelpIcon from '@mui/icons-material/Help'
+import ContentPasteIcon from '@mui/icons-material/ContentPaste'
+import TroubleshootIcon from '@mui/icons-material/Troubleshoot'
+import SearchIcon from '@mui/icons-material/Search'
+import ClearIcon from '@mui/icons-material/Clear'
+import MUIDataTable from "mui-datatables"
+import ReactMarkdown from 'react-markdown'
+import { useHotkeys } from 'react-hotkeys-hook'
+
+import ExplainIconButton from './App'
+import PasteIconButton from './App'
+import InterpreterOutput from './App'
+import VersionSelect from './App'
+import DocumentationTable from './App'
+
+interface StatusMessage {
+  type: string;
+  value: string;
+}
+const drawerWidth = 240
+const socket = io("http://localhost:5000")
+
+function Interpreter() {
+  const versions = [
+    { "label": "22.7.4", "releaseDate": new Date()},
+    { "label": "22.7.3", "releaseDate": new Date()}
+  ]
+
+  const [isConnected, setIsConnected] = useState<boolean>(socket.connected)
+  const [code, setCode] = useState<string>(":t!")
+  const [running, setRunning] = useState<boolean>(false)
+  const [output, setOutput] = useState<string[]>([])
+  const [errors, setErrors] = useState<string[]>([])
+  const [version, setVersion] = useState<string>(versions[0].label)
+  const [session, setSession] = useState<string|null>(null)
+  const [inputs, setInputs] = useState<string>("120")
+  const [showDocumentation, setShowDocumentation] = useState<boolean>(false)
+
+  const runCode = async () => {
+    if (running) {
+      return
+    }
+
+    setRunning(true)
+    setOutput([])
+    setErrors([])
+
+    await socket.emitWithAck('submit', {
+      code,
+      inputs,
+      version,
+      uid: session
+    })
+  }
+
+  useHotkeys('ctrl+enter', runCode)
+
+  useEffect(() => {
+    socket.on('connect', () => {
+      setIsConnected(true)
+    })
+
+    socket.on('disconnect', () => {
+      setIsConnected(false)
+    })
+
+    socket.on('complete', () => {
+      setRunning(false)
+    })
+
+    socket.on('connection', (data) => setSession(data.session_id))
+
+    socket.on('status', (data) => {
+      const messages = data.data as StatusMessage[]
+      const errors = []
+      const outputs = []
+
+      for (const message of messages) {
+        if (message.type == "stderr") {
+          errors.push(message.value)
+        } else if (message.type == "stdout") {
+          outputs.push(message.value)
+        }
+      }
+
+      setOutput(outputs)
+      setErrors(errors)
+    })
+  })
+
+  return (
+    <Box sx={{flexGrow:1, display: "flex", flexDirection: "column", overflow: "auto"}}>
+      <Stack direction="row">
+        <Typography variant="h5" component="div" sx={{flexGrow: 0, marginBottom: 3}}>
+              MATL Interpreter
+        </Typography>
+        <Box sx={{ flexGrow: 1 }}></Box>
+        <Box sx={{ flexGrow: 0}}>
+          <FormControlLabel
+            sx={{ marginRight: 0 }}
+            labelPlacement="start"
+            control={<Switch size="medium" checked={showDocumentation} onChange={(el) => setShowDocumentation(el.target.checked)}/>}
+            label={<MenuBookIcon/>}
+          />
+        </Box>
+      </Stack>
+      <Grid container spacing={2} sx={{ flexGrow: 1, display: "flex"}}>
+        <Grid item xs={showDocumentation ? 6 : 12 } sx={{ flexGrow: 1, height: 1, display: "flex"}}>
+          <Stack direction="column" spacing={2} sx={{flexGrow: 1, overflow: "auto"}}>
+            <Grid container spacing={2} sx={{mt: 0}}>
+              <Grid item xs={10}>
+                <TextField
+                  id="code"
+                  label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
+                  multiline
+                  autoFocus={true}
+                  value={code}
+                  onChange={(el) => setCode(el.target.value)}
+                  maxRows={Infinity}
+                  variant="outlined"
+                  sx={{flexGrow: 1, width: 1}}
+                  InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <VersionSelect/>
+              </Grid>
+            </Grid>
+            <TextField
+              id="inputs"
+              label="Input Arguments"
+              variant="outlined"
+              multiline
+              value={inputs}
+              onChange={(el) => setInputs(el.target.value)}
+              maxRows={Infinity}
+              sx={{display: "flex"}}
+              InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
+            />
+            <Stack direction="row" spacing={1} sx={{ width: showDocumentation ? 1/2 : 1/4}}>
+              <Button
+                variant='contained'
+                disabled={!isConnected}
+                sx={{ width: 1/2}}
+                onClick={runCode}
+                startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
+              >
+                {
+                  running ? "Cancel" : "Run"
+                }
+              </Button>
+              <Button variant='outlined' sx={{ width: 1/2 }} startIcon={<ShareIcon/>}>Share</Button>
+            </Stack>
+            <InterpreterOutput/>
+          </Stack>
+        </Grid>
+        { showDocumentation &&
+              <Grid item xs={6} sx={{ flexGrow: 1, overflow: "auto", maxHeight: "80vh"}}>
+                <Box sx={{flexGrow: 1, overflow: "auto", maxHeight: "80vh", width: 400, maxWidth: 600, marginLeft: 2}}>
+                  <DocumentationTable/>
+                </Box>
+              </Grid>
+        }
+      </Grid>
+    </Box>
+  )
+}
