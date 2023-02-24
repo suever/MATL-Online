@@ -433,58 +433,59 @@ function Interpreter() {
           />
         </Box>
       </Stack>
-      <Stack direction="column" spacing={2} sx={{flexGrow: 1, overflow: "auto"}}>
-        <Grid container spacing={2} sx={{mt: 0}}>
-          <Grid item xs={10}>
-            <TextField
-              id="code"
-              label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
-              multiline
-              autoFocus={true}
-              value={code}
-              onChange={(el) => setCode(el.target.value)}
-              maxRows={Infinity}
-              variant="outlined"
-              sx={{flexGrow: 1, width: 1}}
-              InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
-            />
+      <Stack direction="row" sx={{ flexGrow: 1, overflow: "auto", display: "flex" }}>
+        <Stack direction="column" spacing={2} sx={{flexGrow: 1, overflow: "auto"}}>
+          <Grid container spacing={2} sx={{mt: 0}}>
+            <Grid item xs={10}>
+              <TextField
+                id="code"
+                label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
+                multiline
+                autoFocus={true}
+                value={code}
+                onChange={(el) => setCode(el.target.value)}
+                maxRows={Infinity}
+                variant="outlined"
+                fullWidth
+                InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <VersionSelect onChange={setVersion} value={version} versions={versions}/>
+            </Grid>
           </Grid>
-          <Grid item xs={2}>
-            <VersionSelect onChange={setVersion} value={version} versions={versions}/>
-          </Grid>
-        </Grid>
-        <TextField
-          id="inputs"
-          label="Input Arguments"
-          variant="outlined"
-          multiline
-          value={inputs}
-          onChange={(el) => setInputs(el.target.value)}
-          maxRows={Infinity}
-          sx={{display: "flex"}}
-          InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
-        />
-        <Stack direction="row" spacing={1} sx={{ width: showDocumentation ? 1/2 : 1/4}}>
-          <Button
-            variant='contained'
-            disabled={!isConnected}
-            sx={{ width: 1/2}}
-            onClick={runCode}
-            startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
-          >
-            {
-              running ? "Cancel" : "Run"
-            }
-          </Button>
-          <Button variant='outlined' sx={{ width: 1/2 }} startIcon={<ShareIcon/>}>Share</Button>
+          <TextField
+            id="inputs"
+            label="Input Arguments"
+            variant="outlined"
+            multiline
+            value={inputs}
+            onChange={(el) => setInputs(el.target.value)}
+            maxRows={Infinity}
+            InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
+          />
+          <Stack direction="row" spacing={1} sx={{ width: showDocumentation ? 1/2 : 1/4}}>
+            <Button
+              variant='contained'
+              disabled={!isConnected}
+              sx={{ width: 1/2}}
+              onClick={runCode}
+              startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
+            >
+              {
+                running ? "Cancel" : "Run"
+              }
+            </Button>
+            <Button variant='outlined' sx={{ width: 1/2 }} startIcon={<ShareIcon/>}>Share</Button>
+          </Stack>
+          <InterpreterOutput running={running} output={output} errors={errors}/>
         </Stack>
-        <InterpreterOutput running={running} output={output} errors={errors}/>
-      </Stack>
-      { showDocumentation &&
+        { showDocumentation &&
                 <Box sx={{flexGrow: 1, overflow: "auto", maxHeight: "80vh", width: 400, maxWidth: 600, marginLeft: 2}}>
                   <DocumentationTable version={version}/>
                 </Box>
-      }
+        }
+      </Stack>
     </Box>
   )
 }
