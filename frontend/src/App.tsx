@@ -285,7 +285,7 @@ function InterpreterOutput(props: InterpreterOutputProps) {
 
   return (
     <Paper variant="outlined"
-      sx={{p: 2, whiteSpace: "pre", fontFamily: " monospace", fontSize: 14, marginLeft: 0, width: 1, height: 1}}>
+      sx={{p: 2, flexGrow: 1, whiteSpace: "pre", fontFamily: " monospace", fontSize: 14, marginLeft: 0, width: 1, overflow: "auto"}}>
       {props.output.join("\n")}
       {props.errors.length > 0 &&
           <Alert severity="error">
@@ -421,27 +421,26 @@ function Interpreter() {
   })
 
   return (
-    <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column", overflow: "auto"}}>
+    <Box sx={{flexGrow: 1, height: 2, display: "flex", flexDirection: "column"}}>
+      {/* Row containing the page title and documentation toggle */}
       <Stack direction="row" sx={{display: "flex", justifyContent: "space-between"}}>
-        <Typography variant="h5" component="div" sx={{flexGrow: 0, marginBottom: 3}}>
+        <Typography variant="h5" component="div" sx={{marginBottom: 3}}>
           MATL Interpreter
         </Typography>
-        <Box sx={{flexGrow: 0}}>
-          <FormControlLabel
-            sx={{marginRight: 0}}
-            labelPlacement="start"
-            control={<Switch size="medium" checked={showDocumentation}
-              onChange={(el) => setShowDocumentation(el.target.checked)}/>}
-            label={<MenuBookIcon/>}
-          />
-        </Box>
+        <FormControlLabel
+          sx={{mr: 0}}
+          labelPlacement="start"
+          control={<Switch size="medium" checked={showDocumentation}
+            onChange={(el) => setShowDocumentation(el.target.checked)}/>}
+          label={<MenuBookIcon/>}
+        />
       </Stack>
       {/* This is the horizontal row that contains the interpreter on the left and docs on the right */}
-      <Box sx={{flexGrow: 1, overflow: "auto", display: "flex", flexDirection: "row"}}>
+      <Box sx={{flexGrow: 1, display: "flex", flexDirection: "row"}}>
         {/* The code inputs, buttons, and output */}
-        <Stack spacing={2} sx={{flexGrow: 1, flexDirection: "column", overflow: "auto"}}>
+        <Stack spacing={2} sx={{flexGrow: 1, flexBasis: "50%", width: 2, flexDirection: "column", maxHeight: 1}}>
           <Grid container spacing={2} sx={{mt: 0}}>
-            <Grid item xs={10}>
+            <Grid item xs={9}>
               <TextField
                 id="code"
                 label={`Code ${code.length ? `(${code.length} byte${code.length > 1 ? "s" : ""})` : ''}`}
@@ -455,7 +454,7 @@ function Interpreter() {
                 InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={3}>
               <VersionSelect onChange={setVersion} value={version} versions={versions}/>
             </Grid>
           </Grid>
@@ -470,28 +469,33 @@ function Interpreter() {
             maxRows={Infinity}
             InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
           />
+          {/* Buttons for running the code and sharing*/}
           <Stack direction="row" spacing={1} sx={{width: showDocumentation ? 1 / 2 : 1 / 4}}>
             <Button
               variant='contained'
               disabled={!isConnected}
-
-              sx={{width: 1 / 2}}
               onClick={runCode}
+              sx={{ minWidth: "9em" }}
               startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
             >
               {
                 running ? "Cancel" : "Run"
               }
             </Button>
-            <Button variant='outlined' sx={{width: 1 / 2}} startIcon={<ShareIcon/>}>Share</Button>
+            <Button
+              variant='outlined'
+              sx={{ minWidth: "9em" }}
+              startIcon={<ShareIcon/>}>
+              Share
+            </Button>
           </Stack>
-          <Box sx={{whiteSpace: "pre", fontFamily: "monospace", overflow: "auto", flexGrow: 1, height: 1, width: 1}}>
+          <Box sx={{whiteSpace: "pre", fontFamily: "monospace", overflow: "auto", flexGrow: 1, height: 2, width: 1, display: "flex"}}>
             <InterpreterOutput running={running} output={output} errors={errors}/>
           </Box>
         </Stack>
         {/* The documentation (if it exists)*/}
         {showDocumentation &&
-            <Box sx={{flexGrow: 0, overflow: "auto", maxHeight: "80vh", maxWidth: 600, marginLeft: 2}}>
+            <Box sx={{flexGrow: 0, overflow: "auto", maxHeight: "80vh", flexBasis: "50%", maxWidth: 600, marginLeft: 2}}>
               <DocumentationTable version={version}/>
             </Box>
         }
@@ -505,7 +509,8 @@ function App() {
     <Box sx={{display: 'flex', flexDirection: "row"}}>
       <ButtonAppBar/>
       <Box component="main"
-        sx={{p: 2, display: "flex", flexDirection: "column", flexGrow: 1, width: 2, height: "100vh"}}>
+        sx={{p: 2, display: "flex", flexDirection: "column", flexGrow: 1, width: 2, height: "100vh"}}
+      >
         <Toolbar/>
         <Interpreter/>
       </Box>
