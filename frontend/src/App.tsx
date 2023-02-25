@@ -1,5 +1,5 @@
 import React from 'react'
-import {useState, useEffect } from 'react'
+import {useState, useEffect} from 'react'
 import io from 'socket.io-client'
 import AppBar from '@mui/material/AppBar'
 import Alert from '@mui/material/Alert'
@@ -43,7 +43,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import MUIDataTable from "mui-datatables"
 import ReactMarkdown from 'react-markdown'
-import { useHotkeys } from 'react-hotkeys-hook'
+import {useHotkeys} from 'react-hotkeys-hook'
 
 interface SearchBarProps {
   value: string
@@ -57,14 +57,14 @@ function SearchBar(props: SearchBarProps) {
   )
 
   return (
-    <Stack direction="column" sx={{ p: 1}}>
+    <Stack direction="column" sx={{p: 1}}>
       <TextField
         value={props.value}
         onChange={(el) => {
           const value = el.target.value
           props.onChange(value)
         }}
-        InputProps={{ endAdornment: icon}}
+        InputProps={{endAdornment: icon}}
       />
     </Stack>
   )
@@ -86,15 +86,15 @@ function DocumentationTable(props: DocumentationTableProps) {
   const [value, setValue] = useState<string>("")
   const [data, setData] = useState<documentation[]>([])
   const [loading, setLoading] = useState<boolean>(false)
-  
+
   const columns = [
     {
       name: "source",
       label: "Source",
       options: {
-        customBodyRenderLite: (dataIndex: number):  React.ReactNode =>  {
+        customBodyRenderLite: (dataIndex: number): React.ReactNode => {
           const value = data[dataIndex].source
-          return <span style={{ fontFamily: "monospace", verticalAlign: "top"}}><strong>{value}</strong></span>
+          return <span style={{fontFamily: "monospace", verticalAlign: "top"}}><strong>{value}</strong></span>
         }
       }
     },
@@ -108,7 +108,7 @@ function DocumentationTable(props: DocumentationTableProps) {
           //value.replace('</strong>', '**')
           //return <ReactMarkdown>{value}</ReactMarkdown>
           return (
-            <div style={{ fontFamily: "monospace", fontSize: 12, whiteSpace: "pre-line"}}>
+            <div style={{fontFamily: "monospace", fontSize: 12, whiteSpace: "pre-line"}}>
               <strong>{record.brief}</strong>
               {'\n' + record.arguments}
               <div dangerouslySetInnerHTML={{__html: record.description}}/>
@@ -148,7 +148,9 @@ function DocumentationTable(props: DocumentationTableProps) {
     const json = await response.json()
 
     // Add an aggregate field that contains all of the searchable info
-    json.data.forEach((element: documentation) => { element.searchText = element.arguments + ' ' + element.brief + ' ' + element.description})
+    json.data.forEach((element: documentation) => {
+      element.searchText = element.arguments + ' ' + element.brief + ' ' + element.description
+    })
 
     setData(json.data)
 
@@ -234,7 +236,7 @@ function ButtonAppBar() {
             </IconButton>
           </div>
           <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-                        MATL Online
+            MATL Online
           </Typography>
         </Toolbar>
       </AppBar>
@@ -274,20 +276,21 @@ function ButtonAppBar() {
 }
 
 interface InterpreterOutputProps {
-    running: boolean;
-    output: string[];
-    errors: string[];
+  running: boolean;
+  output: string[];
+  errors: string[];
 }
 
 function InterpreterOutput(props: InterpreterOutputProps) {
 
   return (
-    <Paper variant="outlined" sx={{p: 2, whiteSpace: "pre", fontFamily:" monospace", fontSize: 14, overflow: "auto", flexGrow: 0, width: 1, height: 1, marginLeft: 0}} >
+    <Paper variant="outlined"
+      sx={{p: 2, whiteSpace: "pre", fontFamily: " monospace", fontSize: 14, marginLeft: 0, width: 1, height: 1}}>
       {props.output.join("\n")}
-      { props.errors.length > 0 &&
-      <Alert severity="error">
-        { props.errors.join("\n")}
-      </Alert>
+      {props.errors.length > 0 &&
+          <Alert severity="error">
+            {props.errors.join("\n")}
+          </Alert>
       }
     </Paper>
   )
@@ -309,7 +312,7 @@ function VersionSelect(props: VersionSelectProps) {
         label="Version"
         onChange={(el) => props.onChange(el.target.value)}
         value={props.value}
-        sx={{ flexGrow: 0}}
+        sx={{flexGrow: 0}}
       >
         {
           props.versions.map((version) => {
@@ -339,7 +342,7 @@ function ExplainIconButton() {
   )
 }
 
-function PasteIconButton () {
+function PasteIconButton() {
   return (
     <Tooltip title="Paste formatted input">
       <IconButton size="small" sx={{m: -1}}>
@@ -351,8 +354,8 @@ function PasteIconButton () {
 
 function Interpreter() {
   const versions = [
-    { "label": "22.7.4", "releaseDate": new Date()},
-    { "label": "22.7.3", "releaseDate": new Date()}
+    {"label": "22.7.4", "releaseDate": new Date()},
+    {"label": "22.7.3", "releaseDate": new Date()}
   ]
 
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected)
@@ -361,7 +364,7 @@ function Interpreter() {
   const [output, setOutput] = useState<string[]>([])
   const [errors, setErrors] = useState<string[]>([])
   const [version, setVersion] = useState<string>(versions[0].label)
-  const [session, setSession] = useState<string|null>(null)
+  const [session, setSession] = useState<string | null>(null)
   const [inputs, setInputs] = useState<string>("120")
   const [showDocumentation, setShowDocumentation] = useState<boolean>(false)
 
@@ -418,23 +421,26 @@ function Interpreter() {
   })
 
   return (
-    <Box sx={{flexGrow:1, display: "flex", flexDirection: "column", overflow: "auto"}}>
-      <Stack direction="row">
+    <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column", overflow: "auto"}}>
+      <Stack direction="row" sx={{display: "flex"}}>
         <Typography variant="h5" component="div" sx={{flexGrow: 0, marginBottom: 3}}>
-              MATL Interpreter
+          MATL Interpreter
         </Typography>
-        <Box sx={{ flexGrow: 1 }}></Box>
-        <Box sx={{ flexGrow: 0}}>
+        <Box sx={{flexGrow: 1}}></Box>
+        <Box sx={{flexGrow: 0}}>
           <FormControlLabel
-            sx={{ marginRight: 0 }}
+            sx={{marginRight: 0}}
             labelPlacement="start"
-            control={<Switch size="medium" checked={showDocumentation} onChange={(el) => setShowDocumentation(el.target.checked)}/>}
+            control={<Switch size="medium" checked={showDocumentation}
+              onChange={(el) => setShowDocumentation(el.target.checked)}/>}
             label={<MenuBookIcon/>}
           />
         </Box>
       </Stack>
-      <Stack direction="row" sx={{ flexGrow: 1, overflow: "auto", display: "flex" }}>
-        <Stack direction="column" spacing={2} sx={{flexGrow: 1, overflow: "auto"}}>
+      {/* This is the horizontal row that contains the interpreter on the left and docs on the right */}
+      <Box sx={{flexGrow: 1, overflow: "auto", display: "flex", flexDirection: "row"}}>
+        {/* The code inputs, buttons, and output */}
+        <Stack spacing={2} sx={{flexGrow: 1, flexDirection: "column", overflow: "auto"}}>
           <Grid container spacing={2} sx={{mt: 0}}>
             <Grid item xs={10}>
               <TextField
@@ -459,16 +465,18 @@ function Interpreter() {
             label="Input Arguments"
             variant="outlined"
             multiline
+            fullWidth
             value={inputs}
             onChange={(el) => setInputs(el.target.value)}
             maxRows={Infinity}
             InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
           />
-          <Stack direction="row" spacing={1} sx={{ width: showDocumentation ? 1/2 : 1/4}}>
+          <Stack direction="row" spacing={1} sx={{width: showDocumentation ? 1 / 2 : 1 / 4}}>
             <Button
               variant='contained'
               disabled={!isConnected}
-              sx={{ width: 1/2}}
+
+              sx={{width: 1 / 2}}
               onClick={runCode}
               startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
             >
@@ -476,16 +484,19 @@ function Interpreter() {
                 running ? "Cancel" : "Run"
               }
             </Button>
-            <Button variant='outlined' sx={{ width: 1/2 }} startIcon={<ShareIcon/>}>Share</Button>
+            <Button variant='outlined' sx={{width: 1 / 2}} startIcon={<ShareIcon/>}>Share</Button>
           </Stack>
-          <InterpreterOutput running={running} output={output} errors={errors}/>
+          <Box sx={{whiteSpace: "pre", fontFamily: "monospace", overflow: "auto", flexGrow: 1, height: 1, width: 1}}>
+            <InterpreterOutput running={running} output={output} errors={errors}/>
+          </Box>
         </Stack>
-        { showDocumentation &&
-                <Box sx={{flexGrow: 1, overflow: "auto", maxHeight: "80vh", width: 400, maxWidth: 600, marginLeft: 2}}>
-                  <DocumentationTable version={version}/>
-                </Box>
+        {/* The documentation (if it exists)*/}
+        {showDocumentation &&
+            <Box sx={{flexGrow: 0, overflow: "auto", maxHeight: "80vh", maxWidth: 600, marginLeft: 2}}>
+              <DocumentationTable version={version}/>
+            </Box>
         }
-      </Stack>
+      </Box>
     </Box>
   )
 }
@@ -494,7 +505,8 @@ function App() {
   return (
     <Box sx={{display: 'flex', flexDirection: "row"}}>
       <ButtonAppBar/>
-      <Box component="main" sx={{p: 2, display: "flex", flexDirection: "column", flexGrow: 1, width: 2, height: "100vh" }}>
+      <Box component="main"
+        sx={{p: 2, display: "flex", flexDirection: "column", flexGrow: 1, width: 2, height: "100vh"}}>
         <Toolbar/>
         <Interpreter/>
       </Box>
