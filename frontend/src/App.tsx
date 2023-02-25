@@ -422,11 +422,10 @@ function Interpreter() {
 
   return (
     <Box sx={{flexGrow: 1, display: "flex", flexDirection: "column", overflow: "auto"}}>
-      <Stack direction="row" sx={{display: "flex"}}>
+      <Stack direction="row" sx={{display: "flex", justifyContent: "space-between"}}>
         <Typography variant="h5" component="div" sx={{flexGrow: 0, marginBottom: 3}}>
           MATL Interpreter
         </Typography>
-        <Box sx={{flexGrow: 1}}></Box>
         <Box sx={{flexGrow: 0}}>
           <FormControlLabel
             sx={{marginRight: 0}}
