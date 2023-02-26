@@ -6,6 +6,8 @@ import Alert from '@mui/material/Alert'
 import Paper from '@mui/material/Paper'
 import Box from '@mui/material/Box'
 import Switch from '@mui/material/Switch'
+import "./index.css"
+import {createTheme, createMuiTheme, Theme, ThemeProvider} from '@mui/material/styles'
 import FormGroup from '@mui/material/FormGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Toolbar from '@mui/material/Toolbar'
@@ -44,11 +46,257 @@ import ClearIcon from '@mui/icons-material/Clear'
 import MUIDataTable from "mui-datatables"
 import ReactMarkdown from 'react-markdown'
 import {useHotkeys} from 'react-hotkeys-hook'
+import {ComponentsOverrides} from '@mui/material/styles/overrides'
 
 interface SearchBarProps {
   value: string
   onChange: (newValue: string) => void
 }
+
+declare module '@mui/material/styles' {
+    interface Components {
+        MUIDataTable?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTable'];
+        };
+        
+        MUIDataTableBody?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableBody'];
+        };
+
+        MUIDataTableBodyCell?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableBodyCell'];
+        };
+
+        MUIDataTableBodyRow?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableBodyRow'];
+        };
+
+        MUIDataTableFilter?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableFilter'];
+        };
+
+        MUIDataTableFilterList?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableFilterList'];
+        };
+
+        MUIDataTableFooter?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableFooter'];
+        };
+
+        MUIDataTableHead?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableHead'];
+        };
+
+        MUIDataTableHeadCell?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableHeadCell'];
+        };
+
+        MUIDataTableHeadRow?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableHeadRow'];
+        };
+
+        MUIDataTableJumpToPage?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableJumpToPage'];
+        };
+
+        MUIDataTablePagination?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTablePagination'];
+        };
+
+        MUIDataTableResize?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableResize'];
+        };
+
+        MUIDataTableSearch?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableSearch'];
+        };
+
+        MUIDataTableSelectCell?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableSelectCell'];
+        };
+
+        MUIDataTableToolbar?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableToolbar'];
+        };
+
+        MUIDataTableToolbarSelect?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableToolbarSelect'];
+        };
+
+        MUIDataTableViewCol?: {
+            styleOverrides?: ComponentsOverrides['MUIDataTableViewCol'];
+        };
+    }
+}
+
+declare module '@mui/material/styles/overrides' {
+    interface ComponentNameToClassKey {
+        MUIDataTable: 'root' | 'caption' | 'responsiveBase' | 'liveAnnounce' | 'paper' | 'responsiveScroll' | 'tableRoot';
+
+        MUIDataTableBody: 'root' | 'emptyTitle' | 'lastSimpleCell' | 'lastStackedCell';
+
+        MUIDataTableBodyCell:
+            | 'root'
+            | 'cellHide'
+            | 'cellStackedSmall'
+            | 'responsiveStackedSmall'
+            | 'responsiveStackedSmallParent'
+            | 'simpleCell'
+            | 'simpleHeader'
+            | 'stackedCommon'
+            | 'stackedCommonAlways'
+            | 'stackedHeader'
+            | 'stackedParent'
+            | 'stackedParentAlways';
+
+        MUIDataTableBodyRow: 'root' | 'hoverCursor' | 'responsiveSimple' | 'responsiveStacked';
+
+        MUIDataTableFilter:
+            | 'root'
+            | 'checkbox'
+            | 'checkboxFormControl'
+            | 'checkboxFormControlLabel'
+            | 'checkboxFormGroup'
+            | 'checkboxIcon'
+            | 'checkboxListTitle'
+            | 'checked'
+            | 'filtersSelected'
+            | 'gridListTile'
+            | 'header'
+            | 'noMargin'
+            | 'reset'
+            | 'resetLink'
+            | 'title';
+
+        MUIDataTableFilterList: 'root' | 'chip';
+
+        MUIDataTableFooter: 'root';
+
+        MUIDataTableHead: 'main' | 'responsiveSimple' | 'responsiveStacked' | 'responsiveStackedAlways';
+
+        MUIDataTableHeadCell:
+            | 'root'
+            | 'contentWrapper'
+            | 'data'
+            | 'dragCursor'
+            | 'fixedHeader'
+            | 'hintIconAlone'
+            | 'hintIconWithSortIcon'
+            | 'mypopper'
+            | 'sortAction'
+            | 'sortActive'
+            | 'sortLabelRoot'
+            | 'toolButton'
+            | 'tooltip';
+
+        MUIDataTableHeadRow: 'root';
+
+        MUIDataTableJumpToPage: 'root' | 'caption' | 'input' | 'select' | 'selectIcon' | 'selectRoot';
+
+        MUIDataTablePagination:
+            | 'root'
+            | '@media screen and (max-width: 400px)'
+            | 'navContainer'
+            | 'selectRoot'
+            | 'tableCellContainer'
+            | 'toolbar';
+
+        MUIDataTableResize: 'root' | 'resizer';
+
+        MUIDataTableSearch: 'clearIcon' | 'main' | 'searchIcon' | 'searchText';
+
+        MUIDataTableSelectCell:
+            | 'root'
+            | 'checkboxRoot'
+            | 'checked'
+            | 'disabled'
+            | 'expandDisabled'
+            | 'expanded'
+            | 'fixedHeader'
+            | 'fixedLeft'
+            | 'headerCell'
+            | 'hide'
+            | 'icon';
+
+        MUIDataTableToolbar:
+            | 'root'
+            | '@media screen and (max-width: 480px)'
+            | "[theme.breakpoints.down('sm')]"
+            | "[theme.breakpoints.down('xs')]"
+            | 'actions'
+            | 'filterCloseIcon'
+            | 'filterPaper'
+            | 'fullWidthActions'
+            | 'fullWidthLeft'
+            | 'fullWidthRoot'
+            | 'fullWidthTitleText'
+            | 'icon'
+            | 'iconActive'
+            | 'left'
+            | 'searchIcon'
+            | 'titleRoot'
+            | 'titleText';
+
+        MUIDataTableToolbarSelect: 'root' | 'deleteIcon' | 'iconButton' | 'title';
+
+        MUIDataTableViewCol:
+            | 'root'
+            | 'checkbox'
+            | 'checkboxRoot'
+            | 'checked'
+            | 'formControl'
+            | 'formGroup'
+            | 'label'
+            | 'title';
+    }
+}
+
+/*
+declare module '@mui/material/styles' {
+  interface Components {
+    MUIDataTable?: {
+      styleOverrides?: ComponentsOverrides['MUIDataTable']
+    }
+  }
+}
+
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MUIDataTable: 'root' | 'caption' | 'liveAnnounce' | 'paper' | 'responsiveScroll' | 'tableRoot';
+  }
+}
+
+declare module '@mui/material/styles' {
+  interface Components {
+    [key: string]: any //eslint-disable-line
+  }
+}
+ */
+
+const customTheme = createTheme({
+  components: {
+    /*
+    MUIDataTableBodyCell: {
+      styleOverrides: {
+        root: {
+          fontWeight: 'bold',
+        },
+      },
+    },
+     */
+    MUIDataTable: {
+      styleOverrides: {
+        tableRoot: {
+          height: "100%",
+        },
+        paper: {
+          height: "calc(100% - 70px)",
+          boxShadow: 'none',
+        },
+      }
+    },
+  }
+})
 
 function SearchBar(props: SearchBarProps) {
 
@@ -163,20 +411,27 @@ function DocumentationTable(props: DocumentationTableProps) {
   fetchData(props.version)
 
   return (
-    <MUIDataTable
-      title={"Employee List"}
-      data={data}
-      columns={columns}
-      options={{
-        download: false,
-        print: false,
-        viewColumns: false,
-        filter: false,
-        pagination: false,
-        searchAlwaysOpen: true,
-        selectableRows: undefined,
-      }}
-    />
+    <ThemeProvider theme={customTheme}>
+      <MUIDataTable
+        title={"Employee List"}
+        data={data}
+        columns={columns}
+        options={{
+          setTableProps: () => {
+            return {style: {height: "200px"}}
+          },
+          download: false,
+          tableBodyHeight: "100%",
+          responsive: "standard",
+          print: false,
+          viewColumns: false,
+          filter: false,
+          pagination: false,
+          searchAlwaysOpen: true,
+          selectableRows: undefined,
+        }}
+      />
+    </ThemeProvider>
   )
 }
 
@@ -285,12 +540,21 @@ function InterpreterOutput(props: InterpreterOutputProps) {
 
   return (
     <Paper variant="outlined"
-      sx={{p: 2, flexGrow: 1, whiteSpace: "pre", fontFamily: " monospace", fontSize: 14, marginLeft: 0, width: 1, overflow: "auto"}}>
+      sx={{
+        p: 2,
+        flexGrow: 1,
+        whiteSpace: "pre",
+        fontFamily: " monospace",
+        fontSize: 14,
+        marginLeft: 0,
+        width: 1,
+        overflow: "auto"
+      }}>
       {props.output.join("\n")}
       {props.errors.length > 0 &&
-          <Alert severity="error">
-            {props.errors.join("\n")}
-          </Alert>
+        <Alert severity="error">
+          {props.errors.join("\n")}
+        </Alert>
       }
     </Paper>
   )
@@ -436,7 +700,7 @@ function Interpreter() {
         />
       </Stack>
       {/* This is the horizontal row that contains the interpreter on the left and docs on the right */}
-      <Box sx={{flexGrow: 1, display: "flex", flexDirection: "row"}}>
+      <Box sx={{flexGrow: 1, display: "flex", flexDirection: "row", height: 2}}>
         {/* The code inputs, buttons, and output */}
         <Stack spacing={2} sx={{flexGrow: 1, flexBasis: "50%", width: 2, flexDirection: "column", maxHeight: 1}}>
           <Grid container spacing={2} sx={{mt: 0}}>
@@ -475,7 +739,7 @@ function Interpreter() {
               variant='contained'
               disabled={!isConnected}
               onClick={runCode}
-              sx={{ minWidth: "9em" }}
+              sx={{minWidth: "9em"}}
               startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
             >
               {
@@ -484,20 +748,28 @@ function Interpreter() {
             </Button>
             <Button
               variant='outlined'
-              sx={{ minWidth: "9em" }}
+              sx={{minWidth: "9em"}}
               startIcon={<ShareIcon/>}>
               Share
             </Button>
           </Stack>
-          <Box sx={{whiteSpace: "pre", fontFamily: "monospace", overflow: "auto", flexGrow: 1, height: 2, width: 1, display: "flex"}}>
+          <Box sx={{
+            whiteSpace: "pre",
+            fontFamily: "monospace",
+            overflow: "auto",
+            flexGrow: 1,
+            height: 2,
+            width: 1,
+            display: "flex"
+          }}>
             <InterpreterOutput running={running} output={output} errors={errors}/>
           </Box>
         </Stack>
         {/* The documentation (if it exists)*/}
         {showDocumentation &&
-            <Box sx={{flexGrow: 0, overflow: "auto", maxHeight: "80vh", flexBasis: "50%", maxWidth: 600, marginLeft: 2}}>
-              <DocumentationTable version={version}/>
-            </Box>
+          <Box sx={{flexGrow: 0, overflow: "auto", height: "100%", flexBasis: "50%", maxWidth: 600, marginLeft: 2}}>
+            <DocumentationTable version={version}/>
+          </Box>
         }
       </Box>
     </Box>
