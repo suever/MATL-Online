@@ -1,10 +1,13 @@
 import React from 'react'
-import { useState} from 'react'
+import { useState } from 'react'
 import {createTheme, ThemeProvider} from '@mui/material/styles'
 import MUIDataTable from "mui-datatables"
 import { Version} from "./VersionSelect"
+import useHelp from "../hooks/useHelp"
 
 interface DocumentationTableProps {
+  onSearchChange?: (search: string) => void
+  searchText?: string | null
   version: Version
 }
 
@@ -12,9 +15,6 @@ const customTheme = createTheme({
   components: {
     MUIDataTable: {
       styleOverrides: {
-        tableRoot: {
-          height: "100%",
-        },
         paper: {
           height: "calc(100% - 70px)",
           boxShadow: 'none',
@@ -24,7 +24,7 @@ const customTheme = createTheme({
   }
 })
 
-interface documentation {
+export interface documentation {
   source: string,
   brief: string,
   arguments: string,
@@ -33,8 +33,9 @@ interface documentation {
 }
 
 function DocumentationTable(props: DocumentationTableProps) {
-  const [data, setData] = useState<documentation[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
+
+  const [search, setSearch] = useState<string>("")
+  const { data } = useHelp(props.version)
 
   const columns = [
     {
@@ -65,27 +66,6 @@ function DocumentationTable(props: DocumentationTableProps) {
     }
   ]
 
-  const fetchData = async (version: string) => {
-    if (loading || data.length > 0) {
-      return
-    }
-
-    setLoading(true)
-    const response = await fetch(`http://localhost:5000/help/${version}`)
-    const json = await response.json()
-
-    // Add an aggregate field that contains all of the searchable info
-    json.data.forEach((element: documentation) => {
-      element.searchText = element.arguments + ' ' + element.brief + ' ' + element.description
-    })
-
-    setData(json.data)
-    setLoading(false)
-
-  }
-
-  fetchData(props.version.label)
-
   return (
     <ThemeProvider theme={customTheme}>
       <MUIDataTable
@@ -102,6 +82,10 @@ function DocumentationTable(props: DocumentationTableProps) {
           pagination: false,
           searchAlwaysOpen: true,
           selectableRows: undefined,
+          searchText: props.searchText || '',
+          onSearchChange: (s: string | null) => {
+            props.onSearchChange && props.onSearchChange(s || "")
+          }
         }}
       />
     </ThemeProvider>

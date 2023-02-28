@@ -18,10 +18,12 @@ interface InterpreterProps {
 const Interpreter = (props: InterpreterProps) => {
   const versions = [
     {"label": "22.7.4", "releaseDate": new Date()},
-    {"label": "22.7.3", "releaseDate": new Date()}
+    {"label": "22.7.3", "releaseDate": new Date()},
+    {"label": "20.2.1", "releaseDate": new Date()},
   ]
   const [version, setVersion] = useState<Version>(versions[0])
   const [showDocumentation, setShowDocumentation] = useState<boolean>(false)
+  const [search, setSearch] = useState<string>("")
 
   return (
     <Box sx={{flexGrow: 1, height: 2, display: "flex", flexDirection: "column"}}>
@@ -47,7 +49,7 @@ const Interpreter = (props: InterpreterProps) => {
         {/* The documentation (if it exists)*/}
         {showDocumentation &&
           <Box sx={{flexGrow: 0, overflow: "auto", height: "100%", flexBasis: "50%", maxWidth: 600, marginLeft: 2}}>
-            <DocumentationTable version={version}/>
+            <DocumentationTable version={version} searchText={search} onSearchChange={setSearch}/>
           </Box>
         }
       </Box>
