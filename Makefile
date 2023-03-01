@@ -1,3 +1,5 @@
+.PHONY: frontend
+
 COMMIT_HASH := $(shell git rev-parse --short HEAD)
 
 DOCKER_IMAGE := suever/matl-online:$(COMMIT_HASH)
@@ -35,3 +37,5 @@ flake8:
 
 lint: type-check format-check flake8
 
+frontend:
+	yarn --cwd frontend start

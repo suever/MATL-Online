@@ -1,9 +1,8 @@
-import React from 'react'
-import { useState } from 'react'
-import {createTheme, ThemeProvider} from '@mui/material/styles'
 import MUIDataTable from "mui-datatables"
-import { Version} from "./VersionSelect"
+import React from 'react'
 import useHelp from "../hooks/useHelp"
+import { Version} from "./VersionSelect"
+import {createTheme, ThemeProvider} from '@mui/material/styles'
 
 interface DocumentationTableProps {
   onSearchChange?: (search: string) => void
@@ -33,8 +32,6 @@ export interface documentation {
 }
 
 function DocumentationTable(props: DocumentationTableProps) {
-
-  const [search, setSearch] = useState<string>("")
   const { data } = useHelp(props.version)
 
   const columns = [

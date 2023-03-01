@@ -6,6 +6,7 @@ import CodeIcon from '@mui/icons-material/Code'
 import SchoolIcon from '@mui/icons-material/School'
 import HelpIcon from '@mui/icons-material/Help'
 import Box from '@mui/material/Box'
+import Tooltip from '@mui/material/Tooltip'
 import Drawer from '@mui/material/Drawer'
 import Toolbar from '@mui/material/Toolbar'
 import List from '@mui/material/List'
@@ -43,40 +44,48 @@ const navigationOptions = [
 ]
 
 interface NavigationProps {
-  width: number;
+  collapsed?: boolean;
 }
 
 const Navigation = (props: NavigationProps) => {
+  const drawerWidth = props.collapsed ? 55 : 240
+
   return (
     <Drawer
       variant='persistent'
       open={true}
       sx={{
-        width: props.width,
-        flexShrink: 0
+        height: "100vh",
+        width: drawerWidth,
+        flexShrink: 0,
+        border: '1px solid #0F0'
       }}
     >
       <Toolbar/>
-      <Box sx={{overflow: 'auto', width: props.width}}>
-        <List>
-          {
-            navigationOptions.map((option) => {
-              return (
-                <ListItem key={option.label} disablePadding selected={option.selected == true}>
-                  <ListItemButton>
-                    <ListItemIcon>
-                      {option.icon}
-                    </ListItemIcon>
-                    <ListItemText primary={option.label}>
-                      {option.label}
-                    </ListItemText>
-                  </ListItemButton>
-                </ListItem>
-              )
-            })
+      <Box sx={{ display: "flex", flexDirection: "column", overflow: 'hidden', height: 1, justifyContent: "space-between"}}>
+        <Box sx={{ width: drawerWidth }}>
+          <List>
+            {
+              navigationOptions.map((option) => {
+                return (
+                  <ListItem key={option.label} disablePadding selected={option.selected == true}>
+                    <Tooltip title={option.label}>
+                      <ListItemButton>
+                        <ListItemIcon>
+                          {option.icon}
+                        </ListItemIcon>
+                        <ListItemText primary={option.label}>
+                          {option.label}
+                        </ListItemText>
+                      </ListItemButton>
+                    </Tooltip>
+                  </ListItem>
+                )
+              })
 
-          }
-        </List>
+            }
+          </List>
+        </Box>
       </Box>
     </Drawer>
   )
