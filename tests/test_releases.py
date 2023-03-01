@@ -16,11 +16,12 @@ class TestRelease:
 
     def test_get_latest(self) -> None:
         """Make sure that the expected release is returned as the latest."""
+
         # Create 3 release each time checking that the latest is the latest
         # release
         for k in range(3):
             # Ensure that this is the latest release
-            new_release: Release = ReleaseFactory()
+            new_release = ReleaseFactory.create()
             latest_release = Release.latest()
             assert latest_release
             assert new_release == latest_release
@@ -44,10 +45,10 @@ class TestRelease:
 
     def test_release_ordering(self) -> None:
         """Make sure that we sort the releases properly."""
-        release1: Release = ReleaseFactory(tag="9.0.0")
-        release2 = ReleaseFactory(tag="9.0.1")
-        release3 = ReleaseFactory(tag="9.1.0")
-        release4 = ReleaseFactory(tag="10.0.0")
+        release1: Release = ReleaseFactory.build(tag="9.0.0")
+        release2 = ReleaseFactory.build(tag="9.0.1")
+        release3 = ReleaseFactory.build(tag="9.1.0")
+        release4 = ReleaseFactory.build(tag="10.0.0")
 
         assert release2.version > release1.version
         assert release3.version > release1.version
@@ -56,11 +57,11 @@ class TestRelease:
 
     def test_release_ordering_truncated(self) -> None:
         """Make sure that even if we don't have 3 parts, we sort correctly."""
-        release1: Release = ReleaseFactory(tag="9")
-        release2 = ReleaseFactory(tag="9.0.1")
-        release3 = ReleaseFactory(tag="9.1")
-        release4 = ReleaseFactory(tag="9.1.2")
-        release5 = ReleaseFactory(tag="10")
+        release1: Release = ReleaseFactory.build(tag="9")
+        release2 = ReleaseFactory.build(tag="9.0.1")
+        release3 = ReleaseFactory.build(tag="9.1")
+        release4 = ReleaseFactory.build(tag="9.1.2")
+        release5 = ReleaseFactory.build(tag="10")
 
         assert release2.version > release1.version
         assert release3.version > release2.version
@@ -111,13 +112,13 @@ class TestRelease:
 
     def test_release_repr(self) -> None:
         """Check that the release is displayed properly if coerced."""
-        release: Release = ReleaseFactory(tag="1.2.3")
+        release: Release = ReleaseFactory.build(tag="1.2.3")
         assert release.__repr__() == "<Release %r>" % "1.2.3"
 
     def test_factory(self, db: SQLAlchemy) -> None:
         """Ensure that the factory is working as expected."""
         now = datetime.now()
-        release: Release = ReleaseFactory(date=now)
+        release: Release = ReleaseFactory.build(date=now)
         db.session.commit()
 
         assert bool(release.tag)

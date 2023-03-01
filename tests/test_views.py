@@ -208,8 +208,8 @@ class TestExplain:
         db: SQLAlchemy,
     ) -> None:
         """Specify a version and get a successful response."""
-        ReleaseFactory(tag="1.2.3")
-        ReleaseFactory(tag="2.4.5")
+        ReleaseFactory.build(tag="1.2.3")
+        ReleaseFactory.build(tag="2.4.5")
 
         version = "1.2.3"
         url = url_for("public.explain", version=version)
@@ -259,7 +259,7 @@ def test_fetch_help(
         fid.write(json.dumps(data))
 
     version = "1.2.3"
-    ReleaseFactory(tag=version)
+    ReleaseFactory.create(tag=version)
 
     url = url_for("public.documentation", version=version)
 

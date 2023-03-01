@@ -9,7 +9,6 @@ from flask_sqlalchemy import SQLAlchemy
 from pytest_mock.plugin import MockerFixture
 
 from matl_online.errors import InvalidVersion
-from matl_online.public.models import Release
 from matl_online.utils import sanitize_version, unzip
 
 from .factories import ReleaseFactory
@@ -111,13 +110,13 @@ class TestSanitizeVersion:
     def test_version_tag(self, db: SQLAlchemy) -> None:
         # Create the version in the database
         tag = "v1.2.3.4"
-        release: Release = ReleaseFactory(tag=tag)
+        release = ReleaseFactory.build(tag=tag)
         release.save()
         assert sanitize_version(tag) == tag
 
     def test_missing_version_tag(self, db: SQLAlchemy) -> None:
         tag = "v1.2.3.4"
-        release: Release = ReleaseFactory(tag=tag + ".5")
+        release = ReleaseFactory.build(tag=tag + ".5")
         release.save()
 
         with pytest.raises(InvalidVersion):
