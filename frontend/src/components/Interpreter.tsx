@@ -17,16 +17,23 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import ShareIcon from '@mui/icons-material/Share'
 import Box from '@mui/material/Box'
 import { Version } from './VersionSelect'
+import axios from 'axios'
+import ExplanationModal from "./ExplanationModal"
 
 interface StatusMessage {
   type: string;
   value: string;
 }
 
-function ExplainIconButton() {
+interface IconButtonProps {
+  disabled?: boolean;
+  onClick?: () => void;
+}
+
+function ExplainIconButton(props: IconButtonProps) {
   return (
     <Tooltip title="Explain the code">
-      <IconButton size="small" sx={{m: -1}}>
+      <IconButton size="small" onClick={props.onClick} disabled={props.disabled} sx={{m: -1}} >
         <TroubleshootIcon/>
       </IconButton>
     </Tooltip>
@@ -60,6 +67,8 @@ const Interpreter = (props: InterpreterProps) => {
   const [errors, setErrors] = useState<string[]>([])
   const [session, setSession] = useState<string | null>(null)
   const [inputs, setInputs] = useState<string>("120")
+  const [explaining, setExplaining] = useState<boolean>(false)
+  const [explanation, setExplanation] = useState<string>("")
 
   const version = props.version
 
@@ -98,6 +107,10 @@ const Interpreter = (props: InterpreterProps) => {
     socket.on('connection', (data) => setSession(data.session_id))
 
     socket.on('status', (data) => {
+      if (!running) {
+        return
+      }
+
       const messages = data.data as StatusMessage[]
       const errors = []
       const outputs = []
@@ -115,8 +128,30 @@ const Interpreter = (props: InterpreterProps) => {
     })
   })
 
+  const explainCode = async () => {
+    // Swap out the icon with loading icon?
+
+    setExplaining(true)
+    // Display the "explain modal"
+    const response = await axios.get(`http://localhost:5000/explain`, { params: { code, version}})
+    const message = response.data.data.map((m: StatusMessage) => m.value).join('\n')
+    setExplanation(message)
+
+    // Retrieve the explanation
+    return
+  }
+
+  if (explaining) {
+    console.log('explaining')
+  } else {
+    console.log('not explaining')
+  }
+
   return (
     <Stack spacing={2} direction="column" sx={{ height: 1}}>
+      { explaining  &&
+        <ExplanationModal open={explaining} explanation={explanation} onClose={() => setExplaining(false)}/>
+      }
       <Grid container spacing={2} sx={{mt: 0}}>
         <Grid item xs={9}>
           <TextField
@@ -129,7 +164,10 @@ const Interpreter = (props: InterpreterProps) => {
             maxRows={Infinity}
             variant="outlined"
             fullWidth
-            InputProps={{style: {fontFamily: "monospace"}, endAdornment: <ExplainIconButton/>}}
+            InputProps={{
+              style: {fontFamily: "monospace"},
+              endAdornment: <ExplainIconButton disabled={code.length < 1} onClick={explainCode}/>
+            }}
           />
         </Grid>
         <Grid item xs={3}>
