@@ -25,17 +25,14 @@ const style = {
 }
 
 function ExplanationModal(props: ExplanationModalProps) {
-  const [open, setOpen] = useState<boolean>(props.open)
-
   const handleClose = () => {
-    setOpen(false)
     if (props.onClose) {
       props.onClose()
     }
   }
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal open={props.open} onClose={handleClose}>
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6">
           Explanation

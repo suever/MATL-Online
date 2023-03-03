@@ -19,6 +19,7 @@ import Box from '@mui/material/Box'
 import { Version } from './VersionSelect'
 import axios from 'axios'
 import ExplanationModal from "./ExplanationModal"
+import InputPasteDialog from "./InputPasteDialog"
 
 interface StatusMessage {
   type: string;
@@ -40,14 +41,21 @@ function ExplainIconButton(props: IconButtonProps) {
   )
 }
 
-function PasteIconButton() {
+function PasteIconButton(props: IconButtonProps) {
   return (
     <Tooltip title="Paste formatted input">
-      <IconButton size="small" sx={{m: -1}}>
+      <IconButton size="small" onClick={props.onClick} disabled={props.disabled} sx={{m: -1}}>
         <ContentPasteIcon/>
       </IconButton>
     </Tooltip>
   )
+}
+
+enum Mode {
+  Idle,
+  Explain,
+  Paste  ,
+  Run,
 }
 
 interface InterpreterProps {
@@ -62,28 +70,30 @@ const Interpreter = (props: InterpreterProps) => {
 
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected)
   const [code, setCode] = useState<string>(":t!")
-  const [running, setRunning] = useState<boolean>(false)
   const [output, setOutput] = useState<string[]>([])
   const [errors, setErrors] = useState<string[]>([])
   const [session, setSession] = useState<string | null>(null)
-  const [inputs, setInputs] = useState<string>("120")
-  const [explaining, setExplaining] = useState<boolean>(false)
+  const [inputs, setInputs] = useState<string[]>(["123"])
   const [explanation, setExplanation] = useState<string>("")
+  const [mode, setMode] = useState<Mode>(Mode.Idle)
+
+  const resetMode = () => setMode(Mode.Idle)
 
   const version = props.version
 
   const runCode = async () => {
-    if (running) {
+    // If we are already running, ignore this
+    if (mode == Mode.Run) {
       return
     }
 
-    setRunning(true)
+    setMode(Mode.Run)
     setOutput([])
     setErrors([])
 
     await socket.emitWithAck('submit', {
       code,
-      inputs,
+      inputs: inputs.join('\n'),
       version: version.label,
       uid: session
     })
@@ -100,14 +110,12 @@ const Interpreter = (props: InterpreterProps) => {
       setIsConnected(false)
     })
 
-    socket.on('complete', () => {
-      setRunning(false)
-    })
+    socket.on('complete', () => resetMode())
 
     socket.on('connection', (data) => setSession(data.session_id))
 
     socket.on('status', (data) => {
-      if (!running) {
+      if (mode != Mode.Run) {
         return
       }
 
@@ -129,29 +137,27 @@ const Interpreter = (props: InterpreterProps) => {
   })
 
   const explainCode = async () => {
-    // Swap out the icon with loading icon?
-
-    setExplaining(true)
-    // Display the "explain modal"
     const response = await axios.get(`http://localhost:5000/explain`, { params: { code, version}})
     const message = response.data.data.map((m: StatusMessage) => m.value).join('\n')
+
     setExplanation(message)
+    setMode(Mode.Explain)
 
     // Retrieve the explanation
     return
   }
 
-  if (explaining) {
-    console.log('explaining')
-  } else {
-    console.log('not explaining')
+  const handlePasteInput = (input: string) =>{
+    inputs.push(input)
+    setInputs(inputs)
+
+    resetMode()
   }
 
   return (
     <Stack spacing={2} direction="column" sx={{ height: 1}}>
-      { explaining  &&
-        <ExplanationModal open={explaining} explanation={explanation} onClose={() => setExplaining(false)}/>
-      }
+      <ExplanationModal open={mode == Mode.Explain} explanation={explanation} onClose={resetMode}/>
+      <InputPasteDialog open={mode == Mode.Paste} onClose={resetMode} onApply={handlePasteInput}/>
       <Grid container spacing={2} sx={{mt: 0}}>
         <Grid item xs={9}>
           <TextField
@@ -165,7 +171,7 @@ const Interpreter = (props: InterpreterProps) => {
             variant="outlined"
             fullWidth
             InputProps={{
-              style: {fontFamily: "monospace"},
+              style: {fontFamily: "monospace", alignItems: "flex-start"},
               endAdornment: <ExplainIconButton disabled={code.length < 1} onClick={explainCode}/>
             }}
           />
@@ -186,10 +192,10 @@ const Interpreter = (props: InterpreterProps) => {
         variant="outlined"
         multiline
         fullWidth
-        value={inputs}
-        onChange={(el) => setInputs(el.target.value)}
+        value={inputs.join('\n')}
+        onChange={(el) => setInputs(el.target.value.split('\n'))}
         maxRows={Infinity}
-        InputProps={{style: {fontFamily: "monospace"}, endAdornment: <PasteIconButton/>}}
+        InputProps={{style: {fontFamily: "monospace", alignItems: "flex-start"}, endAdornment: <PasteIconButton onClick={() => setMode(Mode.Paste)}/>}}
       />
       {/* Buttons for running the code and sharing*/}
       <Stack direction="row" spacing={1} sx={{width: 1 / 2 }}>
@@ -198,10 +204,10 @@ const Interpreter = (props: InterpreterProps) => {
           disabled={!isConnected}
           onClick={runCode}
           sx={{minWidth: "9em"}}
-          startIcon={running ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
+          startIcon={mode == Mode.Run ? <CircularProgress size={14} color="inherit"/> : <PlayArrowIcon/>}
         >
           {
-            running ? "Cancel" : "Run"
+            mode == Mode.Run ? "Cancel" : "Run"
           }
         </Button>
         <Button
@@ -220,7 +226,7 @@ const Interpreter = (props: InterpreterProps) => {
         width: 1,
         display: "flex"
       }}>
-        <InterpreterOutput running={running} output={output} errors={errors}/>
+        <InterpreterOutput running={mode == Mode.Run} output={output} errors={errors}/>
       </Box>
     </Stack>
   )

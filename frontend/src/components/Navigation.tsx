@@ -69,7 +69,7 @@ const Navigation = (props: NavigationProps) => {
               navigationOptions.map((option) => {
                 return (
                   <ListItem key={option.label} disablePadding selected={option.selected == true}>
-                    <Tooltip title={option.label}>
+                    <Tooltip title={option.label} placement='right'>
                       <ListItemButton>
                         <ListItemIcon>
                           {option.icon}
