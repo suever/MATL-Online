@@ -30,6 +30,13 @@ services:
       - postgres
       - worker
 
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+
   worker:
     build:
       context: .

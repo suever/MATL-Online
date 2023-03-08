@@ -8,6 +8,9 @@ docker:
 	docker build -f Dockerfile -t suever/matl-online .
 	docker tag suever/matl-online $(DOCKER_IMAGE)
 
+frontend/docker:
+	$(MAKE) -C frontend docker
+
 test:
 	MATL_ONLINE_ENV=test \
 		pytest \
