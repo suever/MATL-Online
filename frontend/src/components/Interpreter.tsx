@@ -21,6 +21,7 @@ import axios from 'axios'
 import { urlFor} from "../utilities/api"
 import ExplanationModal from "./ExplanationModal"
 import InputPasteDialog from "./InputPasteDialog"
+import Duration from "./Duration"
 
 interface StatusMessage {
   type: string;
@@ -199,7 +200,7 @@ const Interpreter = (props: InterpreterProps) => {
         InputProps={{style: {fontFamily: "monospace", alignItems: "flex-start"}, endAdornment: <PasteIconButton onClick={() => setMode(Mode.Paste)}/>}}
       />
       {/* Buttons for running the code and sharing*/}
-      <Stack direction="row" spacing={1} sx={{width: 1 / 2 }}>
+      <Stack direction="row" spacing={1} sx={{ width: 1 }}>
         <Button
           variant='contained'
           disabled={!isConnected}
@@ -217,6 +218,9 @@ const Interpreter = (props: InterpreterProps) => {
           startIcon={<ShareIcon/>}>
           Share
         </Button>
+        <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "flex-end" }}>
+          <Duration running={mode == Mode.Run} />
+        </Box>
       </Stack>
       <Box sx={{
         whiteSpace: "pre",
