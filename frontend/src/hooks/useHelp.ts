@@ -1,11 +1,12 @@
 import {Version} from "../components/VersionSelect"
 import { useState, useEffect } from 'react'
 import {documentation} from '../components/DocumentationTable'
+import { urlFor} from "../utilities/api"
 
 const cache = new Map<string, documentation[]>()
 
 const fetchHelp = async (version: Version) :  Promise<documentation[]> => {
-  const response = await fetch(`http://localhost:5000/help/${version.label}`)
+  const response = await fetch(urlFor('help', version.label))
   const json  = await response.json()
 
   json.data.forEach((element: documentation) => {

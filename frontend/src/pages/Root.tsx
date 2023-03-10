@@ -6,8 +6,9 @@ import Header from "../components/Header"
 import Navigation from "../components/Navigation"
 import InterpreterPage from "./Interpreter"
 import io from 'socket.io-client'
+import { baseUrl} from "../utilities/api"
 
-const socket = io('http://localhost:5000')
+const socket = io(baseUrl())
 
 const Root = () => {
   const [collapsed, setCollapsed] = useState<boolean>(true)

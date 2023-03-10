@@ -18,6 +18,7 @@ import ShareIcon from '@mui/icons-material/Share'
 import Box from '@mui/material/Box'
 import { Version } from './VersionSelect'
 import axios from 'axios'
+import { urlFor} from "../utilities/api"
 import ExplanationModal from "./ExplanationModal"
 import InputPasteDialog from "./InputPasteDialog"
 
@@ -137,7 +138,7 @@ const Interpreter = (props: InterpreterProps) => {
   })
 
   const explainCode = async () => {
-    const response = await axios.get(`http://localhost:5000/explain`, { params: { code, version}})
+    const response = await axios.get(urlFor('explain'), { params: { code, version}})
     const message = response.data.data.map((m: StatusMessage) => m.value).join('\n')
 
     setExplanation(message)
