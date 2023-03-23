@@ -32,7 +32,7 @@ sympy==1.5.1
 
 # Database
 alembic==1.10.2
-SQLAlchemy==2.0.6
+SQLAlchemy==2.0.7
 Flask-SQLAlchemy==3.0.3
 psycopg2-binary==2.9.5
 
