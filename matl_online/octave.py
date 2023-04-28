@@ -18,8 +18,9 @@ OutputCallback = Callable[[str], None]
 
 
 def string(value: str) -> str:
-    # Takes the input and ensure it is wrapped in double quotes and then any double quotes in it are escaped
-    value = value.replace('"', '\\"')
+    # Takes the input and ensure it is wrapped in double quotes and then all
+    # necessary characters are escaped
+    value = value.replace("\\", "\\\\").replace('"', '\\"')
     return f'"{value}"'
 
 

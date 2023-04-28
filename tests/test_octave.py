@@ -5,7 +5,7 @@ from typing import Any, List
 
 from pytest_mock.plugin import MockerFixture
 
-from matl_online.octave import OctaveSession
+from matl_online.octave import OctaveSession, string
 
 
 class TestOctaveSession:
@@ -196,3 +196,17 @@ class TestOctaveSession:
             run_mock.assert_not_called()
 
         run_mock.assert_not_called()
+
+
+class TestString:
+    def test_double_quotes(self) -> None:
+        """Ensure double quotes are properly escaped."""
+        original = 'testing "quotes"'
+
+        assert string(original) == '"testing \\"quotes\\""'
+
+    def test_backslackes(self) -> None:
+        """Ensure backslashes are properly escaped."""
+        original = "testing \\backslashes\\"
+
+        assert string(original) == r'"testing \\backslashes\\"'
