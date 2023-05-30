@@ -6,7 +6,7 @@ pytest==7.3.1
 factory-boy==3.2.1
 pytest-mock==3.10.0
 webtest==3.0.0
-pytest-cov==4.0.0
+pytest-cov==4.1.0
 
 # Acceptance Testing
 robotframework==6.0.2
