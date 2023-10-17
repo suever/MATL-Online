@@ -1,5 +1,5 @@
 # General
-flask==2.3.1
+flask==3.0.0
 requests==2.31.0
 eventlet==0.33.3
 # Should be pinned until a new gunicorn release greater than 20.1.0 comes out. (Due to eventlet v0.33 compatibility issues)
