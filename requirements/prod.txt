@@ -1,7 +1,7 @@
 # General
 flask==2.3.1
 requests==2.32.3
-eventlet==0.33.3
+eventlet==0.35.2
 # Should be pinned until a new gunicorn release greater than 20.1.0 comes out. (Due to eventlet v0.33 compatibility issues)
 git+https://github.com/benoitc/gunicorn.git@1299ea9e967a61ae2edebe191082fd169b864c64#egg=gunicorn[eventlet]==20.1.0
 werkzeug==2.3.1
