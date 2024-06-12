@@ -1,4 +1,5 @@
 """Application configuration."""
+
 import os
 import pathlib
 import uuid
