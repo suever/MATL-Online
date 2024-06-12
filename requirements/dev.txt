@@ -10,7 +10,7 @@ pytest-cov==5.0.0
 
 # Acceptance Testing
 robotframework==6.0.2
-robotframework-seleniumlibrary==6.0.0
+robotframework-seleniumlibrary==6.3.0
 webdrivermanager==0.10.0
 
 # Lint and code style
