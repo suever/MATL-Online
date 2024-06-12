@@ -1,4 +1,5 @@
 """SQLAlchemy models."""
+
 import operator
 from typing import List, Optional, Tuple
 

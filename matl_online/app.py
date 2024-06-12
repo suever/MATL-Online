@@ -1,4 +1,5 @@
 """The app module, containing the app factory function."""
+
 from typing import Optional, Type
 
 from flask import Flask, got_request_exception

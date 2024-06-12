@@ -1,4 +1,5 @@
 """Module for creating an octave instance."""
+
 import logging
 import os
 import pathlib
