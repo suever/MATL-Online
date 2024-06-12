@@ -1,14 +1,12 @@
 # General
-flask==2.3.1
+flask==3.0.3
 requests==2.32.3
 eventlet==0.35.2
-# Should be pinned until a new gunicorn release greater than 20.1.0 comes out. (Due to eventlet v0.33 compatibility issues)
-git+https://github.com/benoitc/gunicorn.git@1299ea9e967a61ae2edebe191082fd169b864c64#egg=gunicorn[eventlet]==20.1.0
-werkzeug==2.3.1
+gunicorn[eventlet]==22.0.0
 pydantic==1.10.13
 
 # CSS/JS Assets
-flask_assets==2.0
+flask_assets==2.1.0
 jsmin==3.0.1
 
 # Sockets
@@ -40,7 +38,7 @@ psycopg2-binary==2.9.6
 Flask-Migrate==4.0.4
 
 # Forms
-flask_wtf==1.1.1
+flask_wtf==1.2.0
 wtforms==3.0.1
 
 # GitHub interaction
