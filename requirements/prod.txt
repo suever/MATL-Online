@@ -31,7 +31,7 @@ ipython==8.12.1
 sympy==1.5.1
 
 # Database
-alembic==1.10.4
+alembic==1.13.1
 SQLAlchemy==2.0.25
 Flask-SQLAlchemy==3.0.3
 psycopg2-binary==2.9.6
