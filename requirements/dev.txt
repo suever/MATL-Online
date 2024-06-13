@@ -17,7 +17,7 @@ webdrivermanager==0.10.0
 black==24.3.0
 flake8==7.0.0
 flake8-docstrings==1.7.0
-flake8-quotes==3.3.2
+flake8-quotes==3.4.0
 isort==5.13.2
 pep8-naming==0.13.3
 
