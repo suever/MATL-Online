@@ -10,11 +10,6 @@ updates:
   - suever
   assignees:
   - suever
-  ignore:
-  - dependency-name: pydocstyle
-    versions:
-    - ">= 4.0.0.a"
-    - "< 4.0.1"
 - package-ecosystem: npm
   directory: "/"
   schedule:
