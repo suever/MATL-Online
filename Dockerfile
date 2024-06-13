@@ -7,7 +7,7 @@ WORKDIR /app
 RUN apt update \
     && apt install -y software-properties-common \
     && add-apt-repository -y ppa:deadsnakes/ppa \
-    && curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh \
+    && curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh \
     && bash nodesource_setup.sh \
     && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
     && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
