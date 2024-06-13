@@ -23,7 +23,7 @@ pep8-naming==0.13.3
 
 # Types
 mypy==1.2.0
-celery-types==0.15.0
+celery-types==0.22.0
 types-flask==1.1.6
 types-requests==2.31.0.1
 types-flask-migrate==4.0.0.20240311
