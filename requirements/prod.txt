@@ -35,7 +35,7 @@ Flask-SQLAlchemy==3.0.3
 psycopg2-binary==2.9.6
 
 # App management
-Flask-Migrate==4.0.4
+Flask-Migrate==4.0.7
 
 # Forms
 flask_wtf==1.2.0
