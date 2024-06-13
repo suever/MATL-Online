@@ -1,7 +1,7 @@
 # General
 flask==3.0.3
 requests==2.32.3
-eventlet==0.35.2
+eventlet==0.36.1
 gunicorn[eventlet]==22.0.0
 pydantic==1.10.13
 
