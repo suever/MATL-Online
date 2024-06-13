@@ -46,7 +46,7 @@ pygithub==2.3.0
 
 # Error Tracking
 blinker==1.6.2
-rollbar==0.16.3
+rollbar==1.0.0
 
 # Metrics
 prometheus-flask-exporter==0.23.0
