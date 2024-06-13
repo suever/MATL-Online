@@ -36,8 +36,7 @@ RUN wget "https://github.com/suever/matl-online-octave-packages/raw/main/image-2
     && octave-cli --eval 'pkg install "image-2.14.0.tar.gz"' \
     && rm -rf image-2.14.0.tar.gz
 
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
-    && python get-pip.py
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
 
 # Install Node dependencies and add them to the PATH
 COPY package.json yarn.lock ./
@@ -47,7 +46,7 @@ ENV PATH="/app/node_modules/.bin:${PATH}"
 # Explicitly install only the production dependencies
 COPY requirements/prod.txt requirements.txt
 
-RUN python -m pip install -r requirements.txt
+RUN python3.10 -m pip install -r requirements.txt
 
 RUN useradd -u 8877 matl
 RUN chown matl:matl /app
@@ -57,4 +56,4 @@ COPY --chown=matl . .
 
 ENTRYPOINT []
 
-CMD ["python"]
+CMD ["python3.10"]
