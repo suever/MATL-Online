@@ -12,7 +12,7 @@ jsmin==3.0.1
 # Sockets
 flask_socketio==5.3.6
 python_engineio==4.9.1
-python_socketio==5.11.2
+python_socketio==5.11.3
 
 # Celery
 celery==5.4.0
@@ -30,7 +30,7 @@ sympy==1.5.1
 
 # Database
 alembic==1.13.1
-SQLAlchemy==2.0.30
+SQLAlchemy==2.0.31
 Flask-SQLAlchemy==3.1.1
 psycopg2-binary==2.9.9
 
