@@ -49,4 +49,4 @@ blinker==1.8.2
 rollbar==1.0.0
 
 # Metrics
-prometheus-flask-exporter==0.23.0
+prometheus-flask-exporter==0.23.1
