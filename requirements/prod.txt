@@ -42,7 +42,7 @@ flask_wtf==1.2.1
 wtforms==3.1.2
 
 # GitHub interaction
-pygithub==2.3.0
+pygithub==2.4.0
 
 # Error Tracking
 blinker==1.8.2
