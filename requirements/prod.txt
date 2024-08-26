@@ -20,7 +20,7 @@ flower==2.0.1
 redis==5.0.8
 
 # Octave interaction
-scipy==1.14.0
+scipy==1.14.1
 numpy==2.1.0
 octave-kernel==0.36.0
 ipython==8.26.0
