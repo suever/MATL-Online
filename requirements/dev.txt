@@ -9,7 +9,7 @@ webtest==3.0.1
 pytest-cov==5.0.0
 
 # Acceptance Testing
-robotframework==7.0.1
+robotframework==7.1
 robotframework-seleniumlibrary==6.6.1
 webdrivermanager==0.10.0
 
