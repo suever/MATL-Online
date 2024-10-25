@@ -17,7 +17,7 @@ python_socketio==5.11.4
 # Celery
 celery==5.4.0
 flower==2.0.1
-redis==5.1.0
+redis==5.2.0
 
 # Octave interaction
 scipy==1.14.1
