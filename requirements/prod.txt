@@ -45,7 +45,7 @@ wtforms==3.1.2
 pygithub==2.4.0
 
 # Error Tracking
-blinker==1.8.2
+blinker==1.9.0
 rollbar==1.0.0
 
 # Metrics
