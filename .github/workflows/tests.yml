@@ -55,7 +55,7 @@ jobs:
       - name: Install Octave
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -qq octave liboctave-dev libmpfr-dev
+          sudo apt-get install -qq octave octave-dev libmpfr-dev
 
       - name: Install Yarn and Node
         uses: actions/setup-node@v4
