@@ -10,9 +10,9 @@ flask_assets==2.1.0
 jsmin==3.0.1
 
 # Sockets
-flask_socketio==5.3.7
-python_engineio==4.9.1
-python_socketio==5.11.4
+flask_socketio==5.5.1
+python_engineio==4.11.2
+python_socketio==5.12.1
 
 # Celery
 celery==5.4.0
