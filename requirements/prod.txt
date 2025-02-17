@@ -39,7 +39,7 @@ Flask-Migrate==4.0.7
 
 # Forms
 flask_wtf==1.2.1
-wtforms==3.1.2
+wtforms==3.2.1
 
 # GitHub interaction
 pygithub==2.4.0
