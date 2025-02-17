@@ -132,4 +132,7 @@ class TestReleaseRefresh:
         # Ensure the old release was updated
         original_release = Release.query.filter_by(tag="1.2.3").one()
 
-        assert original_release.date.replace(tzinfo=pytz.UTC) == releases[0].published_at.replace(tzinfo=pytz.UTC)
+        original_date = original_release.date.replace(tzinfo=pytz.UTC)
+        new_date = releases[0].published_at.replace(tzinfo=pytz.UTC)
+
+        assert original_date == new_date
