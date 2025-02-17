@@ -30,7 +30,8 @@ def refresh_releases(
             continue
 
         # Check if our local release is stale
-        if release.published_at > release_record.date.replace(tzinfo=pytz.UTC):
+        local_release_time = release.published_at.replace(tzinfo=pytz.UTC)
+        if local_release_time > release_record.date.replace(tzinfo=pytz.UTC):
             # Clear our cache of the source code
             remove_source_directory(version, source_root=source_root)
 
