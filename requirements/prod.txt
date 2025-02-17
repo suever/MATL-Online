@@ -38,7 +38,7 @@ psycopg2-binary==2.9.9
 Flask-Migrate==4.1.0
 
 # Forms
-flask_wtf==1.2.1
+flask_wtf==1.2.2
 wtforms==3.2.1
 
 # GitHub interaction
