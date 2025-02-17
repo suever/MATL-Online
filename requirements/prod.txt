@@ -32,7 +32,7 @@ sympy==1.5.1
 alembic==1.14.1
 SQLAlchemy==2.0.38
 Flask-SQLAlchemy==3.1.1
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 
 # App management
 Flask-Migrate==4.1.0
