@@ -1,4 +1,5 @@
 import pathlib
+import pytz
 
 from matl_online.public.models import Release
 from matl_online.settings import Config
@@ -29,7 +30,7 @@ def refresh_releases(
             continue
 
         # Check if our local release is stale
-        if release.published_at > release_record.date:
+        if release.published_at > release_record.date.replace(tzinfo=pytz.UTC):
             # Clear our cache of the source code
             remove_source_directory(version, source_root=source_root)
 

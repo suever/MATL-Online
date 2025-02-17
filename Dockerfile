@@ -16,9 +16,9 @@ RUN apt update \
     netbase \
     nodejs \
     python-is-python3 \
-    python3.10 \
-    python3.10-dev \
-    python3.10-distutils \
+    python3.11 \
+    python3.11-dev \
+    python3.11-distutils \
     yarn \
     && rm -rf /var/lib/apt/lists/*
 
@@ -36,7 +36,7 @@ RUN wget "https://github.com/suever/matl-online-octave-packages/raw/main/image-2
     && octave-cli --eval 'pkg install "image-2.14.0.tar.gz"' \
     && rm -rf image-2.14.0.tar.gz
 
-RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
 
 # Install Node dependencies and add them to the PATH
 COPY package.json yarn.lock ./
@@ -46,7 +46,7 @@ ENV PATH="/app/node_modules/.bin:${PATH}"
 # Explicitly install only the production dependencies
 COPY requirements/prod.txt requirements.txt
 
-RUN python3.10 -m pip install -r requirements.txt
+RUN python3.11 -m pip install -r requirements.txt
 
 RUN useradd -u 8877 matl
 RUN chown matl:matl /app
@@ -56,4 +56,4 @@ COPY --chown=matl . .
 
 ENTRYPOINT []
 
-CMD ["python3.10"]
+CMD ["python3.11"]
