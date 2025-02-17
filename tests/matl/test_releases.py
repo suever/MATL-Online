@@ -1,4 +1,6 @@
 import pathlib
+import pytz
+
 from datetime import datetime
 from typing import Optional
 from unittest.mock import MagicMock
@@ -130,4 +132,4 @@ class TestReleaseRefresh:
         # Ensure the old release was updated
         original_release = Release.query.filter_by(tag="1.2.3").one()
 
-        assert original_release.date == releases[0].published_at
+        assert original_release.date.replace(tzinfo=pytz.UTC) == releases[0].published_at.replace(tzinfo=pytz.UTC)
