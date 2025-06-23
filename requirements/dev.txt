@@ -15,7 +15,7 @@ webdrivermanager==0.10.0
 
 # Lint and code style
 black==25.1.0
-flake8==7.2.0
+flake8==7.3.0
 flake8-docstrings==1.7.0
 flake8-quotes==3.4.0
 isort==6.0.1
