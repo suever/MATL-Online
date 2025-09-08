@@ -5,39 +5,45 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
-      - name: setup python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - name: Set up Python 3.13
+        run: uv python install 3.13
       - name: install dependencies
-        run: pip install -r requirements.txt
+        run: uv pip install --python 3.13 -r requirements.txt
       - name: type-check
-        run: make type-check
+        run: uv run --python 3.13 make type-check
 
   black:
     runs-on: ubuntu-latest
     steps:
-      - name: setup python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - name: Set up Python 3.13
+        run: uv python install 3.13
       - name: install dependencies
-        run: pip install -r requirements/dev.txt
+        run: uv pip install --python 3.13 -r requirements/dev.txt
       - name: format-check
-        run: make format-check
+        run: uv run --python 3.13 make format-check
 
   flake8:
     runs-on: ubuntu-latest
     steps:
-      - name: setup python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - name: Set up Python 3.13
+        run: uv python install 3.13
       - name: install dependencies
-        run: pip install -r requirements/dev.txt
+        run: uv pip install --python 3.13 -r requirements/dev.txt
       - name: flake8
         uses: suo/flake8-github-action@releases/v1
         with:
