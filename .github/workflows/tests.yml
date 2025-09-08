@@ -51,8 +51,10 @@ jobs:
         with:
           version: "latest"
 
-      - name: Set up Python ${{ matrix.python-version }}
-        run: uv python install ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }} and create virtual environment
+        run: |
+          uv python install ${{ matrix.python-version }}
+          uv venv --python ${{ matrix.python-version }}
 
       - name: Install Octave
         run: |
@@ -69,16 +71,16 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          uv pip install --python ${{ matrix.python-version }} --system --upgrade pip setuptools wheel coveralls
-          uv pip install --python ${{ matrix.python-version }} --system --only-binary=numpy,scipy -r requirements.txt
+          uv pip install --upgrade pip setuptools wheel coveralls
+          uv pip install --only-binary=numpy,scipy -r requirements.txt
 
       - name: Run tests
         run: |
           export PATH="$(yarn bin):$PATH"
-          uv run --python ${{ matrix.python-version }} make test
+          uv run make test
 
       - name: Report Coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          uv run --python ${{ matrix.python-version }} coveralls --service=github
+          uv run coveralls --service=github

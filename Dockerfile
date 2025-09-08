@@ -20,8 +20,11 @@ RUN apt update \
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-# Set up Python 3.13 using uv
+# Set up Python 3.13 using uv and create virtual environment
 RUN uv python install 3.13
+RUN uv venv --python 3.13 /app/venv
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Install octave requirements
 RUN wget "https://github.com/suever/matl-online-octave-packages/raw/main/io-2.6.4.tar.gz" \
@@ -46,7 +49,7 @@ ENV PATH="/app/node_modules/.bin:${PATH}"
 # Explicitly install only the production dependencies
 COPY requirements/prod.txt requirements.txt
 
-RUN uv pip install --python 3.13 --system -r requirements.txt
+RUN uv pip install -r requirements.txt
 
 RUN useradd -u 8877 matl
 RUN chown matl:matl /app
@@ -56,4 +59,4 @@ COPY --chown=matl . .
 
 ENTRYPOINT []
 
-CMD ["uv", "run", "--python", "3.13", "python"]
+CMD ["python"]
