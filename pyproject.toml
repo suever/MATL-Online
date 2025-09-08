@@ -1,5 +1,5 @@
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.13"
 
 strict_optional = true
 show_error_codes = true
@@ -35,5 +35,5 @@ plugins = [
 profile = "black"
 
 [tool.black]
-target-version = ["py37", "py38", "py39"]
+target-version = ["py313"]
 extend-exclude = "(migrations)"
