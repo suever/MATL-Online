@@ -32,10 +32,10 @@ class TestMATLInterface:
         )
 
         # Ensure we use the temporary folder
-        assert octave_mock.current_directory.called_once_with(tmp_path)
+        octave_mock.current_directory.assert_called_once_with(tmp_path)
 
         # Ensure we added the MATL code directory to the path
-        assert octave_mock.paths.called_once_with(matl_folder)
+        octave_mock.paths.assert_called_once_with(matl_folder)
 
     def test_single_input(
         self,
