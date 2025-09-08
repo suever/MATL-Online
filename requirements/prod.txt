@@ -1,7 +1,7 @@
 # General
 flask==3.1.1
 requests==2.32.4
-eventlet==0.39.1
+eventlet==0.40.3
 gunicorn[eventlet]==23.0.0
 pydantic==2.11.7
 
@@ -11,13 +11,13 @@ jsmin==3.0.1
 
 # Sockets
 flask_socketio==5.5.1
-python_engineio==4.12.1
+python_engineio==4.12.2
 python_socketio==5.13.0
 
 # Celery
 celery==5.5.2
 flower==2.0.1
-redis==6.1.0
+redis==6.4.0
 
 # Octave interaction
 scipy==1.15.2
@@ -29,8 +29,8 @@ ipython==8.32.0
 sympy==1.5.1
 
 # Database
-alembic==1.16.1
-SQLAlchemy==2.0.41
+alembic==1.16.5
+SQLAlchemy==2.0.43
 Flask-SQLAlchemy==3.1.1
 psycopg2-binary==2.9.10
 
