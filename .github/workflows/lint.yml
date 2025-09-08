@@ -13,7 +13,7 @@ jobs:
       - name: Set up Python 3.13
         run: uv python install 3.13
       - name: install dependencies
-        run: uv pip install --python 3.13 -r requirements.txt
+        run: uv pip install --python 3.13 --system -r requirements.txt
       - name: type-check
         run: uv run --python 3.13 make type-check
 
@@ -28,7 +28,7 @@ jobs:
       - name: Set up Python 3.13
         run: uv python install 3.13
       - name: install dependencies
-        run: uv pip install --python 3.13 -r requirements/dev.txt
+        run: uv pip install --python 3.13 --system -r requirements/dev.txt
       - name: format-check
         run: uv run --python 3.13 make format-check
 
@@ -43,7 +43,7 @@ jobs:
       - name: Set up Python 3.13
         run: uv python install 3.13
       - name: install dependencies
-        run: uv pip install --python 3.13 -r requirements/dev.txt
+        run: uv pip install --python 3.13 --system -r requirements/dev.txt
       - name: flake8
         uses: suo/flake8-github-action@releases/v1
         with:

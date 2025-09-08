@@ -46,7 +46,7 @@ ENV PATH="/app/node_modules/.bin:${PATH}"
 # Explicitly install only the production dependencies
 COPY requirements/prod.txt requirements.txt
 
-RUN uv pip install --python 3.13 -r requirements.txt
+RUN uv pip install --python 3.13 --system -r requirements.txt
 
 RUN useradd -u 8877 matl
 RUN chown matl:matl /app
