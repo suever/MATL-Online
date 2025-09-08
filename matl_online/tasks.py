@@ -111,7 +111,6 @@ class OctaveTask(Task[[MATLTaskParameters], None]):
     @property
     def octave(self) -> Optional[OctaveSession]:
         """Dependent property which automatically spawns octave if needed."""
-        global octave
         return octave
 
     @cached_property

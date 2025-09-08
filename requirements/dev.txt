@@ -2,32 +2,32 @@
 -r prod.txt
 
 # Unit Testing
-pytest==8.3.5
+pytest==8.4.1
 factory-boy==3.3.3
-pytest-mock==3.14.0
-webtest==3.0.4
-pytest-cov==6.0.0
+pytest-mock==3.15.0
+webtest==3.0.6
+pytest-cov==6.2.1
 
 # Acceptance Testing
-robotframework==7.2.2
+robotframework==7.3.1
 robotframework-seleniumlibrary==6.7.1
-webdrivermanager==0.10.0
+webdriver-manager==4.0.2
 
 # Lint and code style
 black==25.1.0
-flake8==7.1.2
+flake8==7.3.0
 flake8-docstrings==1.7.0
 flake8-quotes==3.4.0
 isort==6.0.1
-pep8-naming==0.14.1
+pep8-naming==0.15.1
 
 # Types
-mypy==1.15.0
+mypy==1.17.1
 celery-types==0.23.0
 types-flask==1.1.6
-types-requests==2.32.0.20250306
+types-requests==2.32.4.20250809
 types-flask-migrate==4.1.0.20250112
 types-flask-sqlalchemy==2.5.9.4
 types-sqlalchemy==1.4.53.38
 types-factory-boy==0.4.1
-types-pytz==2025.1.0.20250204
+types-pytz==2025.2.0.20250516
