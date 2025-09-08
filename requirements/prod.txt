@@ -15,7 +15,7 @@ python_engineio==4.12.2
 python_socketio==5.13.0
 
 # Celery
-celery==5.5.2
+celery==5.5.3
 flower==2.0.1
 redis==6.4.0
 
