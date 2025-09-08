@@ -5,7 +5,7 @@ jobs:
   integration-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -41,15 +41,20 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.11"
+          - "3.13"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          version: "latest"
+
+      - name: Set up Python ${{ matrix.python-version }} and create virtual environment
+        run: |
+          uv python install ${{ matrix.python-version }}
+          uv venv --python ${{ matrix.python-version }}
 
       - name: Install Octave
         run: |
@@ -66,16 +71,16 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install --upgrade pip setuptools wheel coveralls
-          pip install --only-binary=numpy,scipy -r requirements.txt
+          uv pip install --upgrade pip setuptools wheel coveralls
+          uv pip install --only-binary=numpy --only-binary=scipy -r requirements.txt
 
       - name: Run tests
         run: |
           export PATH="$(yarn bin):$PATH"
-          make test
+          uv run make test
 
       - name: Report Coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          coveralls --service=github
+          uv run coveralls --service=github
