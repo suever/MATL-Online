@@ -14,7 +14,7 @@ robotframework-seleniumlibrary==6.7.1
 webdriver-manager==4.0.2
 
 # Lint and code style
-black==25.1.0
+black==25.9.0
 flake8==7.3.0
 flake8-docstrings==1.7.0
 flake8-quotes==3.4.0
