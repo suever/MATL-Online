@@ -3,7 +3,7 @@ flask==3.1.2
 requests==2.32.5
 eventlet==0.40.3
 gunicorn[eventlet]==23.0.0
-pydantic==2.12.0
+pydantic==2.12.3
 
 # CSS/JS Assets
 flask_assets==2.1.0
@@ -12,7 +12,7 @@ jsmin==3.0.1
 # Sockets
 flask_socketio==5.5.1
 python_engineio==4.12.3
-python_socketio==5.14.1
+python_socketio==5.14.2
 
 # Celery
 celery==5.5.3
@@ -21,16 +21,16 @@ redis==6.4.0
 
 # Octave interaction
 scipy==1.16.2
-numpy==2.3.3
+numpy==2.3.4
 octave-kernel==0.36.0
-ipython==9.6.0
+ipython==8.37.0
 
 # Octave packages
 sympy==1.5.1
 
 # Database
-alembic==1.16.5
-SQLAlchemy==2.0.43
+alembic==1.17.0
+SQLAlchemy==2.0.44
 Flask-SQLAlchemy==3.1.1
 psycopg2-binary==2.9.11
 
