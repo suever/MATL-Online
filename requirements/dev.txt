@@ -22,7 +22,7 @@ isort==7.0.0
 pep8-naming==0.15.1
 
 # Types
-mypy==1.18.2
+mypy==1.19.1
 celery-types==0.23.0
 types-flask==1.1.6
 types-requests==2.32.4.20250913

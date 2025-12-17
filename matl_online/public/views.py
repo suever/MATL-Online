@@ -104,7 +104,7 @@ def privacy() -> str:
     return render_template("privacy.html")
 
 
-@csrf.exempt  # type: ignore[misc]
+@csrf.exempt  # type: ignore[untyped-decorator]
 @blueprint.route("/hook", methods=["POST"])
 def github_hook() -> Union[Response, Tuple[str, int]]:
     """GitHub web hook for receiving information about MATL releases."""
@@ -179,16 +179,16 @@ def share() -> Tuple[Response, int]:
         return jsonify({"success": False}), 400
 
 
-@socketio.on("connect")  # type: ignore[misc]
-@metrics.counter("socketio_connections", "SocketIO Events")  # type: ignore[misc]
+@socketio.on("connect")  # type: ignore[untyped-decorator]
+@metrics.counter("socketio_connections", "SocketIO Events")  # type: ignore[untyped-decorator]
 def connected() -> None:
     """Send an event to the client with the ID of their session."""
     session_id = rooms()[0]
     emit("connection", {"session_id": session_id})
 
 
-@socketio.on("kill")  # type: ignore[misc]
-@metrics.counter("socketio_kill_events", "SocketIO Kill Events")  # type: ignore[misc]
+@socketio.on("kill")  # type: ignore[untyped-decorator]
+@metrics.counter("socketio_kill_events", "SocketIO Kill Events")  # type: ignore[untyped-decorator]
 def kill_task(data: Any) -> None:
     """Triggered when a kill message is sent to kill a task."""
     taskid = session.get("taskid", None)
@@ -202,8 +202,8 @@ def kill_task(data: Any) -> None:
     session["taskid"] = None
 
 
-@socketio.on("submit")  # type: ignore[misc]
-@metrics.counter("socketio_submit_events", "SocketIO Submit Events")  # type: ignore[misc]
+@socketio.on("submit")  # type: ignore[untyped-decorator]
+@metrics.counter("socketio_submit_events", "SocketIO Submit Events")  # type: ignore[untyped-decorator]
 def submit_job(data: Dict[str, Any]) -> None:
     """Submit some code and inputs for interpretation."""
     # If we already have a task disable submitting
