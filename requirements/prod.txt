@@ -23,7 +23,7 @@ redis==7.1.0
 scipy==1.16.3
 numpy==2.4.0
 octave-kernel==0.36.0
-ipython==8.37.0
+ipython==8.38.0
 
 # Octave packages
 sympy==1.5.1
