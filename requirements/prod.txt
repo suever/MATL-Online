@@ -2,7 +2,7 @@
 flask==3.1.2
 requests==2.32.5
 eventlet==0.40.4
-gunicorn[eventlet]==23.0.0
+gunicorn[eventlet]==25.1.0
 pydantic==2.12.5
 
 # CSS/JS Assets
