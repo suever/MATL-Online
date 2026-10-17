@@ -30,6 +30,8 @@ jobs:
 
       - name: run tests
         run: make integration-tests
+        env:
+          BUILDX_BAKE_ENTITLEMENTS_FS: "0"
 
       - name: Move cache
         run: |
