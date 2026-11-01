@@ -22,7 +22,7 @@ redis==8.1.0
 # Octave interaction
 scipy==1.18.1
 numpy==2.5.4
-octave-kernel==0.36.0
+octave-kernel==1.1.1
 ipython==8.38.0
 
 # Octave packages

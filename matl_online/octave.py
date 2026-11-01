@@ -4,7 +4,7 @@ import logging
 import os
 import pathlib
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Generator, List, Optional
+from typing import Any, Callable, Generator, List, Optional
 
 from octave_kernel.kernel import OctaveEngine  # type: ignore
 
@@ -112,7 +112,7 @@ class OctaveSession:
         self,
         code: str,
         line_handler: Optional[OutputCallback] = None,
-        **kwargs: Dict[str, Any],
+        **kwargs: Any,
     ) -> str:
         """Evaluate some code in Octave."""
 
