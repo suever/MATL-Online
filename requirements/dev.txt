@@ -9,13 +9,13 @@ webtest==3.0.7
 pytest-cov==7.0.0
 
 # Acceptance Testing
-robotframework==7.4.1
-robotframework-seleniumlibrary==6.8.0
+robotframework==7.5
+robotframework-seleniumlibrary==6.9.0
 webdriver-manager==4.0.2
 
 # Lint and code style
 black==26.10.1
-flake8==7.3.0
+flake8==7.5.0
 flake8-docstrings==1.7.0
 flake8-quotes==3.4.0
 isort==9.0.2
@@ -23,10 +23,10 @@ pep8-naming==0.15.1
 
 # Types
 mypy==1.19.1
-celery-types==0.24.0
+celery-types==0.26.0
 types-flask==1.1.6
 types-requests==2.32.4.20260107
-types-flask-migrate==4.1.0.20250809
+types-flask-migrate==4.1.0.20260508
 types-flask-sqlalchemy==2.5.9.4
 types-sqlalchemy==1.4.53.38
 types-factory-boy==0.4.1
