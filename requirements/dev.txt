@@ -4,7 +4,7 @@
 # Unit Testing
 pytest==9.2.0
 factory-boy==3.3.3
-pytest-mock==3.16.0
+pytest-mock==3.17.0
 webtest==3.0.7
 pytest-cov==7.0.0
 
