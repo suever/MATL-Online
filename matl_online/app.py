@@ -47,8 +47,8 @@ def register_extensions(app: Flask) -> None:
 
 def register_rollbar(app: Flask) -> None:
     rollbar.init(
-        app.config.get("ROLLBAR_SERVER_SIDE_TOKEN"),
-        environment=app.config.get("ROLLBAR_ENV"),
+        app.config["ROLLBAR_SERVER_SIDE_TOKEN"],
+        environment=app.config["ROLLBAR_ENV"],
         root=app.config.get("PROJECT_ROOT"),
         allow_logging_basic_config=False,
         code_version=app.config.get("APP_VERSION"),
