@@ -2,7 +2,7 @@
 -r prod.txt
 
 # Unit Testing
-pytest==9.0.3
+pytest==9.2.0
 factory-boy==3.3.3
 pytest-mock==3.16.0
 webtest==3.0.7
