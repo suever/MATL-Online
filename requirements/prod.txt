@@ -1,6 +1,6 @@
 # General
 flask==3.1.3
-requests==2.33.0
+requests==2.34.2
 eventlet==0.41.3
 gunicorn[eventlet]==23.0.0
 pydantic==2.14.1
@@ -16,7 +16,7 @@ python_socketio==5.17.0
 
 # Celery
 celery==5.6.3
-flower==2.0.1
+flower==2.2.0
 redis==8.1.0
 
 # Octave interaction
@@ -32,13 +32,13 @@ sympy==1.5.1
 alembic==1.20.0
 SQLAlchemy==2.0.46
 Flask-SQLAlchemy==3.1.1
-psycopg2-binary==2.9.11
+psycopg2-binary==2.9.13
 
 # App management
 Flask-Migrate==4.1.0
 
 # Forms
-flask_wtf==1.2.2
+flask_wtf==1.3.0
 wtforms==3.2.1
 
 # GitHub interaction
