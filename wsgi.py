@@ -1,8 +1,8 @@
 """Script for initializing a production app for use with uwsgi."""
 
-import eventlet
+from gevent import monkey
 
-eventlet.monkey_patch()
+monkey.patch_all()
 
 from matl_online.app import create_app  # noqa: E402
 from matl_online.settings import get_config  # noqa: E402
