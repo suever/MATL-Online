@@ -100,7 +100,7 @@ class OutputHandler(StreamHandler):  # type: ignore
         self.contents.append(message)
 
 
-class OctaveTask(Task[[MATLTaskParameters], None]):
+class OctaveTask(Task[[Dict[str, Any]], None]):
     """Custom Task type for interacting with octave."""
 
     abstract: bool = True
@@ -156,9 +156,10 @@ class OctaveTask(Task[[MATLTaskParameters], None]):
 @celery.task(base=OctaveTask, bind=True)
 def matl_task(
     task: OctaveTask,
-    params: MATLTaskParameters,
+    serialized_params: Dict[str, Any],
 ) -> Dict[str, Any]:
     """Celery task for processing a MATL command and returning the result."""
+    params = MATLTaskParameters.from_dict(serialized_params)
     task.session_id = params.session_id
     task.handler.clear()
 

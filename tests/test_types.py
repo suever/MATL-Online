@@ -1,3 +1,7 @@
+import json
+
+import pytest
+
 from matl_online.types import (
     MATLExplainTaskParameters,
     MATLRunTaskParameters,
@@ -67,3 +71,26 @@ class TestMATLExplainTaskParameters:
 
         # They include the expected values
         assert flags == "-oe"
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        MATLTaskParameters(code="1D", version="20.0.0"),
+        MATLRunTaskParameters(
+            code="1\n2", version="20.0.0", inputs="3", session_id="abc"
+        ),
+        MATLExplainTaskParameters(code="1D", version="20.0.0"),
+    ],
+)
+def test_json_round_trip(params: MATLTaskParameters) -> None:
+    # Given parameters that have been serialized to JSON as celery does
+    data = json.loads(json.dumps(params.to_dict()))
+
+    # When reconstructing them
+    restored = MATLTaskParameters.from_dict(data)
+
+    # They are the same type and values, including the flags
+    assert type(restored) is type(params)
+    assert restored == params
+    assert restored.flags == params.flags

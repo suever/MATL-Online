@@ -225,7 +225,7 @@ def submit_job(data: Dict[str, Any]) -> None:
             inputs=inputs,
             version=version,
             session_id=uid,
-        )
+        ).to_dict()
     )
 
     # Store the currently executing task ID in the session
@@ -242,7 +242,7 @@ def explain() -> Tuple[Response, int]:
         MATLExplainTaskParameters(
             code=code,
             version=version,
-        )
+        ).to_dict()
     )
 
     result = task.wait()  # type: ignore
