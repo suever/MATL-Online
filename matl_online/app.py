@@ -32,6 +32,7 @@ def register_extensions(app: Flask) -> None:
     socketio.server_options.pop("client_manager", None)
     socketio.init_app(
         app,
+        async_mode="gevent",
         message_queue=app.config.get("SOCKETIO_MESSAGE_QUEUE"),
         cors_allowed_origins=app.config.get("CORS_ALLOWED_ORIGINS"),
     )

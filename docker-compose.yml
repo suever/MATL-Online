@@ -9,14 +9,13 @@ services:
     command: |
       bash -c "flask db upgrade
       flask refresh_releases
-      gunicorn --worker-class eventlet --bind 0.0.0.0:5000 --workers 1 wsgi:app"
+      gunicorn --worker-class gevent --bind 0.0.0.0:5000 --workers 1 --no-control-socket wsgi:app"
     ports:
       - "5000:5000"
     environment:
       CELERY_BROKER_URL: redis://redis:6379
       CELERY_RESULT_BACKEND: redis://redis:6379
       SOCKETIO_MESSAGE_QUEUE: redis://redis:6379
-      EVENTLET_NO_GREENDNS: "yes"
       MATL_ONLINE_ENV: prod
       SQLALCHEMY_DATABASE_URI: postgresql://postgres:password@postgres
     healthcheck:
@@ -40,7 +39,6 @@ services:
       CELERY_BROKER_URL: redis://redis:6379
       CELERY_RESULT_BACKEND: redis://redis:6379
       SOCKETIO_MESSAGE_QUEUE: redis://redis:6379
-      EVENTLET_NO_GREENDNS: "yes"
       MATL_ONLINE_ENV: prod
     depends_on:
       - redis

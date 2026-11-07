@@ -23,7 +23,7 @@ from matl_online.types import MATLTaskParameters
 
 octave = None
 
-socket = SocketIO(message_queue=config.SOCKETIO_MESSAGE_QUEUE)
+socket = SocketIO(message_queue=config.SOCKETIO_MESSAGE_QUEUE, async_mode="threading")
 
 Task.__class_getitem__ = classmethod(lambda cls, *args, **kwargs: cls)  # type: ignore[attr-defined]
 
