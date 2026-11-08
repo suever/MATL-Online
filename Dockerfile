@@ -1,4 +1,4 @@
-FROM suever/octave:4.2.2
+FROM suever/octave:4.2.2-ubuntu24.04
 
 USER root
 
@@ -8,8 +8,8 @@ RUN apt update \
     && apt install -y software-properties-common curl \
     && curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh \
     && bash nodesource_setup.sh \
-    && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
-    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+    && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg -o /usr/share/keyrings/yarn.asc \
+    && echo "deb [signed-by=/usr/share/keyrings/yarn.asc] https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list \
     && apt update \
     && apt install -y \
     netbase \
@@ -21,6 +21,7 @@ RUN apt update \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 # Set up Python 3.13 using uv and create virtual environment
+ENV UV_PYTHON_INSTALL_DIR=/opt/uv/python
 RUN uv python install 3.13
 RUN uv venv --python 3.13 /app/venv
 ENV VIRTUAL_ENV=/app/venv
