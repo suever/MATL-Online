@@ -77,7 +77,7 @@ class TestMATLTask:
                     code="1D",
                     version="20.0.0",
                     session_id=session_id_for_client(socketio_client),
-                ),
+                ).to_dict(),
             ),
         )
 
@@ -110,7 +110,7 @@ class TestMATLTask:
                     code="1D",
                     version="20.0.0",
                     session_id=session_id_for_client(socketio_client),
-                ),
+                ).to_dict(),
             ),
         )
 
@@ -152,7 +152,7 @@ class TestMATLTask:
                         code="1D",
                         version="20.0.0",
                         session_id=session_id_for_client(socketio_client),
-                    ),
+                    ).to_dict(),
                 ),
             )
 
@@ -193,7 +193,7 @@ class TestMATLTask:
                     code="1D",
                     version="20.0.0",
                     session_id=session_id_for_client(socketio_client),
-                ),
+                ).to_dict(),
             ),
         )
 

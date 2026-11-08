@@ -136,9 +136,9 @@ def get_celery_configuration(configuration: FlaskConfig) -> Dict[str, Any]:
         "worker_proc_alive_timeout": 30,
         # Ensure that celery tasks are executed locally when in a test environment
         "task_always_eager": configuration.get("ENV") == "test",
-        # Use pickling for serialization to allow first-class objects rather than dicts.
-        # The source is also trusted therefore it should be secure enough
-        "accept_content": ["application/json", "application/x-python-serialize"],
-        "task_serializer": "pickle",
-        "result_serializer": "pickle",
+        # Never accept pickle since anything that can write to the broker could
+        # then execute arbitrary code in the worker
+        "accept_content": ["json"],
+        "task_serializer": "json",
+        "result_serializer": "json",
     }
