@@ -52,9 +52,10 @@ COPY requirements/prod.txt requirements.txt
 
 RUN uv pip install -r requirements.txt
 
-RUN useradd -u 8877 matl
+RUN useradd -m -u 8877 matl
 RUN chown matl:matl /app
 USER matl
+ENV HOME=/home/matl
 
 COPY --chown=matl . .
 
