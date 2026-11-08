@@ -21,6 +21,7 @@ RUN apt update \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 # Set up Python 3.13 using uv and create virtual environment
+ENV UV_PYTHON_INSTALL_DIR=/opt/uv/python
 RUN uv python install 3.13
 RUN uv venv --python 3.13 /app/venv
 ENV VIRTUAL_ENV=/app/venv
