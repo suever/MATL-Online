@@ -4,7 +4,7 @@ requests==2.34.2
 urllib3==2.8.0
 gevent==26.9.0
 gunicorn==26.2.0
-pydantic==2.14.2
+pydantic==2.14.3
 
 # CSS/JS Assets
 flask_assets==2.1.0
