@@ -15,14 +15,15 @@ RUN apt update \
     netbase \
     nodejs \
     yarn \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /usr/lib/node_modules/npm /usr/bin/npm /usr/bin/npx
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 # Set up Python 3.13 using uv and create virtual environment
-ENV UV_PYTHON_INSTALL_DIR=/opt/uv/python
-RUN uv python install 3.13
+ENV UV_PYTHON_INSTALL_DIR=/opt/uv/python UV_NO_CACHE=1
+RUN uv python install 3.13 \
+    && rm -rf /opt/uv/python/*/lib/python3.13/site-packages/pip*
 RUN uv venv --python 3.13 /app/venv
 ENV VIRTUAL_ENV=/app/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
